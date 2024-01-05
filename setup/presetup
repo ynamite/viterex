@@ -1,5 +1,45 @@
 #!/usr/bin/env bash
 
+installRepositories() (
+    set -eu
+    local user="$1"  
+    shift
+    local repos="$@"
+
+    for repo in ${repos[@]}
+    do
+        set -eu
+        printf "Loading: ${user}/${repo}\n"
+        local tmpdir=$(mktemp -d)
+        trap 'rm -rf -- "$tmpdir"' EXIT    
+        local url="https://api.github.com/repos/${user}/${repo}"
+        local repoNormalized=`echo ${repo} | sed 's/\//-/g'`
+        curl -Ls -o ${tmpdir}/${repoNormalized}_repo.json ${url}
+        local json_data=(`php -r '$data = json_decode(file_get_contents("'${tmpdir}'/'${repo}'_repo.json")); echo $data->name . " " . $data->releases;'`)
+        local name="${json_data[0]}"
+        local releases="${json_data[1]}"
+        if [ -z "$releases" ]; then
+            curl -Ls -o ${tmpdir}/${repoNormalized}_repo.json ${url}/releases/latest
+            zipball_url=`php -r "echo json_decode(file_get_contents('${tmpdir}/${repoNormalized}_repo.json'))->zipball_url;"`
+        else
+            default_branch=`php -r "echo json_decode(file_get_contents('${tmpdir}/${repoNormalized}_repo.json'))->default_branch;"`
+            zipball_url="${url}/zipball/${default_branch}"
+        fi
+        rm -rf ${tmpdir}/*
+        curl -Ls -o ${tmpdir}/${repoNormalized}.zip ${zipball_url}
+
+        unzip -oq ${tmpdir}/${repoNormalized}.zip -d ${tmpdir}/unzip
+        local files=("$tmpdir"/unzip/*)
+        mkdir -p ./src/addons/${repoNormalized}/
+        mv "$files"/* ./src/addons/${repoNormalized}/;
+
+        printf "${CGREEN}${repo}${CNO} was successful loaded and unzipped into the addon folder\n\n"
+        sleep .25 # Waits 0.5 second.
+
+    done
+
+)
+
 set -e
 CRED='\033[0;31m'
 CGREEN='\033[0;32m'
@@ -28,20 +68,27 @@ if [ -f .env ]; then
     echo -e "${CGREEN}.env was copied to .env.local${CNO}"
 fi
 
+rm -rf tmp
+rm -rf public
 
 # make tmp folders
+tmpdir='./tmp'
 if [ ! -d ./tmp ]; then
-    mkdir tmp/
-    mkdir ./tmp/redaxo
+    mkdir $tmpdir
+    # mkdir ./tmp/redaxo
 fi
+# tmpdir=$(mktemp -dt redaxo)
+trap 'rm -rf -- "$tmpdir"' EXIT
+
 
 # load redaxo
 echo -e "${CRED}
 Load REDAXO zip file
 - - - - - - - - - - - -${CNO}"
-curl -Ls -o ./tmp/redaxo/redaxo_${REDAXO_VERSION}.zip https://github.com/redaxo/redaxo/releases/download/${REDAXO_VERSION}/redaxo_${REDAXO_VERSION}.zip
-echo "${REDAXO_SHA} *./tmp/redaxo/redaxo_${REDAXO_VERSION}.zip" | shasum -c -a 256
-unzip -oq ./tmp/redaxo/redaxo_${REDAXO_VERSION}.zip -d ./public
+curl -Ls -o ${tmpdir}/redaxo_${REDAXO_VERSION}.zip https://github.com/redaxo/redaxo/releases/download/${REDAXO_VERSION}/redaxo_${REDAXO_VERSION}.zip
+#echo `shasum -c -a 256 "${REDAXO_SHA} *.${tmpdir}/redaxo_${REDAXO_VERSION}.zip"`
+echo "${REDAXO_SHA} *${tmpdir}/redaxo_${REDAXO_VERSION}.zip" | shasum -c -a 256
+unzip -oq ${tmpdir}/redaxo_${REDAXO_VERSION}.zip -d ./public
 
 echo -e "${CGREEN}
 Redaxo ${REDAXO_VERSION}${CNO} was sussessful loaded and unzipped into the public folder"
@@ -53,9 +100,14 @@ Redaxo ${REDAXO_VERSION}${CNO} was sussessful loaded and unzipped into the publi
 echo -e "${CRED}
 Create Yakamara-MASSIF file structure
 - - - - - - - - - - - -${CNO}"
-mkdir bin
-mkdir src
-mkdir var
+
+rm -rf bin
+rm -rf src
+rm -rf var
+
+mkdir -p bin
+mkdir -p src
+mkdir -p var
 
 mv public/redaxo/bin/* bin
 mv public/redaxo/cache var
@@ -78,98 +130,24 @@ echo -e "${CGREEN}File structure${CNO} was successful created"
 
 # load addons
 echo -e "${CRED}
-Load REDAXO AddOns
+Loading REDAXO packages
 - - - - - - - - - - - -
 ${CNO}"
 
-# structure_tweaks
-read -p "Load FriendsOfREDAXO addons [adminer bloecks developer focuspoint mblock mform quick_navigation cropper hyphenator]:" repos
+# user="FriendsOfREDAXO"
+# repos=("adminer bloecks developer focuspoint mblock mform quick_navigation cropper hyphenator")
+# installRepositories "${user}" "${repos[@]}"
 
-if [ -z "$repos" ]; then
-    repos=("adminer" "bloecks" "developer" "focuspoint" "mblock" "mform" "quick_navigation" "cropper" "hyphenator")
-fi
+# user="yakamara"
+# repos=("redaxo_yform redaxo_yrewrite ydeploy")
+# installRepositories "${user}" "${repos[@]}"
 
-for repo in ${repos[@]}
-do
-    set -e
-    curl -Ls -o ./tmp/${repo}_repo.json https://api.github.com/repos/FriendsOfREDAXO/${repo}/releases/latest
-    zipball_url=`php -r "echo json_decode(file_get_contents('./tmp/${repo}_repo.json'))->zipball_url;"`
-    curl -Ls -o ./tmp/${repo}.zip ${zipball_url}
-    unzip -oq ./tmp/${repo}.zip -d ./tmp
-    mv ./tmp/*${repo}*/ ./src/addons/${repo}/;
+# user="tbaddade"
+# repos=("redaxo_sprog redaxo_url redaxo_watson")
+# installRepositories "${user}" "${repos[@]}"
 
-    echo -e "${CGREEN}${repo}${CNO} was successful loaded and unzipped into the addon folder"
-
-done
-
-
-
-#read -p "Load Yakamara addons [redaxo_yform redaxo_yrewrite ydeploy]:" repos
-#
-#if [ -z "$repos" ]; then
-#    repos=("redaxo_yform" "redaxo_yrewrite" "ydeploy")
-#fi
-#
-#for repo in ${repos[@]}
-#do
-#    set -e
-#    curl -Ls -o ./tmp/${repo}_repo.json https://api.github.com/repos/yakamara/${repo}/releases/latest
-#    zipball_url=`php -r "echo json_decode(file_get_contents('./tmp/${repo}_repo.json'))->zipball_url;"`
-#    curl -Ls -o ./tmp/${repo}.zip ${zipball_url}
-#    unzip -oq ./tmp/${repo}.zip -d ./tmp
-#    mv ./tmp/*${repo}*/ ./src/addons/${repo}/;
-#
-#    echo -e "${CGREEN}${repo}${CNO} was successful loaded and unzipped into the addon folder"
-#
-#done
-
-
-
-read -p "Load tbaddade addons [redaxo_sprog redaxo_url redaxo_watson]:" repos
-
-if [ -z "$repos" ]; then
-    repos=("redaxo_sprog" "redaxo_url" "redaxo_watson")
-fi
-
-for repo in ${repos[@]}
-do
-    set -e
-    curl -Ls -o ./tmp/${repo}_repo.json https://api.github.com/repos/tbaddade/${repo}/releases/latest
-    zipball_url=`php -r "echo json_decode(file_get_contents('./tmp/${repo}_repo.json'))->zipball_url;"`
-    curl -Ls -o ./tmp/${repo}.zip ${zipball_url}
-    unzip -oq ./tmp/${repo}.zip -d ./tmp
-    mv ./tmp/*${repo}*/ ./src/addons/${repo}/;
-
-    echo -e "${CGREEN}${repo}${CNO} was successful loaded and unzipped into the addon folder"
-
-done
-
-
-read -p "Load other addons [media_manager_responsive be_tools]:" repos
-
-if [ -z "$repos" ]; then
-    repos=("iceman-fx/be_tools", "alexplusde/media_manager_responsive")
-fi
-
-for repo in ${repos[@]}
-do
-    set -e
-    curl -Ls -o ./tmp/${repo}_repo.json https://api.github.com/repos/${repo}
-    releases=`php -r "echo json_decode(file_get_contents('./tmp/${repo}_repo.json'))->releases;"`
-    if [ -z "$releases" ]; then
-        curl -Ls -o ./tmp/${repo}_repo.json https://api.github.com/repos/${repo}/releases/latest
-        zipball_url=`php -r "echo json_decode(file_get_contents('./tmp/${repo}_repo.json'))->zipball_url;"`
-        curl -Ls -o ./tmp/${repo}.zip ${zipball_url}
-        unzip -oq ./tmp/${repo}.zip -d ./tmp
-        mv ./tmp/*${repo}*/ ./src/addons/${repo}/;
-    else
-        clone_url=`php -r "echo json_decode(file_get_contents('./tmp/${repo}_repo.json'))->clone_url;"`
-        #name=`php -r "echo json_decode(file_get_contents('./tmp/${repo}_repo.json'))->name;"`
-        git clone ${clone_url} ./src/addons/
-    fi
-    echo -e "${CGREEN}${repo}${CNO} was successful cloned into the addon folder"
-
-done
+installRepositories "iceman-fx" "be_tools"
+installRepositories "alexplusde" "media_manager_responsive"
 
 
 repos_rename=("sprog" "url" "watson" "yform" "yrewrite")
@@ -187,8 +165,7 @@ done
 # remove
 rm -rf public/redaxo/bin
 rm -rf public/redaxo/src
-rm -rf setup
-rm -rf tmp
+# rm -rf setup
 
 # execute yarn
 yarn
