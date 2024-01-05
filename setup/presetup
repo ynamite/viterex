@@ -134,17 +134,17 @@ Loading REDAXO packages
 - - - - - - - - - - - -
 ${CNO}"
 
-# user="FriendsOfREDAXO"
-# repos=("adminer bloecks developer focuspoint mblock mform quick_navigation cropper hyphenator")
-# installRepositories "${user}" "${repos[@]}"
+user="FriendsOfREDAXO"
+repos=("adminer bloecks developer focuspoint mblock mform quick_navigation cropper hyphenator")
+installRepositories "${user}" "${repos[@]}"
 
-# user="yakamara"
-# repos=("redaxo_yform redaxo_yrewrite ydeploy")
-# installRepositories "${user}" "${repos[@]}"
+user="yakamara"
+repos=("redaxo_yform redaxo_yrewrite ydeploy")
+installRepositories "${user}" "${repos[@]}"
 
-# user="tbaddade"
-# repos=("redaxo_sprog redaxo_url redaxo_watson")
-# installRepositories "${user}" "${repos[@]}"
+user="tbaddade"
+repos=("redaxo_sprog redaxo_url redaxo_watson")
+installRepositories "${user}" "${repos[@]}"
 
 installRepositories "iceman-fx" "be_tools"
 installRepositories "alexplusde" "media_manager_responsive"
