@@ -40,6 +40,8 @@ installRepositories() (
 
 )
 
+resetsetup
+
 set -e
 CRED='\033[0;31m'
 CGREEN='\033[0;32m'
@@ -171,3 +173,4 @@ rm -rf public/redaxo/src
 
 # execute yarn
 yarn
+yarn upgrade-interactive --latest
