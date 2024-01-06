@@ -33,6 +33,7 @@ rm -f .prettierrc.cjs
 rm -f .eslintrc.cjs
 rm -f .browserlistrc
 rm -f tailwind.config.js
+rm -f postcss.config.js
 
 echo -e "${CGREEN}
 Done!
