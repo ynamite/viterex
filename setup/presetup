@@ -181,3 +181,4 @@ cp setup/.eslintrc.cjs .eslintrc.cjs
 cp setup/.browserlistrc .browserlistrc
 cp setup/tailwind.config.js tailwind.config.js
 cp setup/postcss.config.js postcss.config.js
+cp setup/vite.config.js vite.config.js
