@@ -1,14 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './*.{vue,js,ts,jsx,tsx}',
-    './pages/**/*.{vue,js,ts,jsx,tsx}',
-    './components/**/*.{vue,js,ts,jsx,tsx}'
+    './assets/js/**/*.js',
+    './assets/css/**/*.css',
+    './src/addons/**/*.php',
+    './var/data/developer/**/*.php'
   ],
   theme: {
-    fontFamily: {
-      suissecuts: ['Suisse Cuts', 'sans-serif']
-    },
+    // fontFamily: {
+    //   suissecuts: ['Suisse Cuts', 'sans-serif']
+    // },
     colors: {
       primary: '#000000',
       eggshell: '#e7eae1'
