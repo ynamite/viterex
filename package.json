@@ -25,7 +25,8 @@
         "stylelint-config-standard": "^36.0.0",
         "tailwindcss": "^3.4.0",
         "typescript": "^5.3.3",
-        "vite": "^5.0.11"
+        "vite": "^5.0.11",
+        "vite-plugin-php": "^1.0.5"
     },
     "engines": {
         "node": ">=16"
