@@ -1,6 +1,8 @@
 /.build
-/.env.local
-/node_modules/
+node_modules
+dist
+dist-ssr
+*.local
 
 /public/assets/fonts
 /public/assets/images
@@ -21,3 +23,15 @@
 /var/data/core/*
 
 /var/log/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
