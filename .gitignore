@@ -5,10 +5,9 @@ dist-ssr
 *.local
 
 /public/assets/fonts
-/public/assets/images
-/public/assets/scripts
-/public/assets/styles
-/public/assets/svgs
+/public/assets/img
+/public/assets/js
+/public/assets/css
 
 /public/media/*
 !/public/media/.redaxo
