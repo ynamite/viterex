@@ -28,6 +28,11 @@ rm -f .env.local
 rm -f LICENSE.md
 rm -f deploy.php
 rm -f yarn.lock
+rm -f stylelint.config.js
+rm -f .prettierrc.cjs
+rm -f .eslintrc.cjs
+rm -f .browserlistrc
+rm -f tailwind.config.js
 
 echo -e "${CGREEN}
 Done!

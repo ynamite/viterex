@@ -174,3 +174,10 @@ rm -rf public/redaxo/src
 # execute yarn
 yarn
 yarn upgrade-interactive --latest
+
+cp setup/stylelint.config.js stylelint.config.js
+cp setup/.prettierrc.cjs .prettierrc.cjs
+cp setup/.eslintrc.cjs .eslintrc.cjs
+cp setup/.browserlistrc .browserlistrc
+cp setup/tailwind.config.js tailwind.config.js
+
