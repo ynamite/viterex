@@ -169,6 +169,7 @@ done
 # remove
 rm -rf public/redaxo/bin
 rm -rf public/redaxo/src
+rm -f public/.gitignore.example
 # rm -rf setup
 
 # execute yarn
