@@ -10,10 +10,6 @@ module.exports = {
     // fontFamily: {
     //   suissecuts: ['Suisse Cuts', 'sans-serif']
     // },
-    colors: {
-      primary: '#000000',
-      eggshell: '#e7eae1'
-    },
     extend: {
       fontSize: {
         base: ['1.25rem', { lineHeight: '1.3' }]

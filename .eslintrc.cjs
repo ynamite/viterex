@@ -1,5 +1,6 @@
 module.exports = {
   root: true,
+  parser: "babel-eslint",
   env: {
     node: true
   },
@@ -14,9 +15,6 @@ module.exports = {
   overrides: [
     {
       files: ['*.html', '*.php'],
-      rules: {
-        'vue/comment-directive': 'off'
-      }
     }
   ]
 }
