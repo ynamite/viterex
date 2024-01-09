@@ -130,6 +130,7 @@ cp setup/index.frontend.php public/index.php
 cp setup/path_provider.php src/path_provider.php
 cp setup/_htaccess public/.htaccess
 
+
 echo -e "${CGREEN}File structure${CNO} was successful created"
 
 # install redaxo

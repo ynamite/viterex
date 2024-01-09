@@ -1,6 +1,4 @@
 <?php
-define('IS_VITE_DEVELOPMENT', true);
-include "../setup/inc.vite.php";
 
 unset($REX);
 $REX['REDAXO'] = false;
