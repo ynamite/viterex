@@ -164,6 +164,8 @@ do
     fi
 done
 
+cp setup/redaxo_massif_install.sql src/addons/massif/install.sql
+
 for repo in ${installedRepos[@]}
 do
     set -e
@@ -187,6 +189,7 @@ do
     fi
 done
 
+rm -f src/addons/massif/install.sql
 
 # remove
 rm -rf public/redaxo/bin
