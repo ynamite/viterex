@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+installedRepos=()
+
 installRepositories() (
     set -eu
     local user="$1"  
@@ -34,7 +36,9 @@ installRepositories() (
         mv "$files"/* ./src/addons/${repoNormalized}/;
 
         printf "${CGREEN}${repo}${CNO} was successful loaded and unzipped into the addon folder\n\n"
-        sleep .25 # Waits 0.5 second.
+        installedRepos+=("${name}")
+
+        sleep .1 # Waits 0.1 seconds.
 
     done
 
@@ -97,10 +101,9 @@ Redaxo ${REDAXO_VERSION}${CNO} was sussessful loaded and unzipped into the publi
 
 
 
-
 # create Yakamara-massif file structure
 echo -e "${CRED}
-Create Yakamara-MASSIF file structure
+Create file structure
 - - - - - - - - - - - -${CNO}"
 
 rm -rf bin
@@ -130,6 +133,10 @@ cp setup/_htaccess public/.htaccess
 
 echo -e "${CGREEN}File structure${CNO} was successful created"
 
+# install redaxo
+printf "\n\n${CRED}Installing Redaxo now
+- - - - - - - - - - - -${CNO}"
+php bin/console setup:run --lang --no-interaction --verbose "de_de" --agree-license --server "$REDAXO_HOST" --servername "$REDAXO_HOST_NAME" --error-email "$REDAXO_ERROR_EMAIL" --timezone "Europe/Berlin" --db-host "$REDAXO_DB_HOST" --db-login "$REDAXO_DB_USER" --db-password "$REDAXO_DB_PASSWORD" --db-name "$REDAXO_DB_NAME" --db-setup "normal" --db-createdb "yes" -db-charset "utf8mb4" --admin-username "$REDAXO_ADMIN_USERNAME" --admin-password "$REDAXO_ADMIN_PASSWORD"
 
 
 # load addons
@@ -138,31 +145,46 @@ Loading REDAXO packages
 - - - - - - - - - - - -
 ${CNO}"
 
-user="FriendsOfREDAXO"
-repos=("adminer bloecks developer focuspoint mblock mform quick_navigation cropper hyphenator")
-installRepositories "${user}" "${repos[@]}"
+installRepositories "${REPOS_FOR_USER}" "${REPOS_FOR[@]}"
+installRepositories "${REPOS_YAKAMARA_USER}" "${REPOS_YAKAMARA[@]}"
+installRepositories "${REPOS_TBADDADE_USER}" "${REPOS_TBADDADE[@]}"
 
-user="yakamara"
-repos=("redaxo_yform redaxo_yrewrite ydeploy")
-installRepositories "${user}" "${repos[@]}"
+for repo in ${REPOS_OTHER[@]}
+do
+    set -e
+    userRepo='/' read -ra ADDR <<< "$repo"
+    installRepositories $userRepo[0] $userRepo[1]
+done
 
-user="tbaddade"
-repos=("redaxo_sprog redaxo_url redaxo_watson")
-installRepositories "${user}" "${repos[@]}"
-
-installRepositories "iceman-fx" "be_tools"
-installRepositories "alexplusde" "media_manager_responsive"
-
-
-repos_rename=("sprog" "url" "watson" "yform" "yrewrite")
-
-for repo in ${repos_rename[@]}
+for repo in ${REPOS_RENAME[@]}
 do
     set -e
     if [ -d ./src/addons/redaxo_${repo} ]; then
         mv ./src/addons/redaxo_${repo} ./src/addons/${repo};
     fi
+done
 
+for repo in ${installedRepos[@]}
+do
+    set -e
+    printf "${CGRED}Installting ${repo} ...${CNO}\n\n"
+    php -r "bin/console package:install ${repo} --no-interaction --verbose"
+    php -r "bin/console package:activate ${repo} --no-interaction --verbose"
+    
+    if([ $repo = 'bloecks' ]); then
+        php -r "bin/console package:activate ${repo}/cutncopy --no-interaction --verbose"
+        php -r "bin/console package:activate ${repo}/dragndrop --no-interaction --verbose"
+        php -r "bin/console package:activate ${repo}/status --no-interaction --verbose"
+    fi
+    if([ $repo = 'ui_tools' ]); then
+        php -r "bin/console package:activate ${repo}/jquery-minicolors --no-interaction --verbose"
+        php -r "bin/console package:activate ${repo}/selectize --no-interaction --verbose"
+    fi
+    if([ $repo = 'yform' ]); then
+        php -r "bin/console package:activate ${repo}/email --no-interaction --verbose"
+        php -r "bin/console package:activate ${repo}/manager --no-interaction --verbose"
+        php -r "bin/console package:activate ${repo}/tools --no-interaction --verbose"
+    fi
 done
 
 
@@ -171,6 +193,7 @@ rm -rf public/redaxo/bin
 rm -rf public/redaxo/src
 rm -f public/.gitignore.example
 # rm -rf setup
+
 
 # execute yarn
 yarn
