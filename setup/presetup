@@ -190,6 +190,7 @@ do
 done
 
 rm -f src/addons/massif/install.sql
+cp -f setup/redaxo_install_config.json var/data/addons/install/config.json
 
 # remove
 rm -rf public/redaxo/bin
