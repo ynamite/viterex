@@ -125,7 +125,6 @@ rm -f public/.htaccess
 
 cp setup/addon.project.boot.php src/addons/project/boot.php
 cp -p setup/console bin/console
-cp setup/deploy.php deploy.php
 cp setup/index.backend.php public/redaxo/index.php
 cp setup/index.frontend.php public/index.php
 cp setup/path_provider.php src/path_provider.php
