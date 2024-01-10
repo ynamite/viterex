@@ -22,6 +22,11 @@ define('DIST_PATH', rex_path::base(ltrim($env['VITE_PUBLIC_DIR'], '/') . DIST_DE
 // js enqueue settings
 define('JS_DEPENDENCY', []); // array('jquery') as example
 
-// deafult server address, port and entry point can be customized in vite.config.json
+// deafult server address, port and entry point can be customized in env.local
 define('VITE_SERVER', $env ? $env['VITE_DEV_SERVER'] . ':' . $env['VITE_DEV_SERVER_PORT'] : 'http://localhost:3000');
 define('VITE_ENTRY_POINT', $env ? $env['VITE_ENTRY_POINT'] : '/main.js');
+
+$manifest = 'manifest.json';
+$manifestPath = DIST_PATH . '/' . $manifest;
+$manifestVitePath = DIST_PATH . '/.vite/' . $manifest;
+define('VITE_MANIFEST', file_exists($manifestPath) ? $manifestPath : $manifestVitePath);
