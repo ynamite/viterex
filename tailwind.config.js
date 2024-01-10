@@ -8,9 +8,9 @@ module.exports = {
     './src/modules/**/*.php'
   ],
   theme: {
-    // fontFamily: {
-    //   suissecuts: ['Suisse Cuts', 'sans-serif']
-    // },
+    fontFamily: {
+      avenir: ['Avenir Next', 'sans-serif']
+    },
     extend: {
       fontSize: {
         base: ['1.25rem', { lineHeight: '1.3' }]
