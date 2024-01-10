@@ -9,7 +9,7 @@ module.exports = {
   ],
   theme: {
     fontFamily: {
-      avenir: ['Avenir Next', 'sans-serif']
+      roboto: ['Roboto', 'sans-serif']
     },
     extend: {
       fontSize: {
