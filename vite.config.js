@@ -11,17 +11,20 @@ export default ({ mode }) => {
     ],
 
     // config
+    publicDir: path.resolve(__dirname, 'dev'),
     base:
-      process.env.NODE_ENV === 'development'
-        ? '/'
-        : '/public/' + process.env.VITE_DIST_DEF,
+      process.env.NODE_ENV === 'development' ? '/' : process.env.VITE_DIST_DIR,
     resolve: {
       alias: [{ find: '@', replacement: path.resolve(__dirname, 'assets') }]
     },
 
     build: {
       // output dir for production build
-      outDir: path.resolve(__dirname, './public/' + process.env.VITE_DIST_DEF),
+      outDir: path.resolve(
+        __dirname,
+        '.' + process.env.VITE_PUBLIC_DIR + process.env.VITE_DIST_DIR
+      ),
+      assetsDir: 'assets',
       emptyOutDir: true,
 
       // emit manifest so PHP can find the hashed files

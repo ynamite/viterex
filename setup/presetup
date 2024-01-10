@@ -75,7 +75,9 @@ if [ -f .env ]; then
     ENV_LOCAL_CONTENT='VITE_DEV_SERVER="'${VITE_DEV_SERVER}'"
     VITE_DEV_SERVER_PORT="'${VITE_DEV_SERVER_PORT}'"
     VITE_ENTRY_POINT="'${VITE_ENTRY_POINT}'"
-    VITE_DIST_DEF="'${VITE_DIST_DEF}'"';
+    VITE_PUBLIC_DIR="'${VITE_PUBLIC_DIR}'"
+    VITE_DIST_DIR="'${VITE_DIST_DIR}'"
+    MODE="development"';
     echo "$ENV_LOCAL_CONTENT" >> ".env.local"
     echo -e "${CGREEN}.env.local updated with VITE config${CNO}"
 
