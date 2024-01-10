@@ -5,10 +5,15 @@
  *
  */
 
-define('IS_VITE_DEVELOPMENT', true);
+$config = @parse_ini_file(rex_path::base('/setup/setup.cfg'));
+$devHost = $config ? $config['REDAXO_HOST_NAME'] : 'redaxo-2024.test';
+
+$env = @parse_ini_file(rex_path::base('.env.local'));
+
+define('IS_VITE_DEVELOPMENT', $env ? $devHost === $_SERVER['HTTP_HOST'] : false);
 
 // dist subfolder - defined in vite.config.json
-define('DIST_DEF', 'assets/dist');
+define('DIST_DEF', $env ? $env['VITE_DIST_DEF'] : 'assets/dist');
 
 // defining some base urls and paths
 define('DIST_URI', '/' . DIST_DEF);
@@ -18,5 +23,5 @@ define('DIST_PATH', __DIR__ . '/../public/' . DIST_DEF);
 define('JS_DEPENDENCY', []); // array('jquery') as example
 
 // deafult server address, port and entry point can be customized in vite.config.json
-define('VITE_SERVER', 'http://localhost:3000');
-define('VITE_ENTRY_POINT', '/main.js');
+define('VITE_SERVER', $env ? $env['VITE_DEV_SERVER'] . ':' . $env['VITE_DEV_SERVER_PORT'] : 'http://localhost:3000');
+define('VITE_ENTRY_POINT', $env ? $env['VITE_ENTRY_POINT'] : '/main.js');

@@ -72,6 +72,13 @@ ${CNO}"
 if [ -f .env ]; then
     cp .env .env.local
     echo -e "${CGREEN}.env was copied to .env.local${CNO}"
+    ENV_LOCAL_CONTENT='VITE_DEV_SERVER="'${VITE_DEV_SERVER}'"
+    VITE_DEV_SERVER_PORT="'${VITE_DEV_SERVER_PORT}'"
+    VITE_ENTRY_POINT="'${VITE_ENTRY_POINT}'"
+    VITE_DIST_DEF="'${VITE_DIST_DEF}'"';
+    echo "$ENV_LOCAL_CONTENT" >> ".env.local"
+    echo -e "${CGREEN}.env.local updated with VITE config${CNO}"
+
 fi
 
 rm -rf tmp
@@ -136,7 +143,7 @@ echo -e "${CGREEN}File structure${CNO} was successful created"
 # install redaxo
 printf "\n\n${CRED}Installing Redaxo now
 - - - - - - - - - - - -${CNO}"
-php bin/console setup:run --lang --no-interaction --verbose "de_de" --agree-license --server "$REDAXO_HOST" --servername "$REDAXO_HOST_NAME" --error-email "$REDAXO_ERROR_EMAIL" --timezone "Europe/Berlin" --db-host "$REDAXO_DB_HOST" --db-login "$REDAXO_DB_USER" --db-password "$REDAXO_DB_PASSWORD" --db-name "$REDAXO_DB_NAME" --db-setup "normal" --db-createdb "yes" -db-charset "utf8mb4" --admin-username "$REDAXO_ADMIN_USERNAME" --admin-password "$REDAXO_ADMIN_PASSWORD"
+php bin/console setup:run --lang --no-interaction --verbose "de_de" --agree-license --server "${REDAXO_HOST_PROTOL}://${REDAXO_HOST_NAME}/" --servername "$REDAXO_SERVER_NAME" --error-email "$REDAXO_ERROR_EMAIL" --timezone "Europe/Berlin" --db-host "$REDAXO_DB_HOST" --db-login "$REDAXO_DB_USER" --db-password "$REDAXO_DB_PASSWORD" --db-name "$REDAXO_DB_NAME" --db-setup "normal" --db-createdb "yes" -db-charset "utf8mb4" --admin-username "$REDAXO_ADMIN_USERNAME" --admin-password "$REDAXO_ADMIN_PASSWORD"
 
 
 # load addons

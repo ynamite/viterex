@@ -1,81 +1,87 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import liveReload from 'vite-plugin-live-reload'
-import { resolve } from 'path'
+import path from 'path'
 
-export default defineConfig({
-  plugins: [
-    //vue(),
-    liveReload(__dirname + '/**/*.php')
-  ],
+export default ({ mode }) => {
+  process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
+  return defineConfig({
+    plugins: [
+      //vue(),
+      liveReload(__dirname + '/**/*.php')
+    ],
 
-  // config
-  root: '',
-  base: process.env.NODE_ENV === 'development' ? '/' : '/public/assets/dist/',
-
-  build: {
-    // output dir for production build
-    outDir: resolve(__dirname, './public/assets/dist'),
-    emptyOutDir: true,
-
-    // emit manifest so PHP can find the hashed files
-    manifest: true,
-
-    // esbuild target
-    // target: 'es2018',
-
-    // our entry
-    rollupOptions: {
-      input: {
-        main: resolve(__dirname + '/main.js')
-      }
-
-      /*
-      output: {
-          entryFileNames: `[name].js`,
-          chunkFileNames: `[name].js`,
-          assetFileNames: `[name].[ext]`
-      }*/
+    // config
+    base:
+      process.env.NODE_ENV === 'development'
+        ? '/'
+        : '/public/' + process.env.VITE_DIST_DEF,
+    resolve: {
+      alias: [{ find: '@', replacement: path.resolve(__dirname, 'assets') }]
     },
 
-    // minifying switch
-    minify: true,
-    write: true
-  },
+    build: {
+      // output dir for production build
+      outDir: path.resolve(__dirname, './public/' + process.env.VITE_DIST_DEF),
+      emptyOutDir: true,
 
-  server: {
-    // required to load scripts from custom host
-    cors: {
+      // emit manifest so PHP can find the hashed files
+      manifest: true,
+
+      // esbuild target
+      // target: 'es2018',
+
+      // our entry
+      rollupOptions: {
+        input: {
+          main: path.resolve(__dirname + process.env.VITE_ENTRY_POINT)
+        }
+
+        /*
+        output: {
+            entryFileNames: `[name].js`,
+            chunkFileNames: `[name].js`,
+            assetFileNames: `[name].[ext]`
+        }*/
+      },
+
+      // minifying switch
+      minify: true,
+      write: true
+    },
+
+    server: {
+      origin: `${process.env.VITE_DEV_SERVER}:${process.env.VITE_DEV_SERVER_PORT}`, // required to load scripts from custom host
       cors: {
-        origin: '*'
+        origin: '*',
         // methods: ["GET", "POST"],
         // allowedHeaders: ["Content-Type", "Authorization"],
+        preflightContinue: true
       },
-      preflightContinue: true
-    },
-    // we need a strict port to match on PHP side
-    // change freely, but update in your functions.php to match the same port
-    strictPort: true,
-    port: 3000,
+      // we need a strict port to match on PHP side
+      // change freely, but update in your functions.php to match the same port
+      strictPort: true,
+      port: process.env.VITE_DEV_SERVER_PORT,
 
-    // serve over http
-    https: false,
+      // serve over http
+      https: false
 
-    // serve over httpS
-    // to generate localhost certificate follow the link:
-    // https://github.com/FiloSottile/mkcert - Windows, MacOS and Linux supported - Browsers Chrome, Chromium and Firefox (FF MacOS and Linux only)
-    // installation example on Windows 10:
-    // > choco install mkcert (this will install mkcert)
-    // > mkcert -install (global one time install)
-    // > mkcert localhost (in project folder files localhost-key.pem & localhost.pem will be created)
-    // uncomment below to enable https
-    //https: {
-    //  key: fs.readFileSync('localhost-key.pem'),
-    //  cert: fs.readFileSync('localhost.pem'),
-    //},
+      // serve over httpS
+      // to generate localhost certificate follow the link:
+      // https://github.com/FiloSottile/mkcert - Windows, MacOS and Linux supported - Browsers Chrome, Chromium and Firefox (FF MacOS and Linux only)
+      // installation example on Windows 10:
+      // > choco install mkcert (this will install mkcert)
+      // > mkcert -install (global one time install)
+      // > mkcert localhost (in project folder files localhost-key.pem & localhost.pem will be created)
+      // uncomment below to enable https
+      //https: {
+      //  key: fs.readFileSync('localhost-key.pem'),
+      //  cert: fs.readFileSync('localhost.pem'),
+      //},
 
-    hmr: {
-      host: 'localhost'
-      //port: 443
+      // hmr: {
+      //   host: 'localhost'
+      //   //port: 443
+      // }
     }
-  }
-})
+  })
+}
