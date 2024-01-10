@@ -7,7 +7,7 @@ import 'vite/modulepreload-polyfill'
 import '@/css/style.css'
 
 // get scripts
-import '@/js/test.js'
+import '@/js/index.js'
 
 /*
 document.querySelector('#app').innerHTML = `
