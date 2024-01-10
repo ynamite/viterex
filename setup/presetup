@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+set -e
 
-installedRepos=()
+source $(dirname $0)/setup.cfg
 
 installRepositories() (
     set -eu
@@ -17,7 +18,7 @@ installRepositories() (
         local url="https://api.github.com/repos/${user}/${repo}"
         local repoNormalized=`echo ${repo} | sed 's/\//-/g'`
         curl -Ls -o ${tmpdir}/${repoNormalized}_repo.json ${url}
-        local json_data=(`php -r '$data = json_decode(file_get_contents("'${tmpdir}'/'${repo}'_repo.json")); echo $data->name . " " . $data->releases;'`)
+        local json_data=(`php -r '$data = json_decode(file_get_contents("'${tmpdir}'/'${repoNormalized}'_repo.json")); echo $data->name . " " . $data->releases;'`)
         local name="${json_data[0]}"
         local releases="${json_data[1]}"
         if [ -z "$releases" ]; then
@@ -38,6 +39,52 @@ installRepositories() (
         printf "${CGREEN}${repo}${CNO} was successful loaded and unzipped into the addon folder\n\n"
         installedRepos+=("${name}")
 
+        for repoRename in ${REPOS_RENAME[@]}
+        do
+            set -e
+            if [ -d ./src/addons/redaxo_${repoRename} ]; then
+                mv ./src/addons/redaxo_${repoRename} ./src/addons/${repoRename};
+            fi
+        done
+
+        printf "${CRED}Installing ${name} ...${CNO}\n\n"
+
+        if([ $name = 'massif' ]); then
+            cp "setup/redaxo_massif_install.sql" src/addons/massif/install.sql
+        fi
+
+        php bin/console package:install "${name}" --no-interaction
+        php bin/console package:activate "${name}" --no-interaction
+        
+        if([ $name = 'bloecks' ]); then
+            php bin/console package:install "${name}"/cutncopy --no-interaction
+            php bin/console package:activate "${name}"/cutncopy --no-interaction
+
+            php bin/console package:install "${name}"/dragndrop --no-interaction
+            php bin/console package:activate "${name}"/dragndrop --no-interaction
+
+            php bin/console package:install "${name}"/status --no-interaction
+            php bin/console package:activate "${name}"/status --no-interaction
+        fi
+        if([ $name = 'ui_tools' ]); then
+            php bin/console package:install "${name}"/jquery-minicolors --no-interaction
+            php bin/console package:activate "${name}"/jquery-minicolors --no-interaction
+
+            php bin/console package:install "${name}"/selectize --no-interaction
+            php bin/console package:activate "${name}"/selectize --no-interaction
+        fi
+        if([ $name = 'yform' ]); then
+            php bin/console package:install "${name}"/email --no-interaction
+            php bin/console package:activate "${name}"/email --no-interaction
+
+            php bin/console package:install "${name}"/manager --no-interaction
+            php bin/console package:activate "${name}"/manager --no-interaction
+
+            php bin/console package:install "${name}"/tools --no-interaction
+            php bin/console package:activate "${name}"/tools --no-interaction
+        fi
+        printf "${CGREEN}${name} installed and activated!${CNO}\n\n"
+
         sleep .1 # Waits 0.1 seconds.
 
     done
@@ -46,7 +93,6 @@ installRepositories() (
 
 resetsetup
 
-set -e
 CRED='\033[0;31m'
 CGREEN='\033[0;32m'
 CNO='\033[0m' # No Color
@@ -59,7 +105,6 @@ Yak REDAXO Pre Setup
 ${CNO}"
 
 
-source $(dirname $0)/setup.cfg
 
 echo -e "${CRED}
 Reading config file
@@ -73,11 +118,11 @@ if [ -f .env ]; then
     cp .env .env.local
     echo -e "${CGREEN}.env was copied to .env.local${CNO}"
     ENV_LOCAL_CONTENT='VITE_DEV_SERVER="'${VITE_DEV_SERVER}'"
-    VITE_DEV_SERVER_PORT="'${VITE_DEV_SERVER_PORT}'"
-    VITE_ENTRY_POINT="'${VITE_ENTRY_POINT}'"
-    VITE_PUBLIC_DIR="'${VITE_PUBLIC_DIR}'"
-    VITE_DIST_DIR="'${VITE_DIST_DIR}'"
-    MODE="development"';
+VITE_DEV_SERVER_PORT="'${VITE_DEV_SERVER_PORT}'"
+VITE_ENTRY_POINT="'${VITE_ENTRY_POINT}'"
+VITE_PUBLIC_DIR="'${VITE_PUBLIC_DIR}'"
+VITE_DIST_DIR="'${VITE_DIST_DIR}'"
+MODE="development"';
     echo "$ENV_LOCAL_CONTENT" >> ".env.local"
     echo -e "${CGREEN}.env.local updated with VITE config${CNO}"
 
@@ -106,14 +151,15 @@ echo "${REDAXO_SHA} *${tmpdir}/redaxo_${REDAXO_VERSION}.zip" | shasum -c -a 256
 unzip -oq ${tmpdir}/redaxo_${REDAXO_VERSION}.zip -d ./public
 
 echo -e "${CGREEN}
-Redaxo ${REDAXO_VERSION}${CNO} was sussessful loaded and unzipped into the public folder"
+Redaxo ${REDAXO_VERSION}${CNO} was sussessfully loaded and unzipped into the public folder"
 
 
 
 # create Yakamara-massif file structure
 echo -e "${CRED}
-Create file structure
-- - - - - - - - - - - -${CNO}"
+Creating file structure
+- - - - - - - - - - - -${CNO}
+"
 
 rm -rf bin
 rm -rf src
@@ -140,12 +186,16 @@ cp setup/path_provider.php src/path_provider.php
 cp setup/_htaccess public/.htaccess
 
 
-echo -e "${CGREEN}File structure${CNO} was successful created"
+echo -e "${CGREEN}File structure${CNO} was successfully created"
 
 # install redaxo
 printf "\n\n${CRED}Installing Redaxo now
 - - - - - - - - - - - -${CNO}"
-php bin/console setup:run --lang --no-interaction --verbose "de_de" --agree-license --server "${REDAXO_HOST_PROTOL}://${REDAXO_HOST_NAME}/" --servername "$REDAXO_SERVER_NAME" --error-email "$REDAXO_ERROR_EMAIL" --timezone "Europe/Berlin" --db-host "$REDAXO_DB_HOST" --db-login "$REDAXO_DB_USER" --db-password "$REDAXO_DB_PASSWORD" --db-name "$REDAXO_DB_NAME" --db-setup "normal" --db-createdb "yes" -db-charset "utf8mb4" --admin-username "$REDAXO_ADMIN_USERNAME" --admin-password "$REDAXO_ADMIN_PASSWORD"
+php bin/console setup:run --lang "de_de" --agree-license --server "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/" --servername "${REDAXO_SERVER_NAME}" --error-email "${REDAXO_ERROR_EMAIL}" --timezone "Europe/Berlin" --db-host "${REDAXO_DB_HOST}" --db-login "${REDAXO_DB_USER}" --db-password "${REDAXO_DB_PASSWORD}" --db-name "${REDAXO_DB_NAME}" --db-setup "normal" --db-createdb "yes" --db-charset "utf8mb4" --admin-username "${REDAXO_ADMIN_USERNAME}" --admin-password "${REDAXO_ADMIN_PASSWORD}" --no-interaction
+
+echo -e "${CGREEN}
+Redaxo ${REDAXO_VERSION}${CNO} was sussessfully installed
+"
 
 
 # load addons
@@ -154,53 +204,22 @@ Loading REDAXO packages
 - - - - - - - - - - - -
 ${CNO}"
 
-installRepositories "${REPOS_FOR_USER}" "${REPOS_FOR[@]}"
 installRepositories "${REPOS_YAKAMARA_USER}" "${REPOS_YAKAMARA[@]}"
+installRepositories "${REPOS_FOR_USER}" "${REPOS_FOR[@]}"
 installRepositories "${REPOS_TBADDADE_USER}" "${REPOS_TBADDADE[@]}"
 
 for repo in ${REPOS_OTHER[@]}
 do
     set -e
-    userRepo='/' read -ra ADDR <<< "$repo"
-    installRepositories $userRepo[0] $userRepo[1]
+    IFS=/ read -r user repo <<< "$repo"
+    installRepositories $user $repo
 done
 
-for repo in ${REPOS_RENAME[@]}
-do
-    set -e
-    if [ -d ./src/addons/redaxo_${repo} ]; then
-        mv ./src/addons/redaxo_${repo} ./src/addons/${repo};
-    fi
-done
-
-cp setup/redaxo_massif_install.sql src/addons/massif/install.sql
-
-for repo in ${installedRepos[@]}
-do
-    set -e
-    printf "${CGRED}Installting ${repo} ...${CNO}\n\n"
-    php -r "bin/console package:install ${repo} --no-interaction --verbose"
-    php -r "bin/console package:activate ${repo} --no-interaction --verbose"
-    
-    if([ $repo = 'bloecks' ]); then
-        php -r "bin/console package:activate ${repo}/cutncopy --no-interaction --verbose"
-        php -r "bin/console package:activate ${repo}/dragndrop --no-interaction --verbose"
-        php -r "bin/console package:activate ${repo}/status --no-interaction --verbose"
-    fi
-    if([ $repo = 'ui_tools' ]); then
-        php -r "bin/console package:activate ${repo}/jquery-minicolors --no-interaction --verbose"
-        php -r "bin/console package:activate ${repo}/selectize --no-interaction --verbose"
-    fi
-    if([ $repo = 'yform' ]); then
-        php -r "bin/console package:activate ${repo}/email --no-interaction --verbose"
-        php -r "bin/console package:activate ${repo}/manager --no-interaction --verbose"
-        php -r "bin/console package:activate ${repo}/tools --no-interaction --verbose"
-    fi
-done
 
 rm -f src/addons/massif/install.sql
 cp -f setup/redaxo_install_config.json var/data/addons/install/config.json
 
+php bin/console cache:clear
 # remove
 rm -rf public/redaxo/bin
 rm -rf public/redaxo/src
@@ -212,10 +231,3 @@ rm -f public/.gitignore.example
 yarn
 yarn upgrade-interactive --latest
 
-# cp setup/stylelint.config.js stylelint.config.js
-# cp setup/.prettierrc.cjs .prettierrc.cjs
-# cp setup/.eslintrc.cjs .eslintrc.cjs
-# cp setup/.browserslistrc .browserslistrc
-# cp setup/tailwind.config.js tailwind.config.js
-# cp setup/postcss.config.js postcss.config.js
-# cp setup/vite.config.js vite.config.js
