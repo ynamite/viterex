@@ -31,25 +31,22 @@ export default ({ mode }) => {
       manifest: true,
 
       // esbuild target
-      // target: 'es2018',
+      // target: 'es2020',
 
       // our entry
       rollupOptions: {
         input: {
           main: path.resolve(__dirname + process.env.VITE_ENTRY_POINT)
         }
-
-        /*
-        output: {
-            entryFileNames: `[name].js`,
-            chunkFileNames: `[name].js`,
-            assetFileNames: `[name].[ext]`
-        }*/
-      },
+        // output: {
+        //   entryFileNames: `[name].js`,
+        //   chunkFileNames: `[name].js`,
+        //   assetFileNames: `[name].[ext]`
+        // }
+      }
 
       // minifying switch
-      minify: true,
-      write: true
+      // minify: true,
     },
 
     server: {

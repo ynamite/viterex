@@ -1,4 +1,6 @@
 // main entry point
+import 'vite/modulepreload-polyfill'
+
 // include your assets here
 
 // get styles
