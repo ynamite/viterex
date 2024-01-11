@@ -1,4 +1,11 @@
 
+SET NAMES utf8mb4;
+
+INSERT INTO `rex_article` (`pid`, `id`, `parent_id`, `name`, `catname`, `catpriority`, `startarticle`, `priority`, `path`, `status`, `template_id`, `clang_id`, `createdate`, `createuser`, `updatedate`, `updateuser`, `revision`, `yrewrite_url_type`, `yrewrite_url`, `yrewrite_redirection`, `yrewrite_title`, `yrewrite_description`, `yrewrite_image`, `yrewrite_changefreq`, `yrewrite_priority`, `yrewrite_index`, `yrewrite_canonical_url`) VALUES
+(1,	1,	0,	'Home',	'Home',	1,	1,	1,	'|',	1,	1,	1,	'2024-01-11 15:21:10',	'admin',	'2024-01-11 15:21:08',	'admin',	0,	'AUTO',	'',	'',	'',	'',	'',	NULL,	NULL,	NULL,	''),
+(2,	2,	0,	'404',	'',	0,	0,	1,	'|',	0,	1,	1,	'2024-01-11 15:23:39',	'admin',	'2024-01-11 15:23:39',	'admin',	0,	'AUTO',	'',	'',	'',	'',	'',	NULL,	NULL,	NULL,	''),
+(3,	3,	0,	'Datenschutz',	'',	0,	0,	2,	'|',	1,	1,	1,	'2024-01-11 15:23:47',	'admin',	'2024-01-11 15:23:49',	'admin',	0,	'AUTO',	'',	'',	'',	'',	'',	NULL,	NULL,	NULL,	'');
+
 --
 -- Daten für Tabelle `rex_clang`
 --
@@ -211,6 +218,7 @@ INSERT INTO `rex_template` (`id`, `key`, `name`, `content`, `active`, `createdat
 --
 -- Daten für Tabelle `rex_tinymce5_profiles`
 --
+
 DELETE FROM `rex_tinymce5_profiles`;
 
 INSERT INTO `rex_tinymce5_profiles` (`id`, `name`, `description`, `plugins`, `toolbar`, `extra`, `mediatype`, `mediapath`, `mediacategory`, `upload_default`, `createdate`, `updatedate`, `createuser`, `updateuser`) VALUES
