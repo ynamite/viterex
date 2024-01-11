@@ -1,101 +1,125 @@
 #!/usr/bin/env bash
-set -e
 
-source $(dirname $0)/setup.cfg
-
-installRepositories() (
-    set -eu
-    local user="$1"  
-    shift
-    local repos="$@"
-
-    for repo in ${repos[@]}
-    do
-        set -eu
-        printf "Loading: ${user}/${repo}\n"
-        local tmpdir=$(mktemp -d)
-        trap 'rm -rf -- "$tmpdir"' EXIT    
-        local url="https://api.github.com/repos/${user}/${repo}"
-        local repoNormalized=`echo ${repo} | sed 's/\//-/g'`
-        curl -Ls -o ${tmpdir}/${repoNormalized}_repo.json ${url}
-        local json_data=(`php -r '$data = json_decode(file_get_contents("'${tmpdir}'/'${repoNormalized}'_repo.json")); echo $data->name . " " . $data->releases;'`)
-        local name="${json_data[0]}"
-        local releases="${json_data[1]}"
-        if [ -z "$releases" ]; then
-            curl -Ls -o ${tmpdir}/${repoNormalized}_repo.json ${url}/releases/latest
-            zipball_url=`php -r "echo json_decode(file_get_contents('${tmpdir}/${repoNormalized}_repo.json'))->zipball_url;"`
-        else
-            default_branch=`php -r "echo json_decode(file_get_contents('${tmpdir}/${repoNormalized}_repo.json'))->default_branch;"`
-            zipball_url="${url}/zipball/${default_branch}"
-        fi
-        rm -rf ${tmpdir}/*
-        curl -Ls -o ${tmpdir}/${repoNormalized}.zip ${zipball_url}
-
-        unzip -oq ${tmpdir}/${repoNormalized}.zip -d ${tmpdir}/unzip
-        local files=("$tmpdir"/unzip/*)
-        mkdir -p ./src/addons/${repoNormalized}/
-        mv "$files"/* ./src/addons/${repoNormalized}/;
-
-        printf "${CGREEN}${repo}${CNO} was successful loaded and unzipped into the addon folder\n\n"
-        installedRepos+=("${name}")
-
-        for repoRename in ${REPOS_RENAME[@]}
-        do
-            set -e
-            if [ -d ./src/addons/redaxo_${repoRename} ]; then
-                mv ./src/addons/redaxo_${repoRename} ./src/addons/${repoRename};
-            fi
-        done
-
-        printf "${CRED}Installing ${name} ...${CNO}\n\n"
-
-        if([ $name = 'massif' ]); then
-            cp "setup/redaxo_massif_install.sql" src/addons/massif/install.sql
-        fi
-
-        php bin/console package:install "${name}" --no-interaction
-        php bin/console package:activate "${name}" --no-interaction
-        
-        if([ $name = 'bloecks' ]); then
-            php bin/console package:install "${name}"/cutncopy --no-interaction
-            php bin/console package:activate "${name}"/cutncopy --no-interaction
-
-            php bin/console package:install "${name}"/dragndrop --no-interaction
-            php bin/console package:activate "${name}"/dragndrop --no-interaction
-
-            php bin/console package:install "${name}"/status --no-interaction
-            php bin/console package:activate "${name}"/status --no-interaction
-        fi
-        if([ $name = 'ui_tools' ]); then
-            php bin/console package:install "${name}"/jquery-minicolors --no-interaction
-            php bin/console package:activate "${name}"/jquery-minicolors --no-interaction
-
-            php bin/console package:install "${name}"/selectize --no-interaction
-            php bin/console package:activate "${name}"/selectize --no-interaction
-        fi
-        if([ $name = 'yform' ]); then
-            php bin/console package:install "${name}"/email --no-interaction
-            php bin/console package:activate "${name}"/email --no-interaction
-
-            php bin/console package:install "${name}"/manager --no-interaction
-            php bin/console package:activate "${name}"/manager --no-interaction
-
-            php bin/console package:install "${name}"/tools --no-interaction
-            php bin/console package:activate "${name}"/tools --no-interaction
-        fi
-        printf "${CGREEN}${name} installed and activated!${CNO}\n\n"
-
-        sleep .1 # Waits 0.1 seconds.
-
-    done
-
-)
-
+clear
 resetsetup
+
+set -e
 
 CRED='\033[0;31m'
 CGREEN='\033[0;32m'
 CNO='\033[0m' # No Color
+
+source $(dirname $0)/setup.cfg
+
+installPackage() {
+        local package="$1"  
+
+        printf "${CRED}Installing${CNO} ${package} ...\n"
+
+        php bin/console package:install "${package}" --no-interaction --quiet
+        wait
+        php bin/console package:activate "${package}" --no-interaction --quiet
+        wait
+        
+        if([ $package = 'bloecks' ]); then
+            php bin/console package:install "${package}"/cutncopy --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/cutncopy --no-interaction --quiet
+            wait
+
+            php bin/console package:install "${package}"/dragndrop --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/dragndrop --no-interaction --quiet
+            wait
+
+            php bin/console package:install "${package}"/status --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/status --no-interaction --quiet
+            wait
+        fi
+        if([ $package = 'ui_tools' ]); then
+            php bin/console package:install "${package}"/jquery-minicolors --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/jquery-minicolors --no-interaction --quiet
+            wait
+
+            php bin/console package:install "${package}"/selectize --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/selectize --no-interaction --quiet
+            wait
+        fi
+        if([ $package = 'yform' ]); then
+            php bin/console package:install "${package}"/email --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/email --no-interaction --quiet
+            wait
+
+            php bin/console package:install "${package}"/manager --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/manager --no-interaction --quiet
+            wait
+
+            php bin/console package:install "${package}"/tools --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/tools --no-interaction --quiet
+            wait
+        fi
+        printf "${CGREEN}${package}${CNO} installed and activated!\n\n"
+}
+
+downloadPackageFromRepo() (
+    set -eu
+    local user="$1"  
+    local repo="$2"
+
+    set -eu
+    printf "${CRED}Downloading${CNO} ${user}/${repo}\n"
+    local tmpdir=$(mktemp -d)
+    trap 'rm -rf -- "$tmpdir"' EXIT    
+    local url="https://api.github.com/repos/${user}/${repo}"
+    # local repoNormalized=`echo ${repo} | sed 's/\//-/g'`
+    curl -Ls -o ${tmpdir}/${repo}_repo.json ${url}
+    local default_branch=`php -r "echo json_decode(file_get_contents('${tmpdir}/${repo}_repo.json'))->default_branch;"`
+    wait
+    zipball_url="${url}/zipball/${default_branch}"
+    rm -rf ${tmpdir}/*
+    curl -Ls -o ${tmpdir}/${repo}.zip ${zipball_url}
+    wait
+
+    unzip -oq ${tmpdir}/${repo}.zip -d ${tmpdir}/unzip
+    wait
+    local files=("$tmpdir"/unzip/*)
+    mkdir -p ./src/addons/${repo}/
+    mv "$files"/* ./src/addons/${repo}/;
+
+    printf "${CGREEN}${repo}${CNO} was successful loaded and unzipped into the addon folder\n"
+
+    local name=''
+
+    for repoRename in ${ADDON_REPOS_RENAME[@]}
+    do
+        set -e
+        if [ -d ./src/addons/redaxo_${repoRename} ]; then
+            mv ./src/addons/redaxo_${repoRename} ./src/addons/${repoRename};
+            name=${repoRename}
+        fi
+    done
+
+    if([ $name = 'massif' ]); then
+        cp "setup/redaxo_massif_install.sql" src/addons/massif/install.sql
+    fi
+
+    installPackage "${name}"
+    wait
+
+    if([ $name = 'massif' ]); then
+        rm -f src/addons/massif/install.sql
+    fi
+
+    sleep .1 # Waits 0.1 seconds.
+    wait
+
+)
 
 
 echo -e "${CRED}
@@ -191,7 +215,8 @@ echo -e "${CGREEN}File structure${CNO} was successfully created"
 # install redaxo
 printf "\n\n${CRED}Installing Redaxo now
 - - - - - - - - - - - -${CNO}"
-php bin/console setup:run --lang "de_de" --agree-license --server "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/" --servername "${REDAXO_SERVER_NAME}" --error-email "${REDAXO_ERROR_EMAIL}" --timezone "Europe/Berlin" --db-host "${REDAXO_DB_HOST}" --db-login "${REDAXO_DB_USER}" --db-password "${REDAXO_DB_PASSWORD}" --db-name "${REDAXO_DB_NAME}" --db-setup "normal" --db-createdb "yes" --db-charset "utf8mb4" --admin-username "${REDAXO_ADMIN_USERNAME}" --admin-password "${REDAXO_ADMIN_PASSWORD}" --no-interaction
+php bin/console setup:run --lang "de_de" --agree-license --server "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/" --servername "${REDAXO_SERVER_NAME}" --error-email "${REDAXO_ERROR_EMAIL}" --timezone "Europe/Berlin" --db-host "${REDAXO_DB_HOST}" --db-login "${REDAXO_DB_USER}" --db-password "${REDAXO_DB_PASSWORD}" --db-name "${REDAXO_DB_NAME}" --db-setup "normal" --db-createdb "yes" --db-charset "utf8mb4" --admin-username "${REDAXO_ADMIN_USERNAME}" --admin-password "${REDAXO_ADMIN_PASSWORD}" --no-interaction --quiet
+wait
 
 echo -e "${CGREEN}
 Redaxo ${REDAXO_VERSION}${CNO} was sussessfully installed
@@ -204,22 +229,36 @@ Loading REDAXO packages
 - - - - - - - - - - - -
 ${CNO}"
 
-installRepositories "${REPOS_YAKAMARA_USER}" "${REPOS_YAKAMARA[@]}"
-installRepositories "${REPOS_FOR_USER}" "${REPOS_FOR[@]}"
-installRepositories "${REPOS_TBADDADE_USER}" "${REPOS_TBADDADE[@]}"
+for package in ${ADDON_PACKAGES[@]}
+do
+    printf "\n${CRED}Downloading package${CNO} ${package}\n"
+    php bin/console install:download "${package}" --no-interaction --quiet
+    wait
+    installPackage "${package}" 
+    # pids="$pids $!"
+    wait
+done
+# for pid in ${pids[*]}; do
+#     wait $pid
+# done
 
-for repo in ${REPOS_OTHER[@]}
+for repo in ${ADDON_REPOS[@]}
 do
     set -e
     IFS=/ read -r user repo <<< "$repo"
-    installRepositories $user $repo
+    downloadPackageFromRepo $user $repo
+    wait
 done
 
-
-rm -f src/addons/massif/install.sql
+mkdir -p var/data/addons/install
 cp -f setup/redaxo_install_config.json var/data/addons/install/config.json
+wait
 
 php bin/console cache:clear
+wait
+php bin/console be_style:compile
+wait
+
 # remove
 rm -rf public/redaxo/bin
 rm -rf public/redaxo/src
