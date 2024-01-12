@@ -54,7 +54,7 @@ Deployment via [ydeploy](https://github.com/yakamara/ydeploy) von [yakamara](htt
 
 - wer sich mit deployer auskennt, kann das natürlich beliebig erweitern.
 
-##Tipps##
+## Tipps
 
 - falls eine andere Redaxo Version gewünscht ist, einfach Eintrag anpassen und SHA-Summe holen:<br/>
   `$ curl -Ls https://github.com/redaxo/redaxo/releases/download/5.15.1/redaxo_5.15.1.zip | shasum`
