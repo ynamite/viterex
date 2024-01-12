@@ -216,7 +216,7 @@ echo -e "${CGREEN}File structure${CNO} was successfully created"
 # install redaxo
 printf "\n\n${CRED}Installing Redaxo now
 - - - - - - - - - - - -${CNO}"
-php bin/console setup:run --lang "de_de" --agree-license --server "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/" --servername "${REDAXO_SERVER_NAME}" --error-email "${REDAXO_ERROR_EMAIL}" --timezone "Europe/Berlin" --db-host "${REDAXO_DB_HOST}" --db-login "${REDAXO_DB_USER}" --db-password "${REDAXO_DB_PASSWORD}" --db-name "${REDAXO_DB_NAME}" --db-setup "normal" --db-createdb "yes" --db-charset "utf8mb4" --admin-username "${REDAXO_ADMIN_USERNAME}" --admin-password "${REDAXO_ADMIN_PASSWORD}" --no-interaction --quiet
+php bin/console setup:run --lang "de_de" --agree-license --server "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/" --servername "${REDAXO_SERVER_NAME}" --error-email "${REDAXO_ERROR_EMAIL}" --timezone "Europe/Berlin" --db-host "${REDAXO_DB_HOST}" --db-login "${REDAXO_DB_USER}" --db-password "${REDAXO_DB_PASSWORD}" --db-name "${REDAXO_DB_NAME}" --db-setup "normal" --db-createdb "yes" --db-charset "utf8mb4" --admin-username "${REDAXO_ADMIN_USERNAME}" --admin-password "${REDAXO_ADMIN_PASSWORD}" --quiet
 wait
 
 echo -e "${CGREEN}
@@ -269,7 +269,7 @@ rm -f public/.gitignore.example
 # rm -rf setup
 
 composer install --no-interaction --quiet
-dep completion bash > /etc/bash_completion.d/deployer
+# dep completion bash > /etc/bash_completion.d/deployer
 
 # execute yarn
 yarn
