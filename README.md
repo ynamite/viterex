@@ -24,9 +24,10 @@ Deployment via [ydeploy](https://github.com/yakamara/ydeploy) von [yakamara](htt
 - lokale Entwicklungsumgebung mit Vite JS
 - Tailwind CSS
 - Vite JS bzw. RollUp als Bundler/Minifier (inkl. PostCSS mit Nesting und Autoprefixer)
-- Live-Reload bzw. HMR folgender Verzeichnisse
+- Live-Reload bzw. HMR für Templates, Struktur, URL (beliebig erweiterbar)
   - /src/templates/\*_/._
   - /src/modules/\*_/._
+  - /var/cache/addons/(structure|url)\*_/._
   - /assets/\*_/._
 - einfach erweiterbar
 - Deployment via ydeploy bzw. deployment via [deployer](https://deployer.org/)

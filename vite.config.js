@@ -7,7 +7,10 @@ export default ({ mode }) => {
   return defineConfig({
     plugins: [
       //vue(),
-      liveReload(__dirname + '/**/*.php')
+      liveReload([
+        __dirname + '/**/*.php',
+        __dirname + '/var/cache/addons/(structure|url)/**'
+      ])
     ],
 
     // config
