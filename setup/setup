@@ -124,7 +124,7 @@ downloadPackageFromRepo() (
 
 echo -e "${CRED}
 - - - - - - - - - - - -
-Yak REDAXO Pre Setup
+ViteRex Setup
 - - - - - - - - - - - -
 ${CNO}"
 
@@ -204,6 +204,7 @@ rm -f public/.htaccess
 
 cp setup/addon.project.boot.php src/addons/project/boot.php
 cp -p setup/console bin/console
+cp setup/deploy.php deploy.php
 cp setup/index.backend.php public/redaxo/index.php
 cp setup/index.frontend.php public/index.php
 cp setup/path_provider.php src/path_provider.php
@@ -258,6 +259,8 @@ php bin/console cache:clear
 wait
 php bin/console be_style:compile
 wait
+php bin/console ydeploy:diff
+wait
 
 # remove
 rm -rf public/redaxo/bin
@@ -265,6 +268,8 @@ rm -rf public/redaxo/src
 rm -f public/.gitignore.example
 # rm -rf setup
 
+composer install --no-interaction --quiet
+dep completion bash > /etc/bash_completion.d/deployer
 
 # execute yarn
 yarn

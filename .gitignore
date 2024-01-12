@@ -1,10 +1,10 @@
 /.build
 node_modules
-dist
-dist-ssr
+vendor
 *.local
 
 /public/assets/*
+/public/dist
 
 /public/media/*
 !/public/media/.redaxo
@@ -17,8 +17,7 @@ dist-ssr
 !/var/data/addons/mform/*
 !/var/data/addons/ydeploy/*
 /var/data/core/*
-
-/var/log/
+/var/log/*
 
 # Editor directories and files
 .vscode/*
