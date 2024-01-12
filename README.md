@@ -1,4 +1,4 @@
-# ViteRex - _REDAXO development on speed_
+# ViteRex - _REDAXO Frontend development on speed_
 
 - [Beschreibung](#beschreibung)
 - [Features](#features)
