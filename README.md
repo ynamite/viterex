@@ -11,10 +11,10 @@
 
 ## Beschreibung
 
-Super einfache Installation einer Redaxo-Instanz, samt Addons und Plugins, sowie
+Super simple Installation einer Redaxo-Instanz, samt Addons und Plugins, sowie
 einer leistungsstarken lokalen Entwicklungsumgebung mit Tailwind CSS, PostCSS und
 Autoprefixer und Vite JS als Bundler.
-Mit Support für Live-Reloading und HMR für PHP, CSS und JS Dateien.
+Mit Support für Live-Reloading und HMR für Redaxo, PHP, CSS und JS Dateien.
 
 Deployment via [ydeploy](https://github.com/yakamara/ydeploy) von [yakamara](https://github.com/yakamara/) (basierend auf [deployer](https://deployer.org/))
 
