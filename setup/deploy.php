@@ -20,10 +20,12 @@ $deploymentPort = '22';
 $deploymentUser = 'benutzername';
 $deploymentType = 'production';
 $deploymentPath = '/httpdocs';
+$deploymentRepository = 'git@github.com:user/repo.git';
+// es muss nicht zwingend ein Git-Repository verwendet werden; dieses Skript prüft, ob ein Git-Repository initialisiert wurde.
+// ohne Git-Repository muss ggf. der `deploy:update_code`-Task in dieser Datei angepasst werden (ab Zeile 105)
 
+// -------------------------------------------------
 
-// Der Pfad ist ggf. anzupassen, falls der Projekt-Root nicht dem REDAXO-Root entspricht
-// Falls die Yak-Struktur (https://github.com/yakamara/yak) verwendet wird, sollte stattdessen die `deploy_yak.php` eingebunden werden
 require __DIR__ . '/src/addons/ydeploy/deploy.php';
 require __DIR__ . '/setup/deployer.task.setup.php';
 
@@ -93,7 +95,7 @@ host($deploymentName)
 
 
 if ($isGit) {
-    set('repository', 'git@github.com:user/repo.git');
+    set('repository', $deploymentRepository);
     set('branch', static fn () => runLocally('{{bin/git}} rev-parse --abbrev-ref HEAD'));
 } else {
     set('branch', 'main');
