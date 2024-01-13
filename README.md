@@ -1,4 +1,4 @@
-# ViteRex - _Supercharged REDAXO Frontend development on speed_ 🍔
+# ViteRex 🚀 _Supercharged REDAXO Frontend development on speed_
 
 - [Beschreibung](#beschreibung)
 - [Vorraussetzungen](#requirements)
@@ -63,7 +63,7 @@ Deployment via [ydeploy](https://github.com/yakamara/ydeploy) von [yakamara](htt
 8. im Backend mit den Zugangsdaten aus setup.cfg anmelden
 9. Happy coding! 🙌🏼
 
-Ab sofort sollten jegliche Änderungen an Dateien (Templates & Module unter /src/ und CSS, JS Dateien unter /assets/) und sogar Anpassungen im Redaxo Backend sofort im Frontend automatisch gespiegelt werden (dank Live-Reload und HMR) – ohne nerviges, manuelles refreshen mit F5 🏃🏻‍♀️
+**Ab sofort sollten jegliche Änderungen an Dateien (Templates & Module unter /src/ und CSS, JS Dateien unter /assets/) und sogar Anpassungen im Redaxo Backend sofort im Frontend automatisch gespiegelt werden (dank Live-Reload und HMR) – ohne nerviges, manuelles refreshen mit F5** 🍔
 
 - mit `CTRL + C` kann der Vite JS Dev-Server im Terminal gestoppt werden
 - mit `yarn dev` Vite JS Dev-Server starten
@@ -87,7 +87,8 @@ einfach im Projekt-Ordner `yarn build` ausführen und folgende Dateien und Ordne
 - `.env.local`
 - `inc.vite.php`
 - `LICENSE.md`
-  _**Wichtig**: Webhosting so konfigurieren, dass der Dokumentstamm (bzw. www-Root) auf den Ordner /public zeigt_
+
+_**Wichtig**: Webhosting so konfigurieren, dass der Dokumentstamm (bzw. www-Root) auf den Ordner /public zeigt_
 
 <a name="tips"></a>
 
