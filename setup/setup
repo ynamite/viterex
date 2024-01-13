@@ -273,4 +273,8 @@ composer install --no-interaction --quiet
 # execute yarn
 yarn
 yarn upgrade-interactive --latest
+yarn dev
 
+# open front and backend
+xdg-open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/"
+xdg-open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/redaxo/"
