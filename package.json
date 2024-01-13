@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "rex-vite",
+  "name": "vite-rex",
   "type": "module",
   "scripts": {
     "dev": "cross-env NODE_ENV=development vite",
