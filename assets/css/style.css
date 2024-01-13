@@ -1,0 +1,6 @@
+@import 'tailwind.css';
+@import 'webfonts.css';
+
+body {
+  @apply p-10 mt-2;
+}

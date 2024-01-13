@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+set -e
+CRED='\033[0;31m'
+CGREEN='\033[0;32m'
+CNO='\033[0m' # No Color
+
+
+echo -e "${CRED}
+- - - - - - - - - - - -
+Yak REDAXO reset
+- - - - - - - - - - - -
+${CNO}"
+
+
+echo -e "${CRED}
+Resetting ...
+${CNO}"
+
+
+rm -rf node_modules
+rm -rf tmp
+rm -rf public
+rm -rf bin
+rm -rf src
+rm -rf var
+rm -rf vendor
+
+rm -f .env.local
+rm -f LICENSE.md
+rm -f yarn.lock
+rm -f deploy.php
+rm -f yarn.lock
+rm -f composer.lock
+
+# rm -f stylelint.config.js
+# rm -f .prettierrc.cjs
+# rm -f .eslintrc.cjs
+# rm -f .browserslistrc
+# rm -f tailwind.config.js
+# rm -f postcss.config.js
+# rm -f vite.config.js
+
+echo -e "${CGREEN}
+Done!
+${CNO}"

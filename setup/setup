@@ -1,0 +1,278 @@
+#!/usr/bin/env bash
+
+clear
+resetsetup
+
+set -e
+
+CRED='\033[0;31m'
+CGREEN='\033[0;32m'
+CNO='\033[0m' # No Color
+
+source $(dirname $0)/setup.cfg
+
+installPackage() {
+        local package="$1"  
+
+        printf "${CRED}Installing${CNO} ${package} ...\n"
+
+        php bin/console package:install "${package}" --no-interaction --quiet
+        wait
+        php bin/console package:activate "${package}" --no-interaction --quiet
+        wait
+        
+        if([ $package = 'bloecks' ]); then
+            php bin/console package:install "${package}"/cutncopy --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/cutncopy --no-interaction --quiet
+            wait
+
+            php bin/console package:install "${package}"/dragndrop --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/dragndrop --no-interaction --quiet
+            wait
+
+            php bin/console package:install "${package}"/status --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/status --no-interaction --quiet
+            wait
+        fi
+        if([ $package = 'ui_tools' ]); then
+            php bin/console package:install "${package}"/jquery-minicolors --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/jquery-minicolors --no-interaction --quiet
+            wait
+
+            php bin/console package:install "${package}"/selectize --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/selectize --no-interaction --quiet
+            wait
+        fi
+        if([ $package = 'yform' ]); then
+            php bin/console package:install "${package}"/email --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/email --no-interaction --quiet
+            wait
+
+            php bin/console package:install "${package}"/manager --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/manager --no-interaction --quiet
+            wait
+
+            php bin/console package:install "${package}"/tools --no-interaction --quiet
+            wait
+            php bin/console package:activate "${package}"/tools --no-interaction --quiet
+            wait
+        fi
+        printf "${CGREEN}${package}${CNO} installed and activated!\n\n"
+}
+
+downloadPackageFromRepo() (
+    set -eu
+    local user="$1"  
+    local repo="$2"
+
+    set -eu
+    printf "${CRED}Downloading${CNO} ${user}/${repo}\n"
+    local tmpdir=$(mktemp -d)
+    trap 'rm -rf -- "$tmpdir"' EXIT    
+    local url="https://api.github.com/repos/${user}/${repo}"
+    # local repoNormalized=`echo ${repo} | sed 's/\//-/g'`
+    curl -Ls -o ${tmpdir}/${repo}_repo.json ${url}
+    local default_branch=`php -r "echo json_decode(file_get_contents('${tmpdir}/${repo}_repo.json'))->default_branch;"`
+    wait
+    zipball_url="${url}/zipball/${default_branch}"
+    rm -rf ${tmpdir}/*
+    curl -Ls -o ${tmpdir}/${repo}.zip ${zipball_url}
+    wait
+
+    unzip -oq ${tmpdir}/${repo}.zip -d ${tmpdir}/unzip
+    wait
+    local files=("$tmpdir"/unzip/*)
+    mkdir -p ./src/addons/${repo}/
+    mv "$files"/* ./src/addons/${repo}/;
+
+    printf "${CGREEN}${repo}${CNO} was successful loaded and unzipped into the addon folder\n"
+
+    local name=$repo
+
+    for repoRename in ${ADDON_REPOS_RENAME[@]}
+    do
+        set -e
+        if [ -d ./src/addons/redaxo_${repoRename} ]; then
+            mv ./src/addons/redaxo_${repoRename} ./src/addons/${repoRename};
+            name=${repoRename}
+        fi
+    done
+
+    if([ "$name" = 'massif' ]); then
+        cp "setup/redaxo_massif_install.sql" src/addons/massif/install.sql
+    fi
+
+    installPackage "${name}"
+    wait
+
+    if([ "$name" = 'massif' ]); then
+        rm -f src/addons/massif/install.sql
+    fi
+
+    sleep .1 # Waits 0.1 seconds.
+    wait
+
+)
+
+
+echo -e "${CRED}
+- - - - - - - - - - - -
+ViteRex Setup
+- - - - - - - - - - - -
+${CNO}"
+
+
+
+echo -e "${CRED}
+Reading config file
+- - - - - - - - - - - -
+    REDAXO install version: ${CNO}$REDAXO_VERSION${CRED}
+    REDAXO shasum: ${CNO}$REDAXO_SHA${CRED}
+${CNO}"
+
+# rename env
+if [ -f .env ]; then
+    cp .env .env.local
+    echo -e "${CGREEN}.env was copied to .env.local${CNO}"
+    ENV_LOCAL_CONTENT='VITE_DEV_SERVER="'${VITE_DEV_SERVER}'"
+VITE_DEV_SERVER_PORT="'${VITE_DEV_SERVER_PORT}'"
+VITE_ENTRY_POINT="'${VITE_ENTRY_POINT}'"
+VITE_PUBLIC_DIR="'${VITE_PUBLIC_DIR}'"
+VITE_DIST_DIR="'${VITE_DIST_DIR}'"
+MODE="development"';
+    echo "$ENV_LOCAL_CONTENT" >> ".env.local"
+    echo -e "${CGREEN}.env.local updated with VITE config${CNO}"
+
+fi
+
+rm -rf tmp
+rm -rf public
+
+# make tmp folders
+tmpdir='./tmp'
+if [ ! -d ./tmp ]; then
+    mkdir $tmpdir
+    # mkdir ./tmp/redaxo
+fi
+# tmpdir=$(mktemp -dt redaxo)
+trap 'rm -rf -- "$tmpdir"' EXIT
+
+
+# load redaxo
+echo -e "${CRED}
+Load REDAXO zip file
+- - - - - - - - - - - -${CNO}"
+curl -Ls -o ${tmpdir}/redaxo_${REDAXO_VERSION}.zip https://github.com/redaxo/redaxo/releases/download/${REDAXO_VERSION}/redaxo_${REDAXO_VERSION}.zip
+#echo `shasum -c -a 256 "${REDAXO_SHA} *.${tmpdir}/redaxo_${REDAXO_VERSION}.zip"`
+echo "${REDAXO_SHA} *${tmpdir}/redaxo_${REDAXO_VERSION}.zip" | shasum -c -a 256
+unzip -oq ${tmpdir}/redaxo_${REDAXO_VERSION}.zip -d ./public
+
+echo -e "${CGREEN}
+Redaxo ${REDAXO_VERSION}${CNO} was sussessfully loaded and unzipped into the public folder"
+
+
+
+echo -e "${CRED}
+Creating file structure
+- - - - - - - - - - - -${CNO}
+"
+
+rm -rf bin
+rm -rf src
+rm -rf var
+
+mkdir -p bin
+mkdir -p src
+mkdir -p var
+
+mv public/redaxo/bin/* bin
+mv public/redaxo/cache var
+mv public/redaxo/data var
+mv public/redaxo/src/addons src
+mv public/redaxo/src/core src
+mv public/LICENSE.md LICENSE.md
+rm -f public/README.md public/README.de.md
+rm -f public/.htaccess
+
+cp setup/addon.project.boot.php src/addons/project/boot.php
+cp -p setup/console bin/console
+cp setup/deploy.php deploy.php
+cp setup/index.backend.php public/redaxo/index.php
+cp setup/index.frontend.php public/index.php
+cp setup/path_provider.php src/path_provider.php
+cp setup/_htaccess public/.htaccess
+
+
+echo -e "${CGREEN}File structure${CNO} was successfully created"
+
+# install redaxo
+printf "\n\n${CRED}Installing Redaxo now
+- - - - - - - - - - - -${CNO}"
+php bin/console setup:run --lang "de_de" --agree-license --server "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/" --servername "${REDAXO_SERVER_NAME}" --error-email "${REDAXO_ERROR_EMAIL}" --timezone "Europe/Berlin" --db-host "${REDAXO_DB_HOST}" --db-login "${REDAXO_DB_USER}" --db-password "${REDAXO_DB_PASSWORD}" --db-name "${REDAXO_DB_NAME}" --db-setup "normal" --db-createdb "yes" --db-charset "utf8mb4" --admin-username "${REDAXO_ADMIN_USERNAME}" --admin-password "${REDAXO_ADMIN_PASSWORD}" --quiet
+wait
+
+echo -e "${CGREEN}
+Redaxo ${REDAXO_VERSION}${CNO} was sussessfully installed
+"
+
+
+# load addons
+echo -e "${CRED}
+Loading REDAXO packages
+- - - - - - - - - - - -
+${CNO}"
+
+for package in ${ADDON_PACKAGES[@]}
+do
+    printf "\n${CRED}Downloading package${CNO} ${package}\n"
+    php bin/console install:download "${package}" --no-interaction --quiet
+    wait
+    installPackage "${package}" 
+    # pids="$pids $!"
+    wait
+done
+# for pid in ${pids[*]}; do
+#     wait $pid
+# done
+
+for repo in ${ADDON_REPOS[@]}
+do
+    set -e
+    IFS=/ read -r user repo <<< "$repo"
+    downloadPackageFromRepo $user $repo
+    wait
+done
+
+mkdir -p var/data/addons/install
+wait
+
+php bin/console cache:clear
+wait
+php bin/console be_style:compile
+wait
+php bin/console ydeploy:diff
+wait
+
+# remove
+rm -rf public/redaxo/bin
+rm -rf public/redaxo/src
+rm -f public/.gitignore.example
+# rm -rf setup
+
+composer install --no-interaction --quiet
+
+# execute yarn
+yarn
+yarn upgrade-interactive --latest
+yarn dev
+
+# open front and backend
+xdg-open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/"
+xdg-open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/redaxo/"

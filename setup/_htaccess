@@ -1,0 +1,125 @@
+# DEFAULT CHARSET
+AddDefaultCharset utf-8
+
+# PREVENT DIRECTORY LISTING
+<IfModule mod_autoindex.c>
+	#Options -Indexes
+</IfModule>
+
+# ADD MIME TYPES
+<IfModule mod_mime.c>
+	AddType image/x-icon .ico
+	AddType image/svg+xml .svg
+	AddType video/ogg .ogv
+	AddType video/mp4 .mp4
+	AddType video/webm .webm
+	AddType video/x-flv .flv
+	AddType audio/mpeg .mp3
+	AddType audio/ogg .ogg
+	AddType text/javascript .js
+	AddType application/json .json
+	AddType application/xml .xml
+	AddType application/x-shockwave-flash .swf
+	AddType application/vnd.ms-fontobject .eot
+	AddType application/x-font-ttf .ttf
+	AddType font/font-woff .woff
+	AddType font/font-woff2 .woff2
+	AddType application/wasm .wasm
+	AddType font/opentype .otf
+</IfModule>
+
+# COMPRESS FILES
+<IfModule mod_deflate.c>
+	AddOutputFilterByType DEFLATE text/html
+	AddOutputFilterByType DEFLATE text/plain
+	AddOutputFilterByType DEFLATE text/xml
+	AddOutputFilterByType DEFLATE text/css
+	AddOutputFilterByType DEFLATE image/svg+xml
+	AddOutputFilterByType DEFLATE text/javascript
+	AddOutputFilterByType DEFLATE application/json
+	AddOutputFilterByType DEFLATE application/xml
+	AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+	AddOutputFilterByType DEFLATE application/x-font-ttf
+	AddOutputFilterByType DEFLATE font/opentype
+</IfModule>
+
+# ADD CACHING HEADERS
+#<IfModule mod_expires.c>
+#	ExpiresActive On
+#	ExpiresDefault "access plus 1 week"
+#	ExpiresByType text/html "access plus 0 seconds"
+#	ExpiresByType text/plain "access plus 0 seconds"
+#	ExpiresByType text/xml "access plus 0 seconds"
+#	ExpiresByType text/css "access plus 4 weeks"
+#	ExpiresByType image/gif "access plus 1 week"
+#	ExpiresByType image/png "access plus 1 week"
+#	ExpiresByType image/jpg "access plus 1 week"
+#	ExpiresByType image/jpeg "access plus 1 week"
+#	ExpiresByType image/x-icon "access plus 4 week"
+#	ExpiresByType image/svg+xml "access plus 4 weeks"
+#	ExpiresByType video/mp4 "access plus 4 weeks"
+#	ExpiresByType video/ogg "access plus 4 weeks"
+#	ExpiresByType video/webm "access plus 4 weeks"
+#	ExpiresByType video/x-flv "access plus 4 weeks"
+#	ExpiresByType text/javascript "access plus 4 weeks"
+#	ExpiresByType application/json "access plus 0 seconds"
+#	ExpiresByType application/xml "access plus 0 seconds"
+#	ExpiresByType application/x-shockwave-flash "access plus 4 weeks"
+#	ExpiresByType application/vnd.ms-fontobject "access plus 4 weeks"
+#	ExpiresByType application/x-font-ttf "access plus 4 weeks"
+#	ExpiresByType font/font-woff "access plus 4 weeks"
+#	ExpiresByType font/font-woff2 "access plus 4 weeks"
+#	ExpiresByType font/opentype "access plus 4 weeks"
+#</IfModule>
+
+# REMOVE ETAG
+#<IfModule mod_headers.c>
+#	Header unset ETag
+#</IfModule>
+#
+#FileETag None
+
+# REWRITING
+<IfModule mod_rewrite.c>
+    # ENABLE REWRITING
+    # for example.org/category/article/ instead of index.php?article_id=1
+    RewriteEngine On
+
+    # Workaround for RewriteBase
+    # Copied from https://github.com/symfony/symfony-standard/blob/master/web/.htaccess
+    RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
+    RewriteRule ^(.*) - [E=BASE:%1]
+
+    # SEO
+    # example.org/sitemap.xml will be generated adhoc by YRewrite
+    # example.org/robots.txt will be generated adhoc by YRewrite
+    RewriteRule ^sitemap\.xml$ %{ENV:BASE}/index.php?rex_yrewrite_func=sitemap [NC,L]
+    RewriteRule ^robots\.txt$ %{ENV:BASE}/index.php?rex_yrewrite_func=robots [NC,L]
+
+    # REWRITE RULE FOR SEO FRIENDLY IMAGE MANAGER URLS
+    # Use example.org/media/media-type-profile/file.ext for beautified URLs and optimized images.
+    # More details: https://www.redaxo.org/doku/master/media-manager
+    # IMPORTANT: These rule will also prevent subfolders and files of /media/
+    #            to be loaded directly. Use the /assets/ folder instead.
+    RewriteRule ^mediatypes/([^/]*)/([^/]*) %{ENV:BASE}/index.php?rex_media_type=$1&rex_media_file=$2
+    RewriteRule ^media/([^/]+)/(.*) %{ENV:BASE}/index.php?rex_media_type=$1&rex_media_file=$2&%{QUERY_STRING} [B]
+    RewriteRule ^media/(.*) %{ENV:BASE}/index.php?rex_media_type=yrewrite_default&rex_media_file=$1&%{QUERY_STRING} [B]
+
+    # deprecated
+    RewriteRule ^images/([^/]*)/([^/]*) %{ENV:BASE}/index.php?rex_media_type=$1&rex_media_file=$2&%{QUERY_STRING} [B]
+    RewriteRule ^imagetypes/([^/]*)/([^/]*) %{ENV:BASE}/index.php?rex_media_type=$1&rex_media_file=$2
+
+    # existing files will not be overwritten
+    RewriteCond %{REQUEST_FILENAME} !-f
+
+    # existing folders will not be overwritten
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # treats symbolic links as pathname
+    RewriteCond %{REQUEST_FILENAME} !-l
+
+    RewriteCond %{REQUEST_URI} !^/?redaxo/.*$
+
+    RewriteRule ^(.*)$ %{ENV:BASE}/index.php?%{QUERY_STRING} [L]
+
+</IfModule>
