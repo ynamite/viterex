@@ -24,9 +24,9 @@ Deployment via [ydeploy](https://github.com/yakamara/ydeploy) von [yakamara](htt
 
 - automatische Redaxo Installation per Terminal, inkl. gewünschter Addons und Plugins
 - modular konfigurierbar über eine Konfigurationsdatei unter /setup/setup.cfg
-- lokale Entwicklungsumgebung mit Vite JS
+- lokale Entwicklungsumgebung mit [Vite JS](https://vitejs.dev/)
 - [Tailwind CSS](https://tailwindcss.com/)
-- Vite JS bzw. RollUp als Bundler/Minifier (inkl. PostCSS mit CSS Nesting und Autoprefixer)
+- Vite JS bzw. [rollup.js](https://rollupjs.org/) als Bundler/Minifier (inkl. PostCSS mit CSS Nesting und Autoprefixer)
 - Live-Reload bzw. HMR für Templates, Struktur, URL (beliebig erweiterbar)
   - /src/templates/\*_/._
   - /src/modules/\*_/._
