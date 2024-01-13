@@ -269,7 +269,6 @@ rm -f public/.gitignore.example
 # rm -rf setup
 
 composer install --no-interaction --quiet
-# dep completion bash > /etc/bash_completion.d/deployer
 
 # execute yarn
 yarn
