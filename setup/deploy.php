@@ -1,16 +1,6 @@
 <?php
 
 /*
-*   Deployment-Host-Konfiguration
-*/
-
-$deploymentName = 'mein-deployment';
-$deploymentHost = 'example.com';
-$deploymentUser = 'benutzername';
-$deploymentType = 'production';
-$deploymentPath = '/httpdocs';
-
-/*
 *   ––––––––
 */
 
@@ -19,6 +9,18 @@ namespace Deployer;
 if ('cli' !== PHP_SAPI) {
     throw new \Exception('The deployer configuration must be used in cli.');
 }
+
+/*
+*   Deployment-Host-Konfiguration
+*/
+
+$deploymentName = 'mein-deployment';
+$deploymentHost = 'example.com';
+$deploymentPort = '22';
+$deploymentUser = 'benutzername';
+$deploymentType = 'production';
+$deploymentPath = '/httpdocs';
+
 
 // Der Pfad ist ggf. anzupassen, falls der Projekt-Root nicht dem REDAXO-Root entspricht
 // Falls die Yak-Struktur (https://github.com/yakamara/yak) verwendet wird, sollte stattdessen die `deploy_yak.php` eingebunden werden
@@ -46,7 +48,7 @@ task('release', [
     'deploy:shared',
     'deploy:dump_info',
     'setup',
-    // 'database:migration',
+    'database:migration',
     'deploy:publish',
 ]);
 
@@ -78,6 +80,7 @@ add('clear_paths', [
 host($deploymentName)
     ->setHostname($deploymentHost)
     ->setRemoteUser($deploymentUser)
+    ->setPort($deploymentPort)
     ->set('http_user', 'benutzername')
     ->set('labels', ['stage' => $deploymentType])
     ->set(
