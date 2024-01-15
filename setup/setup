@@ -105,16 +105,8 @@ downloadPackageFromRepo() (
         fi
     done
 
-    if([ "$name" = 'massif' ]); then
-        cp "setup/redaxo_massif_install.sql" src/addons/massif/install.sql
-    fi
-
     installPackage "${name}"
     wait
-
-    if([ "$name" = 'massif' ]); then
-        rm -f src/addons/massif/install.sql
-    fi
 
     sleep .1 # Waits 0.1 seconds.
     wait
@@ -249,6 +241,9 @@ do
     downloadPackageFromRepo $user $repo
     wait
 done
+
+mysqlCmd=$(which mysql)
+${mysqlCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} -p"${REDAXO_DB_PASSWORD}" ${REDAXO_DB_NAME} -e "source setup/redaxo_base.sql"
 
 mkdir -p var/data/addons/install
 wait
