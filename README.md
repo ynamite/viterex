@@ -18,7 +18,7 @@ Mit Support für Live-Reloading und HMR für Redaxo, PHP, CSS und JS Dateien.
 
 Deployment via [ydeploy](https://github.com/yakamara/ydeploy) von [yakamara](https://github.com/yakamara/) (basierend auf [deployer](https://deployer.org/))
 
-Basierend auf [yak](https://github.com/yakamara/yak) von Thomas Blum aka [tbaddade](https://github.com/tbaddade)
+Basierend auf [yak](https://github.com/yakamara/yak) von Thomas Blum ([tbaddade](https://github.com/tbaddade))
 
 <a name="features"></a>
 
