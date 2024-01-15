@@ -267,9 +267,8 @@ yarn
 yarn upgrade-interactive --latest
 
 # open front and backend
-xdg-open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/"
-xdg-open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/redaxo/"
+open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/"
+open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/redaxo/"
 
 # start vite
 yarn dev
-
