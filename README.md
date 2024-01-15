@@ -61,7 +61,9 @@ Deployment via [ydeploy](https://github.com/yakamara/ydeploy) von [yakamara](htt
    _nun wird Redaxo heruntergeladen und installiert. Danach folgen die gewählten Addons und Plugins. Am Ende werden die PHP-Dependencies per Composer und per Yarn die Node-Dependencies installiert._
 7. der Vite JS Dev-Server sollte nun automatisch gestartet und im Default-Browser das Front- und Backend geöffnet werden
 8. im Backend mit den Zugangsdaten aus setup.cfg anmelden
-9. Happy coding! 🙌🏼
+9. (optional) Projekt-Ordner einem eigenen Git-Repo zuweisen, mittels `git remote set-url {dein remote name, zBsp.: origin} {deine remote URL, zBsp.:https://github.com/DEIN/REPOSITORY}. 
+  _selbstverständlich kannst du GIT auch komplett aus deinem Projekt-Ordner löschen, in dem du `rm -fr .git` ausführtst_
+10. Happy coding! 🙌🏼
 
 **Ab sofort sollten jegliche Änderungen an Dateien (Templates & Module unter /src/ und CSS, JS Dateien unter /assets/) und sogar Anpassungen im Redaxo Backend sofort im Frontend automatisch gespiegelt werden (dank Live-Reload und HMR) – ohne nerviges, manuelles refreshen mit F5** 🍔
 
