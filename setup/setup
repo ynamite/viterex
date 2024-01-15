@@ -247,6 +247,7 @@ ${mysqlCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} --password="${REDAXO_DB_PA
 mkdir -p var/data/addons/install
 wait
 
+php bin/console developer:sync
 php bin/console cache:clear
 wait
 php bin/console be_style:compile
