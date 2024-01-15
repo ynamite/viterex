@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-resetsetup
+setup/resetsetup
 
 set -e
 
