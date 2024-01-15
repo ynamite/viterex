@@ -108,7 +108,7 @@ if ($isGit) {
             'public',
             'src',
             'var',
-            '.env.local',
+            '.env',
             'package.json',
             'postcss.config.js',
             'stylelint.config.js',
