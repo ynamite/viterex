@@ -105,8 +105,8 @@ _**Wichtig**: Webhosting so konfigurieren, dass der Dokumentstamm (bzw. www-Root
 - falls auf eurem System mysql im Shell nicht verfügbar sein sollte (wie mit Laravel Herd und DBngin der Fall), dann wie folgt vorgehen:
   - Für Mac OS und MySQL 8.0.33:
     ins Terminal gehen und folgendes eingeben und mit Enter bestätigen<br/>
-    `sudo nano ~/.bash_profile`
-    Folgende Zeile kopieren und dort einfügen<br/>
+    `sudo nano /etc/zshrc`
+    System-Passwort eingeben und dann folgende Zeile ganz am Ende auf einer neuen Zeile eintragen<br/>
     `export PATH=/Users/Shared/DBngin/mysql/8.0.33/bin:$PATH`
     nun mit CTRL + O die Datei speichern und mit CTRL + X den Nano Editor verlassen
 - bei deployment via ydeploy, sollte folgendes sichergestellt werden:
