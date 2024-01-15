@@ -55,9 +55,9 @@ Deployment via [ydeploy](https://github.com/yakamara/ydeploy) von [yakamara](htt
 2. dieses Repo klonen – ggf. geklontes Directory umbenennen, das ist nun der Projekt-Ordner
 3. Projekt-Ordner als vhost mounten (über installierten Webserver)
 4. im Terminal in den Projekt-Ordner wechseln
-5. `setup/setup.cfg` in einem Editor anpassen
+5. `setup/setup.cfg` in einem Editor anpassen. __Wichtig:__ unbedingt REDAXO_ERROR_EMAIL ausfüllen!
    _die Einträge beginnend mit `VITE_` am besten unverändert lassen, ausser man weiss, was man tut\_ 😌
-6. Skript `setup/setup` im Projekt-Verzeichnis im Terminal ausführen.
+6. Skript `setup/setup` im Projekt-Verzeichnis im Terminal ausführen. __Achtung:__ falls eine DB mit dem angegebenen Namen bereits besteht, wird im setup Ordner ein Backup angelegt und die bestehende DB neu angelegt!
    _nun wird Redaxo heruntergeladen und installiert. Danach folgen die gewählten Addons und Plugins. Am Ende werden die PHP-Dependencies per Composer und per Yarn die Node-Dependencies installiert._
 7. der Vite JS Dev-Server sollte nun automatisch gestartet und im Default-Browser das Front- und Backend geöffnet werden
 8. im Backend mit den Zugangsdaten aus setup.cfg anmelden

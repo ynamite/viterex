@@ -1,17 +1,45 @@
 #!/usr/bin/env bash
 
 set -e
+
+clear
+
 CRED='\033[0;31m'
 CGREEN='\033[0;32m'
 CNO='\033[0m' # No Color
 
+source $(dirname $0)/setup.cfg
+
 
 echo -e "${CRED}
 - - - - - - - - - - - -
-Yak REDAXO reset
+Reset
 - - - - - - - - - - - -
 ${CNO}"
 
+
+mysqlCmd=$(which mysql)
+if [ $mysqlCmd = "mysql not found" ];then
+  echo -e "${CRED}
+  $mysqlCmd
+  ${CNO}"
+  exit
+fi
+
+mysqlDumpCmd=$(which mysqldump)
+DBEXISTS=$($mysqlCmd -h $REDAXO_DB_HOST -u $REDAXO_DB_USER --password="$REDAXO_DB_PASSWORD" --skip-column-names -e "SHOW DATABASES LIKE '"$REDAXO_DB_NAME"';")
+if echo $DBEXISTS | grep -q $REDAXO_DB_NAME;then
+  set -e
+  backupFileName="setup/backup_${REDAXO_DB_NAME}_$(date +%s).sql"
+  echo -e "${CRED}
+  Database already exists!${CNO}"
+  echo -e "${CGREEN}
+  Creating backup ${backupFileName}... ${CNO}"
+  ${mysqlDumpCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} --password="${REDAXO_DB_PASSWORD}" --databases ${REDAXO_DB_NAME} > ${backupFileName}
+  echo -e "${CGREEN}
+  Dropping ${REDAXO_DB_NAME}... ${CNO}"
+  ${mysqlCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} --password="${REDAXO_DB_PASSWORD}" -e "DROP DATABASE "$REDAXO_DB_NAME";"
+fi
 
 echo -e "${CRED}
 Resetting ...

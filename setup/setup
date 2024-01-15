@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-clear
 resetsetup
 
 set -e
@@ -243,7 +242,7 @@ do
 done
 
 mysqlCmd=$(which mysql)
-${mysqlCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} -p"${REDAXO_DB_PASSWORD}" ${REDAXO_DB_NAME} -e "source setup/redaxo_base.sql"
+${mysqlCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} --password="${REDAXO_DB_PASSWORD}" ${REDAXO_DB_NAME} -e "source setup/redaxo_base.sql"
 
 mkdir -p var/data/addons/install
 wait
@@ -266,8 +265,11 @@ composer install --no-interaction --quiet
 # execute yarn
 yarn
 yarn upgrade-interactive --latest
-yarn dev
 
 # open front and backend
 xdg-open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/"
 xdg-open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/redaxo/"
+
+# start vite
+yarn dev
+
