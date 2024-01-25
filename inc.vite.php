@@ -5,10 +5,11 @@
  *
  */
 
-$config = @parse_ini_file(rex_path::base('/setup/setup.cfg'));
-$devHost = $config ? $config['REDAXO_HOST_NAME'] : 'redaxo-2024.test';
+$env = @parse_ini_file(rex_path::base('.env'));
+if (file_exists(rex_path::base('.env.local')))
+  $env = @parse_ini_file(rex_path::base('.env.local'));
 
-$env = @parse_ini_file(rex_path::base('.env.local'));
+$devHost = $env ? $env['REDAXO_HOST_NAME'] : 'redaxo-2024.test';
 
 define('IS_VITE_DEVELOPMENT', $env ? $devHost === $_SERVER['HTTP_HOST'] && $env['MODE'] !== 'production' : false);
 
