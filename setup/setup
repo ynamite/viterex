@@ -284,7 +284,10 @@ open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/redaxo/"
 git init
 git add .
 git commit -m "initial commit"
-git push --set-upstream "git@gitlab.com:ynamite/${GITLAB_REPO_NAME}.git" main
+git push --set-upstream "git@gitlab.com:${GITLAB_NAMESPACE}/${GITLAB_REPO_NAME}.git" main
+git remote add origin "https://gitlab.com/${GITLAB_NAMESPACE}/${GITLAB_REPO_NAME}.git"
+
+
 
 # start vite
 yarn dev
