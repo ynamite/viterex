@@ -266,6 +266,7 @@ wait
 rm -rf public/redaxo/bin
 rm -rf public/redaxo/src
 rm -f public/.gitignore.example
+rm -f README.md
 rm -rf tmp
 rm -rf .git
 rm -rf setup
