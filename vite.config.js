@@ -6,13 +6,18 @@ export default ({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
   return defineConfig({
     plugins: [
-      //vue(),
       liveReload([
         __dirname + '/**/*.php',
         __dirname + '/var/cache/addons/(structure|url)/**'
       ])
     ],
 
+    css: {
+      modules: {
+        scopeBehaviour: 'global'
+        //generateScopedName: '[local]_[hash:base64:5]'
+      }
+    },
     // config
     publicDir: path.resolve(__dirname, 'dev'),
     base:
@@ -38,9 +43,12 @@ export default ({ mode }) => {
 
       // our entry
       rollupOptions: {
+        // cache: false,
         input: {
           main: path.resolve(__dirname + process.env.VITE_ENTRY_POINT)
-        }
+          // portfolio: path.resolve(__dirname + '/assets/js/portfolio')
+        },
+        output: {}
         // output: {
         //   entryFileNames: `[name].js`,
         //   chunkFileNames: `[name].js`,
