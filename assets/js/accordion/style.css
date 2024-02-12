@@ -1,0 +1,5 @@
+@layer utilities.accordion {
+  [data-accordion-id] {
+    @apply relative overflow-hidden;
+  }
+}
