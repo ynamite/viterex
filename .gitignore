@@ -23,6 +23,7 @@ vendor
 .vscode/*
 !.vscode/extensions.json
 .idea
+.npmrc
 .DS_Store
 *.suo
 *.ntvs*
