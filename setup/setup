@@ -199,18 +199,19 @@ mv public/redaxo/bin/* bin
 mv public/redaxo/cache var
 mv public/redaxo/data var
 mv public/redaxo/src/addons src
+cp setup/viterex src
 mv public/redaxo/src/core src
 mv public/LICENSE.md LICENSE.md
 rm -f public/README.md public/README.de.md
 rm -f public/.htaccess
 
-cp setup/addon.project.boot.php src/addons/project/boot.php
 cp -p setup/console bin/console
 cp setup/deploy.php deploy.php
 cp setup/index.backend.php public/redaxo/index.php
 cp setup/index.frontend.php public/index.php
 cp setup/path_provider.php src/path_provider.php
 cp setup/_htaccess public/.htaccess
+cp setup/_npmrc .npmrc
 
 
 echo -e "${CGREEN}File structure${CNO} was successfully created"
@@ -252,6 +253,13 @@ do
     downloadPackageFromRepo $user $repo
     wait
 done
+
+printf "\n${CRED}Installing and activating package${CNO} ViteRex\n"
+php bin/console package:install "viterex" --no-interaction --quiet
+
+mv src/addons/massif/fragments src
+mv src/addons/massif/ytemplates src
+
 
 mkdir -p var/data/addons/install
 cp -f setup/redaxo_install_config.json var/data/addons/install/config.json

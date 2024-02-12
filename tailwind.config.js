@@ -4,6 +4,7 @@ module.exports = {
     './assets/js/**/*.js',
     './assets/css/**/*.css',
     // './src/addons/**/*.php',
+    './src/fragments/**/*.php',
     './src/templates/**/*.php',
     './src/modules/**/*.php'
   ],
@@ -12,6 +13,10 @@ module.exports = {
       roboto: ['Roboto', 'sans-serif']
     },
     extend: {
+      colors: {
+        primary: '#2F5A33',
+        accent: '#9F8158',
+      },
       fontSize: {
         base: ['1.25rem', { lineHeight: '1.3' }]
       },
@@ -20,5 +25,5 @@ module.exports = {
       }
     }
   },
-  plugins: []
+  plugins: [addDynamicIconSelectors()]
 }

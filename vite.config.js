@@ -13,6 +13,12 @@ export default ({ mode }) => {
       ])
     ],
 
+    css: {
+      modules: {
+        scopeBehaviour: 'global'
+        //generateScopedName: '[local]_[hash:base64:5]'
+      }
+    },
     // config
     publicDir: path.resolve(__dirname, 'dev'),
     base:
@@ -38,9 +44,12 @@ export default ({ mode }) => {
 
       // our entry
       rollupOptions: {
+        // cache: false,
         input: {
           main: path.resolve(__dirname + process.env.VITE_ENTRY_POINT)
-        }
+          // portfolio: path.resolve(__dirname + '/assets/js/portfolio')
+        },
+        output: {}
         // output: {
         //   entryFileNames: `[name].js`,
         //   chunkFileNames: `[name].js`,
