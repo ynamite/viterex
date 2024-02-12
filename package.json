@@ -8,12 +8,25 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@swup/a11y-plugin": "^4.5.0",
+    "@swup/body-class-plugin": "^3.1.2",
+    "@swup/head-plugin": "^2.1.2",
+    "@swup/js-plugin": "^3.1.1",
+    "@swup/preload-plugin": "^3.2.7",
+    "@swup/progress-plugin": "^3.1.2",
+    "@swup/route-name-plugin": "^4.1.0",
+    "swup-morph-plugin": "^1.2.1",
+    "glightbox": "^3.2.0",
+    "gsap": "npm:@gsap/business",
     "lazysizes": "^5.3.2",
-    "postcss-cli": "^11.0.0"
+    "postcss-cli": "^11.0.0",
+    "swup": "^4.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.23.7",
     "@babel/eslint-parser": "^7.23.3",
+    "@iconify-json/ion": "^1.1.15",
+    "@iconify/tailwind": "^0.1.4",
     "@rushstack/eslint-patch": "^1.2.0",
     "autoprefixer": "^10.4.16",
     "cross-env": "^7.0.3",
