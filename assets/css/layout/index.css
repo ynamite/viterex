@@ -1,0 +1,81 @@
+@import 'header.css';
+@import 'nav.css';
+@import 'content.css';
+@import 'footer.css';
+
+@layer layout {
+  html {
+    @apply scroll-smooth scroll-pt-[--shoulder] scroll-mt-[--shoulder] overflow-scroll;
+    &.main-menu-opened {
+      @apply pr-[--scrollbarwidth];
+    }
+    &.disable-smooth-scroll {
+      @apply scroll-auto;
+    }
+  }
+  body {
+    @apply flex flex-col min-h-svh transition-all;
+    overflow-anchor: none;
+  }
+  .section-padding {
+    @apply px-4 py-10;
+  }
+  .page-margin {
+    @apply mx-auto max-w-7xl w-full;
+  }
+  .content-wrap {
+    @apply flex flex-col flex-1;
+  }
+  .content-main {
+    @apply grid flex-1 grid-rows-[auto,1fr];
+  }
+
+  .img-cell {
+    @apply m-0 relative overflow-hidden;
+    img.lazyload:not(.lazyloaded) {
+      @apply filter blur-[5px];
+      /* @apply filter blur-[5px] invisible; */
+    }
+  }
+}
+
+@layer utilities.swup {
+  main:focus {
+    outline: none;
+  }
+
+  html {
+    &.is-changing {
+      a {
+        @apply pointer-events-none;
+      }
+    }
+    &.is-animating {
+      @apply cursor-progress;
+      .transition-duration-helper {
+        @apply visible;
+      }
+    }
+  }
+
+  .transition-duration-helper {
+    @apply duration-500 invisible;
+  }
+
+  #transition-fx {
+    @apply z-[22] fixed left-0 top-0 w-[100svw] min-h-svh hidden;
+  }
+
+  .swup-progress-bar {
+    @apply z-[100] h-1 bg-accent;
+  }
+}
+
+@layer utilities.emailobfuscator {
+  span.unicorn {
+    @apply before:content-['@'];
+    > span {
+      @apply border-none border-0 h-[1px] m-[-1px] overflow-hidden p-0 absolute w-[1px];
+    }
+  }
+}

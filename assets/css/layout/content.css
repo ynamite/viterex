@@ -1,0 +1,6 @@
+.section-padding {
+  &.first-row {
+    @apply pt-8 md:pt-16;
+  }
+}
+

@@ -1,0 +1,132 @@
+body {
+  @apply antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-black;
+}
+
+h1,
+.h1 {
+  @apply text-2xl lg:text-3xl;
+}
+
+h2,
+.h2 {
+  @apply text-1xl lg:text-2xl;
+}
+
+h3,
+.h3 {
+  @apply text-1xl lg:text-2xl;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul,
+ol {
+  + * {
+    @apply mt-[0.8em];
+  }
+}
+
+* {
+  + {
+    h1,
+    .h1,
+    h2 {
+      @apply mt-[1.6em];
+    }
+  }
+}
+
+/**
+ * custom classes
+ */
+
+body,
+.text-default {
+  @apply text-base lg:text-2xl;
+}
+
+.h1 {
+  @apply text-accent uppercase;
+}
+
+.prose {
+  ol {
+    counter-reset: list-counter;
+    @apply my-5;
+    > li {
+      counter-increment: list-counter;
+      @apply relative pl-7;
+      &::before {
+        content: counter(list-counter) '.';
+        @apply absolute font-normal;
+      }
+    }
+  }
+  ul {
+    > li {
+      @apply relative pl-7;
+      &::before {
+        content: '';
+        @apply absolute w-2 h-2 bg-accent rounded-full top-[0.75em] left-0;
+      }
+    }
+  }
+}
+
+.prose,
+.footer {
+  a:where(:not(.maps-links, .phone-number)) {
+    /* @apply underline underline-offset-2; */
+    /* @apply relative after:bg-primary after:absolute after:h-[1px] after:w-full after:bottom-[0.05em] after:left-0 hover:after:w-0 after:transition-all after:duration-300 cursor-pointer; */
+    @apply bg-left-bottom bg-gradient-to-r from-current to-current bg-[length:100%_0.0625em] bg-no-repeat hover:bg-[length:0%_0.0625em] transition-all duration-150 ease-in-out;
+  }
+  a:where(.maps-links, .phone-number) {
+    @apply bg-left-bottom bg-gradient-to-r from-current to-current bg-[length:0%_0.0625em] bg-no-repeat hover:bg-[length:100%_0.0625em] transition-all duration-150 ease-in-out;
+  }
+}
+
+/**
+ * This injects Tailwind's component classes and any component classes
+ * registered by plugins.
+ */
+/* @layer components {
+  .btn {
+    @apply rounded border border-[#e2e8f0] px-8 py-2 transition duration-300 hover:bg-white hover:text-primary;
+  }
+} */
+
+/**
+ * This injects Tailwind's utility classes and any utility classes registered
+ * by plugins.
+ */
+/* @layer utilities {
+  .filter-none {
+    filter: none;
+  }
+  .filter-grayscale {
+    filter: grayscale(100%);
+  }
+} */
+
+/**
+ * Use this directive to control where Tailwind injects the hover, focus,
+ * responsive, dark mode, and other variants of each class.
+ *
+ * If omitted, Tailwind will append these classes to the very end of
+ * your stylesheet by default.
+ */
+@tailwind variants;

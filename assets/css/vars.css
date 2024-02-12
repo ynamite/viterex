@@ -1,0 +1,25 @@
+*,
+::before,
+::after {
+  --shoulder: calc(65 / 16 * 1rem);
+  --spacer: 1rem;
+  --footer-height: calc(165.78 / 16 * 1rem);
+}
+
+.home-page {
+  *,
+  ::before,
+  ::after {
+    --footer-height: calc(75 / 16 * 1rem);
+  }
+}
+
+@media screen(lg) {
+  *,
+  ::before,
+  ::after {
+    --shoulder: calc(86 / 16 * 1rem);
+    --spacer: 2rem;
+    --footer-height: calc(165.78 / 16 * 1rem);
+  }
+}

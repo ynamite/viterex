@@ -1,0 +1,14 @@
+:where(.swiper) {
+  &.swiper-fs {
+    @apply min-h-full h-[calc(100svh-var(--shoulder)-var(--footer-height))] max-h-[calc(100svh-var(--shoulder)-var(--footer-height))];
+  }
+}
+
+:where(.swiper-container, .swiper-wrapper, .swiper-slide, .swiper-slide-inner),
+:where(.swiper-slide .img-cell, .swiper-slide img) {
+  @apply w-full h-full;
+}
+
+:where(.swiper-slide img) {
+  @apply object-cover;
+}

@@ -1,0 +1,48 @@
+.js-menu-trigger {
+  --width: 28px;
+  --height: 19px;
+  --bar-height: 3px;
+  @apply top-[0.575rem] right-4 aspect-square flex items-center justify-center;
+}
+
+.js-menu {
+  @apply pt-[var(--shoulder)] flex-col px-4 items-center;
+}
+
+.menu[data-menu-mobile] {
+  .main-nav {
+    @apply py-8 text-5xl text-center;
+    a {
+      @apply block py-6;
+    }
+  }
+}
+
+.menu[data-menu-desktop][data-menu-id='main-menu'] {
+  @apply hidden;
+  .rex-navi1 {
+    @apply flex;
+    a {
+      @apply block px-5 pt-4 pb-5 relative;
+      span {
+        @apply block relative;
+      }
+    }
+    > li {
+      &.rex-current > a,
+      &.rex-active > a,
+      > a:hover {
+        @apply text-primary;
+      }
+    }
+  }
+}
+
+@media screen(lg) {
+  .menu[data-menu-desktop][data-menu-id='main-menu'] {
+    @apply block;
+  }
+  .js-menu-trigger[data-js-menu-trigger='main-menu'] {
+    @apply hidden;
+  }
+}

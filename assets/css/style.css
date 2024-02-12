@@ -1,6 +1,7 @@
-@import 'tailwind.css';
-@import 'webfonts.css';
+@layer utilities, typography, layout;
 
-body {
-  @apply p-10 mt-2;
-}
+@import 'tailwind' layer(utilities.tailwind);
+@import 'typography' layer(utilities.tailwind);
+@import 'vars' layer(layout.vars);
+@import 'webfonts';
+@import 'layout';
