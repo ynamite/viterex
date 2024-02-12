@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-setup/resetsetup
+clear
+resetsetup
 
 set -e
 
@@ -104,8 +105,16 @@ downloadPackageFromRepo() (
         fi
     done
 
+    if([ "$name" = 'massif' ]); then
+        cp "setup/redaxo_massif_install.sql" src/addons/massif/install.sql
+    fi
+
     installPackage "${name}"
     wait
+
+    if([ "$name" = 'massif' ]); then
+        rm -f src/addons/massif/install.sql
+    fi
 
     sleep .1 # Waits 0.1 seconds.
     wait
@@ -130,16 +139,18 @@ ${CNO}"
 
 # rename env
 if [ -f .env ]; then
-    cp .env .env.local
     echo -e "${CGREEN}.env was copied to .env.local${CNO}"
     ENV_LOCAL_CONTENT='VITE_DEV_SERVER="'${VITE_DEV_SERVER}'"
 VITE_DEV_SERVER_PORT="'${VITE_DEV_SERVER_PORT}'"
 VITE_ENTRY_POINT="'${VITE_ENTRY_POINT}'"
 VITE_PUBLIC_DIR="'${VITE_PUBLIC_DIR}'"
 VITE_DIST_DIR="'${VITE_DIST_DIR}'"
+REDAXO_HOST_NAME="'${REDAXO_HOST_NAME}'"
 MODE="development"';
-    echo "$ENV_LOCAL_CONTENT" >> ".env.local"
-    echo -e "${CGREEN}.env.local updated with VITE config${CNO}"
+    echo "$ENV_LOCAL_CONTENT" >> ".env"
+    echo -e "${CGREEN}.env updated with VITE config${CNO}"
+    cp .env .env.local
+    echo -e "${CGREEN}.env copied to .env.local ${CNO}"
 
 fi
 
@@ -170,6 +181,7 @@ Redaxo ${REDAXO_VERSION}${CNO} was sussessfully loaded and unzipped into the pub
 
 
 
+# create Yakamara-massif file structure
 echo -e "${CRED}
 Creating file structure
 - - - - - - - - - - - -${CNO}
@@ -187,12 +199,12 @@ mv public/redaxo/bin/* bin
 mv public/redaxo/cache var
 mv public/redaxo/data var
 mv public/redaxo/src/addons src
+cp setup/viterex src
 mv public/redaxo/src/core src
 mv public/LICENSE.md LICENSE.md
 rm -f public/README.md public/README.de.md
 rm -f public/.htaccess
 
-cp setup/addon.project.boot.php src/addons/project/boot.php
 cp -p setup/console bin/console
 cp setup/deploy.php deploy.php
 cp setup/index.backend.php public/redaxo/index.php
@@ -241,13 +253,11 @@ do
     wait
 done
 
-mysqlCmd=$(which mysql)
-${mysqlCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} --password="${REDAXO_DB_PASSWORD}" ${REDAXO_DB_NAME} -e "source setup/redaxo_base.sql"
+printf "\n${CRED}Installing and activating package${CNO} ViteRex\n"
+php bin/console package:install "viterex" --no-interaction --quiet
 
-mkdir -p var/data/addons/install
-wait
 
-php bin/console developer:sync
+
 php bin/console cache:clear
 wait
 php bin/console be_style:compile
@@ -259,7 +269,10 @@ wait
 rm -rf public/redaxo/bin
 rm -rf public/redaxo/src
 rm -f public/.gitignore.example
-# rm -rf setup
+rm -f README.md
+rm -rf tmp
+rm -rf .git
+rm -rf setup
 
 composer install --no-interaction --quiet
 
@@ -270,6 +283,12 @@ yarn upgrade-interactive --latest
 # open front and backend
 open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/"
 open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/redaxo/"
+
+git init
+git add .
+git commit -m "initial commit"
+
+
 
 # start vite
 yarn dev
