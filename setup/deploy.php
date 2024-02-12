@@ -116,7 +116,6 @@ if ($isGit) {
             'vite.config.js',
             'main.js',
             'yarn.lock',
-            'inc.vite.php',
             'LICENSE.md',
             'README.md',
         ] as $src) {

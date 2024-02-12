@@ -1,0 +1,9 @@
+package: viterex
+version: '1.0.0'
+author: ynamite
+supportpage: https://github.com/ynamite/viterex/tree/main/setup/viterex
+
+requires:
+  redaxo: '^5.13.0'
+  php:
+    version: '>=7.3'
