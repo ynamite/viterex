@@ -199,7 +199,7 @@ mv public/redaxo/bin/* bin
 mv public/redaxo/cache var
 mv public/redaxo/data var
 mv public/redaxo/src/addons src
-cp setup/viterex src
+cp -r setup/viterex src/addons
 mv public/redaxo/src/core src
 mv public/LICENSE.md LICENSE.md
 rm -f public/README.md public/README.de.md
