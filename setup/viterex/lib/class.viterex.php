@@ -17,8 +17,6 @@
 namespace Ynamite\ViteRex;
 
 use rex_file;
-use rex_path;
-use rex_article;
 
 /** @api */
 class ViteRex
