@@ -207,6 +207,7 @@ rm -f public/.htaccess
 
 cp -p setup/console bin/console
 cp setup/deploy.php deploy.php
+cp setup/deployer.task.setup.php deployer.task.setup.php
 cp setup/index.backend.php public/redaxo/index.php
 cp setup/index.frontend.php public/index.php
 cp setup/path_provider.php src/path_provider.php
