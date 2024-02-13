@@ -17,6 +17,8 @@
 namespace Ynamite\ViteRex;
 
 use rex_file;
+use rex_path;
+use rex_url;
 
 /** @api */
 class ViteRex
@@ -100,5 +102,74 @@ class ViteRex
   public static function setValue($key, $value)
   {
     self::${$key} = $value;
+  }
+
+  /**
+   *  get asset content
+   *  @param string $filename Filename to get
+   *  @param string $dir Directory to get from
+   *  @return string
+   */
+  public static function getAsset($name, $dir = '')
+  {
+    return rex_file::get(self::getAssetsPath() . $dir . '/' . $name);
+  }
+
+  /**
+   *  get image content
+   *  @param string $filename Filename to get
+   *  @return string
+   */
+  public static function getImg($name)
+  {
+    return self::getAsset($name, 'img');
+  }
+
+  /**
+   *  get css content
+   *  @param string $filename Filename to get
+   *  @return string
+   */
+  public static function getCss($name)
+  {
+    return self::getAsset($name, 'css');
+  }
+
+  /**
+   *  get font content
+   *  @param string $filename Filename to get
+   *  @return string
+   */
+  public static function getFont($name)
+  {
+    return self::getAsset($name, 'fonts');
+  }
+
+  /**
+   *  get js content
+   *  @param string $filename Filename to get
+   *  @return string
+   */
+  public static function getJs($name)
+  {
+    return self::getAsset($name, 'js');
+  }
+
+  /**
+   *  get assets path
+   *  @return string
+   */
+  public static function getAssetsPath()
+  {
+    return self::$isDev ? rex_path::base('assets/') : self::$distPath . '/assets/';
+  }
+
+  /**
+   *  get assets url
+   *  @return string
+   */
+  public static function getAssetsUrl()
+  {
+    return self::$isDev ? rex_url::base('assets/') : self::$distUri . '/assets/';
   }
 }
