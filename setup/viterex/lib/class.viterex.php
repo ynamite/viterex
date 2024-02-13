@@ -16,6 +16,10 @@
 
 namespace Ynamite\ViteRex;
 
+use rex_file;
+use rex_path;
+use rex_article;
+
 /** @api */
 class ViteRex
 {
@@ -23,6 +27,8 @@ class ViteRex
   private static $isDev = false;
   /** @var string */
   private static $distUri = '';
+  /** @var string */
+  private static $distPath = '';
   /** @var string */
   private static $viteServer = '';
   /** @var string */
@@ -40,23 +46,51 @@ class ViteRex
     if (self::$isDev) {
       $html .= '<script type="module" crossorigin src="' . self::$viteServer . self::$viteEntryPoint . '"></script>';
     } else {
-      $manifest = self::$viteManifestPath;
-      $manifestArray = array_reverse(json_decode($manifest, true));
+      $manifestArray = self::getManifestArray();
       if (is_array($manifestArray)) {
         foreach ($manifestArray as $key => $dependency) {
           if (isset($dependency['isEntry']) && $dependency['isEntry'] === true) {
-            // enqueue CSS files
+            $pathInfo = pathinfo($dependency['file']);
+            if ($pathInfo['extension'] !== 'js') continue;
             $cssFiles = isset($dependency['css']) ? $dependency['css'] : [];
             foreach ($cssFiles as $cssFile) {
               $html .= '<link rel="stylesheet" href="' . self::$distUri . '/' . $cssFile . '">';
             }
-            // enqueue main JS file
             $html .= '<script type="module" crossorigin src="' . self::$distUri  . '/' . $dependency['file'] . '"></script>';
           }
         }
       }
     }
     return $html;
+  }
+
+  /**
+   *  outputs critical css in production for a specific article
+   *  @return string html
+   */
+  public static function getCriticalCss($loadInDev = false)
+  {
+    if (self::$isDev && !$loadInDev) return;
+    $manifestArray = self::getManifestArray();
+    $key = 'assets/css/critical.css';
+    $criticalCss = isset($manifestArray[$key]) ? $manifestArray[$key] : null;
+    if (!$criticalCss) return;
+    $criticalCssPath = self::$distPath . '/' . $criticalCss['file'];
+    if (!file_exists($criticalCssPath)) return;
+    $html = '<style>';
+    $html .= rex_file::get($criticalCssPath);
+    $html .= '</style>';
+    return $html;
+  }
+
+  /**
+   *  get manifest data as array
+   *  @return array
+   */
+  public static function getManifestArray()
+  {
+    $manifest = rex_file::get(self::$viteManifestPath);
+    return array_reverse(json_decode($manifest, true));
   }
 
   /**

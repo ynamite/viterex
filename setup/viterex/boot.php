@@ -36,6 +36,7 @@ $distDef = $env ? $env['VITE_DIST_DIR'] : '/dist';
 // defining some base urls and paths
 viterex::setValue('distUri', $distDef);
 $distPath = rex_path::base(ltrim($env['VITE_PUBLIC_DIR'], '/') . $distDef);
+viterex::setValue('distPath', $distPath);
 
 // deafult server address, port and entry point can be customized in env.local
 viterex::setValue('viteServer', $env ? $env['VITE_DEV_SERVER'] . ':' . $env['VITE_DEV_SERVER_PORT'] : 'http://localhost:3000');
