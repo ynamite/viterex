@@ -46,8 +46,8 @@ export default ({ mode }) => {
       rollupOptions: {
         // cache: false,
         input: {
-          main: path.resolve(__dirname + process.env.VITE_ENTRY_POINT)
-          // portfolio: path.resolve(__dirname + '/assets/js/portfolio')
+          main: path.resolve(__dirname + process.env.VITE_ENTRY_POINT),
+          critical: path.resolve(__dirname + '/assets/css/critical.css')
         },
         output: {}
         // output: {
