@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+import { addDynamicIconSelectors } from '@iconify/tailwind'
+
 module.exports = {
   content: [
     './assets/js/**/*.js',
