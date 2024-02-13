@@ -27,7 +27,7 @@ $deploymentRepository = 'git@github.com:user/repo.git';
 // -------------------------------------------------
 
 require __DIR__ . '/src/addons/ydeploy/deploy.php';
-require __DIR__ . '/setup/deployer.task.setup.php';
+require __DIR__ . '/deployer.task.setup.php';
 
 $isGit = is_dir(__DIR__ . '/.git');
 
@@ -70,7 +70,9 @@ add('writable_dirs', [
 
 add('clear_paths', [
     'assets',
+    'public/dist/assets/img/.gitkeep',
     '.env.local',
+    'deployer.task.setup.php',
     'postcss.config.js',
     'stylelint.config.js',
     'tailwind.config.js',
