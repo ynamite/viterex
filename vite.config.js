@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import liveReload from 'vite-plugin-live-reload'
+import copy from 'rollup-plugin-copy'
 import path from 'path'
 
 export default ({ mode }) => {
@@ -49,12 +50,23 @@ export default ({ mode }) => {
           main: path.resolve(__dirname + process.env.VITE_ENTRY_POINT),
           critical: path.resolve(__dirname + '/assets/css/critical.css')
         },
-        output: {}
+        output: {},
         // output: {
         //   entryFileNames: `[name].js`,
         //   chunkFileNames: `[name].js`,
         //   assetFileNames: `[name].[ext]`
         // }
+        plugins: [
+          copy({
+            targets: [
+              {
+                src: 'assets/img/**/*',
+                dest: 'public/dist/assets/img'
+              }
+            ],
+            hook: 'writeBundle'
+          })
+        ]
       }
 
       // minifying switch
