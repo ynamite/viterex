@@ -101,7 +101,7 @@ _**Wichtig**: Webhosting so konfigurieren, dass der Dokumentstamm (bzw. www-Root
 - falls eine andere Redaxo Version installiert werden soll, einfach Eintrag anpassen und SHA-Vergleichssumme im Terminal anzeigen lassen, in setup/setup.cfg eintragen und setup/setup starten:<br/>
   `$ curl -Ls https://github.com/redaxo/redaxo/releases/download/5.15.1/redaxo_5.15.1.zip | shasum`
 - Um die "Ordner ist unsicher"-Fehlermeldungen in Redaxo loszuwerden, einfach `/public/assets/core/standard.js` bei “redaxo-security-self-test” die Zeile wie folgt anpassen:<br/>
-  `if (i % 2 == 0 && data.substring(0, 6) != '<br />') {`
+  `if (i % 2 == 0 && data != '' && data.substring(0, 6) != '<br />') {`
 - falls auf eurem System mysql im Shell nicht verfügbar sein sollte (wie mit Laravel Herd und DBngin der Fall), dann wie folgt vorgehen:
   - Für Mac OS und MySQL 8.0.33:
     ins Terminal gehen und folgendes eingeben und mit Enter bestätigen<br/>
