@@ -1,9 +1,8 @@
 /.build
 node_modules
-vendor
+/vendor
 *.local
 
-/public/assets/*
 /public/dist
 
 /public/media/*
@@ -23,6 +22,7 @@ vendor
 .vscode/*
 !.vscode/extensions.json
 .idea
+.npmrc
 .DS_Store
 *.suo
 *.ntvs*
