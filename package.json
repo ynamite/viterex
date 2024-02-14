@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-favicon": "real-favicon generate var/data/addons/massif_settings/faviconDescription.json faviconData.json public",
+    "deploy": "./vendor/bin/dep deploy"
   },
   "dependencies": {
     "@swup/a11y-plugin": "^4.5.0",
@@ -29,6 +31,7 @@
     "@iconify/tailwind": "^0.1.4",
     "@rushstack/eslint-patch": "^1.2.0",
     "autoprefixer": "^10.4.16",
+    "cli-real-favicon": "^0.0.8",
     "cross-env": "^7.0.3",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
