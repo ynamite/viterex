@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "./vendor/bin/dep deploy"
   },
   "dependencies": {
     "postcss-cli": "^11.0.0"
