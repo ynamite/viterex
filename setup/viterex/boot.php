@@ -17,7 +17,6 @@ use rex_path;
 use rex_addon;
 use rex_developer_manager;
 
-
 if (rex_addon::get('developer')->isAvailable()) {
     rex_developer_manager::setBasePath(rex_path::src());
 }
