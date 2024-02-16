@@ -1,5 +1,7 @@
 # ViteRex 🚀 _Supercharged REDAXO Frontend development with Vite JS_
 
+![ViteRex](viterex.jpg)
+
 - [Beschreibung](#beschreibung)
 - [Vorraussetzungen](#requirements)
 - [Features](#features)
