@@ -1,4 +1,4 @@
-# ViteRex 🚀 _Supercharged REDAXO Frontend development on speed_
+# ViteRex 🚀 _Supercharged REDAXO Frontend development with Vite JS_
 
 - [Beschreibung](#beschreibung)
 - [Vorraussetzungen](#requirements)
@@ -25,8 +25,10 @@ Basierend auf [yak](https://github.com/yakamara/yak) von Thomas Blum ([tbaddade]
 ## Features
 
 - automatische Redaxo Installation per Terminal, inkl. gewünschter Addons und Plugins
-- modular konfigurierbar über eine Konfigurationsdatei unter /setup/setup.cfg
-- lokale Entwicklungsumgebung mit [Vite JS](https://vitejs.dev/)
+- modular – konfigurierbar über eine Konfigurationsdatei unter /setup/setup.cfg
+- lokale Entwicklungsumgebung mit Node und [Vite JS](https://vitejs.dev/)
+- native JS module imports (und CSS imports per JS, oder Assets imports wie CSS, SVG, Bilder, JSON, etc., inklusive Transformationen und so)
+- alles was NPM bzw. Yarn zu bieten haben
 - [Tailwind CSS](https://tailwindcss.com/)
 - Vite JS bzw. [rollup.js](https://rollupjs.org/) als Bundler/Minifier (inkl. PostCSS mit CSS Nesting und Autoprefixer)
 - Live-Reload bzw. HMR für Templates, Struktur, URL (beliebig erweiterbar)
@@ -34,8 +36,9 @@ Basierend auf [yak](https://github.com/yakamara/yak) von Thomas Blum ([tbaddade]
   - /src/modules/\*_/._
   - /var/cache/addons/(structure|url)\*_/._
   - /assets/\*_/._
-- einfach erweiterbar
+  - einfach erweiterbar, zum Beispiel für Fragmente  
 - Deployment via ydeploy bzw. deployment via [deployer](https://deployer.org/), Konfiguration unter setup/deploy.php
+- einfach erweiterbar
 
 <a name="requirements"></a>
 
