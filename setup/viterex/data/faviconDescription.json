@@ -51,7 +51,8 @@
       }
     },
     "safariPinnedTab": {
-      "pictureAspect": "silhouette",
+      "pictureAspect": "blackAndWhite",
+      "threshold": 92,
       "themeColor": "#7a7256"
     }
   },
