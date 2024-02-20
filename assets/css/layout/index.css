@@ -5,7 +5,7 @@
 
 @layer layout {
   html {
-    @apply scroll-smooth scroll-pt-[--shoulder] scroll-mt-[--shoulder] overflow-scroll;
+    @apply scroll-smooth scroll-pt-[--shoulder] scroll-mt-[--shoulder] overflow-y-scroll;
     &.main-menu-opened {
       @apply pr-[--scrollbarwidth];
     }
