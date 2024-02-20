@@ -292,6 +292,7 @@ yarn upgrade-interactive --latest
 open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/"
 open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/redaxo/"
 
+rm -rf .git
 git init
 git add .
 git commit -m "initial commit"
