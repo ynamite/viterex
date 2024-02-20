@@ -25,7 +25,7 @@ class Favicon
       $favIconData = rex_file::get(rex_path::base('faviconData.json'));
       if ($favIconData) {
         $favIconData = json_decode($favIconData, true);
-        $favIconData['favicon']['html_code'] .= '<link rel=\"icon\" type=\"image/ico\" href=\"/favicon.ico\">\n<meta name=\"msapplication-config\" content=\"browserconfig.xml\" />\n';
+        $favIconData['favicon']['html_code'] .= "\n<link rel=\"icon\" type=\"image/ico\" href=\"/favicon.ico\">\n<meta name=\"msapplication-config\" content=\"browserconfig.xml\" />\n";
         $sql = rex_sql::factory();
         $sql->setTable('rex_template');
         $sql->setWhere(['key' => 'html-favicon']);
