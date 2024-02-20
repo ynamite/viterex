@@ -10,6 +10,8 @@ export default ({ mode }) => {
       //vue(),
       liveReload([
         __dirname + '/**/*.php',
+        __dirname +
+          '/assets/**/(*.svg|*.png|*.jpg|*.jpeg|*.webp|*.avif|*.gif|*.woff|*.woff2)',
         __dirname + '/var/cache/addons/(structure|url)/**'
       ])
     ],
