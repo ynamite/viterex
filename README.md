@@ -115,6 +115,7 @@ _**Wichtig für Deployment ohne Deployer**: Webhosting so konfigurieren, dass de
     location ^~ /bin { deny  all; }
     # YREWRITE END
   ```
+  Pfad zur herd.conf für Laravel Herd: `~/Library/Application Support/Herd/config/nginx`
 - falls eine andere Redaxo Version installiert werden soll, einfach Eintrag anpassen und SHA-Vergleichssumme im Terminal anzeigen lassen, in setup/setup.cfg eintragen und setup/setup starten:<br/>
   `$ curl -Ls https://github.com/redaxo/redaxo/releases/download/5.15.1/redaxo_5.15.1.zip | shasum`
 - Um die "Ordner ist unsicher"-Fehlermeldungen in Redaxo loszuwerden, einfach `/public/assets/core/standard.js` bei “redaxo-security-self-test” die Zeile wie folgt anpassen:<br/>
