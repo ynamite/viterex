@@ -63,7 +63,7 @@ Deployment via [ydeploy](https://github.com/yakamara/ydeploy) von [yakamara](htt
 8. im Backend mit den Zugangsdaten aus setup.cfg anmelden
 9. Happy coding! 🙌🏼
 
-**Ab sofort sollten jegliche Änderungen an Dateien (Templates & Module unter /src/ und CSS, JS Dateien unter /assets/) und sogar Anpassungen im Redaxo Backend sofort im Frontend automatisch gespiegelt werden (dank Live-Reload und HMR) – ohne nerviges, manuelles refreshen mit F5** 🍔
+**Ab sofort sollten jegliche Änderungen an Dateien (Templates, Module und Fragmente unter /src/ und CSS, JS Dateien unter /assets/) und sogar Anpassungen im Redaxo Backend sofort im Frontend automatisch gespiegelt werden (dank Live-Reload und HMR) – ohne nerviges, manuelles refreshen mit F5** 🍔
 
 - mit `CTRL + C` kann der Vite JS Dev-Server im Terminal gestoppt werden
 - mit `yarn dev` Vite JS Dev-Server starten
@@ -88,12 +88,33 @@ einfach im Projekt-Ordner `yarn build` ausführen und folgende Dateien und Ordne
 - `inc.vite.php`
 - `LICENSE.md`
 
-_**Wichtig**: Webhosting so konfigurieren, dass der Dokumentstamm (bzw. www-Root) auf den Ordner /public zeigt_
+_**Wichtig für Deployment ohne Deployer**: Webhosting so konfigurieren, dass der Dokumentstamm (bzw. www-Root) auf den Ordner /public zeigt_
 
 <a name="tips"></a>
 
 ## Tipps
 
+- bei Verwendung unter Laravel Herd (bzw. mit Nginx) müssen folgende Regeln in die herd.conf bei Laravel Herd oder in die nginx.conf, für Nginx:
+  ```
+    # YREWRITE START
+    rewrite ^/sitemap\.xml$                           /index.php?rex_yrewrite_func=sitemap last;
+    rewrite ^/robots\.txt$                            /index.php?rex_yrewrite_func=robots last;
+    rewrite ^/media[0-9]*/imagetypes/([^/]*)/([^/]*)  /index.php?rex_media_type=$1&rex_media_file=$2&$args;
+    rewrite ^/media/([^/]*)/([^/]*)                   /index.php?rex_media_type=$1&rex_media_file=$2&$args;
+    rewrite ^/media/(.*)                              /index.php?rex_media_type=yrewrite_default&rex_media_file=$1&$query_string;
+    rewrite ^/images/([^/]*)/([^/]*)                  /index.php?rex_media_type=$1&rex_media_file=$2&$args;
+    rewrite ^/imagetypes/([^/]*)/([^/]*)              /index.php?rex_media_type=$1&rex_media_file=$2;
+    rewrite ^/image/([^/]*)/([^/]*)/([^/]*)           /index.php?rex_media_type=$1&rex_media_file=$3__w$2;
+
+    # !!! WICHTIG !!! Falls Let's Encrypt fehlschlägt, diese Zeile auskommentieren (sollte jedoch funktionieren)
+    location ~ /\. { deny  all; }
+
+    # Zugriff auf diese Verzeichnisse verbieten
+    location ^~ /src { deny  all; }
+    location ^~ /var { deny  all; }
+    location ^~ /bin { deny  all; }
+    # YREWRITE END
+  ```
 - falls eine andere Redaxo Version installiert werden soll, einfach Eintrag anpassen und SHA-Vergleichssumme im Terminal anzeigen lassen, in setup/setup.cfg eintragen und setup/setup starten:<br/>
   `$ curl -Ls https://github.com/redaxo/redaxo/releases/download/5.15.1/redaxo_5.15.1.zip | shasum`
 - Um die "Ordner ist unsicher"-Fehlermeldungen in Redaxo loszuwerden, einfach `/public/assets/core/standard.js` bei “redaxo-security-self-test” die Zeile wie folgt anpassen:<br/>
