@@ -1,0 +1,37 @@
+@import 'swiper/css' layer(utilities.swiper);
+@import 'swiper/css/navigation' layer(utilities.swiper);
+@import 'swiper/css/pagination' layer(utilities.swiper);
+@import 'swiper/css/effect-fade' layer(utilities.swiper);
+
+@layer utilities.swiper {
+  .swiper {
+    @apply w-full h-[66svh];
+    &.swiper-fs {
+      @apply aspect-auto min-h-full h-[calc(100svh-var(--shoulder))] max-h-[calc(100svh-var(--shoulder))];
+    }
+  }
+  .swiper-container,
+  .swiper-wrapper,
+  .swiper-slide,
+  .swiper-slide-inner,
+  .swiper-slide .img-cell,
+  .swiper-slide img {
+    @apply w-full h-full;
+  }
+
+  .swiper-slide img {
+    @apply object-cover;
+  }
+
+  .swiper-pagination {
+    &.swiper-pagination-bullets.swiper-pagination-horizontal {
+      @apply flex justify-center items-center gap-3 z-20;
+      .swiper-pagination-bullet {
+        @apply size-3 rounded-full bg-white mx-0 opacity-100;
+      }
+      .swiper-pagination-bullet-active {
+        @apply bg-primary;
+      }
+    }
+  }
+}
