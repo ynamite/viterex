@@ -21,6 +21,16 @@ class menu {
     this.selector = selector
 
     this.settings = { ...defaults, ...options }
+    this.settings.strings = { ...defaults.strings, ...options.strings }
+    this.settings.animation = { ...defaults.animation, ...options.animation }
+    this.settings.animation.menu = {
+      ...defaults.animation.menu,
+      ...options.animation.menu
+    }
+    this.settings.animation.listItem = {
+      ...defaults.animation.listItem,
+      ...options.animation.listItem
+    }
     this.settings.selector = selector
     this.settings.state = 'hidden'
   }
