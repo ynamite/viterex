@@ -1,4 +1,6 @@
-# ViteRex 🚀 _Supercharged REDAXO Frontend development on speed_
+# ViteRex 🚀 _Supercharged REDAXO Frontend development with Vite JS_
+
+![ViteRex](viterex.jpg)
 
 - [Beschreibung](#beschreibung)
 - [Vorraussetzungen](#requirements)
@@ -18,13 +20,17 @@ Mit Support für Live-Reloading und HMR für Redaxo, PHP, CSS und JS Dateien.
 
 Deployment via [ydeploy](https://github.com/yakamara/ydeploy) von [yakamara](https://github.com/yakamara/) (basierend auf [deployer](https://deployer.org/))
 
+Basierend auf [yak](https://github.com/yakamara/yak) von Thomas Blum ([tbaddade](https://github.com/tbaddade))
+
 <a name="features"></a>
 
 ## Features
 
 - automatische Redaxo Installation per Terminal, inkl. gewünschter Addons und Plugins
-- modular konfigurierbar über eine Konfigurationsdatei unter /setup/setup.cfg
-- lokale Entwicklungsumgebung mit [Vite JS](https://vitejs.dev/)
+- modular – konfigurierbar über eine Konfigurationsdatei unter /setup/setup.cfg
+- lokale Entwicklungsumgebung mit Node und [Vite JS](https://vitejs.dev/)
+- native JS module imports (und CSS imports per JS, oder Assets imports wie CSS, SVG, Bilder, JSON, etc., inklusive Transformationen und so)
+- alles was NPM bzw. Yarn zu bieten haben
 - [Tailwind CSS](https://tailwindcss.com/)
 - Vite JS bzw. [rollup.js](https://rollupjs.org/) als Bundler/Minifier (inkl. PostCSS mit CSS Nesting und Autoprefixer)
 - Live-Reload bzw. HMR für Templates, Struktur, URL (beliebig erweiterbar)
@@ -32,7 +38,7 @@ Deployment via [ydeploy](https://github.com/yakamara/ydeploy) von [yakamara](htt
   - /src/modules/\*_/._
   - /var/cache/addons/(structure|url)\*_/._
   - /assets/\*_/._
-- einfach erweiterbar
+  - einfach erweiterbar, zum Beispiel für Fragmente  
 - Deployment via ydeploy bzw. deployment via [deployer](https://deployer.org/), Konfiguration unter setup/deploy.php
 
 <a name="requirements"></a>
@@ -55,13 +61,13 @@ Deployment via [ydeploy](https://github.com/yakamara/ydeploy) von [yakamara](htt
 2. dieses Repo klonen – ggf. geklontes Directory umbenennen, das ist nun der Projekt-Ordner
 3. Projekt-Ordner als vhost mounten (über installierten Webserver)
 4. im Terminal in den Projekt-Ordner wechseln
-5. `setup/setup.cfg` in einem Editor anpassen
+5. `setup/setup.cfg` in einem Editor anpassen. __Wichtig:__ unbedingt REDAXO_ERROR_EMAIL ausfüllen!
    _die Einträge beginnend mit `VITE_` am besten unverändert lassen, ausser man weiss, was man tut\_ 😌
-6. Skript `setup/setup` im Projekt-Verzeichnis im Terminal ausführen.
+6. Skript `setup/setup` im Projekt-Verzeichnis im Terminal ausführen. __Achtung:__ falls eine DB mit dem angegebenen Namen bereits besteht, wird im setup Ordner ein Backup angelegt und die bestehende DB neu angelegt!
    _nun wird Redaxo heruntergeladen und installiert. Danach folgen die gewählten Addons und Plugins. Am Ende werden die PHP-Dependencies per Composer und per Yarn die Node-Dependencies installiert._
 7. der Vite JS Dev-Server sollte nun automatisch gestartet und im Default-Browser das Front- und Backend geöffnet werden
 8. im Backend mit den Zugangsdaten aus setup.cfg anmelden
-9. Happy coding! 🙌🏼
+9. Frontend einaml mit F5 reloaden und los gehts! Happy coding! 🙌🏼
 
 **Ab sofort sollten jegliche Änderungen an Dateien (Templates, Module und Fragmente unter /src/ und CSS, JS Dateien unter /assets/) und sogar Anpassungen im Redaxo Backend sofort im Frontend automatisch gespiegelt werden (dank Live-Reload und HMR) – ohne nerviges, manuelles refreshen mit F5** 🍔
 
@@ -123,8 +129,8 @@ _**Wichtig für Deployment ohne Deployer**: Webhosting so konfigurieren, dass de
 - falls auf eurem System mysql im Shell nicht verfügbar sein sollte (wie mit Laravel Herd und DBngin der Fall), dann wie folgt vorgehen:
   - Für Mac OS und MySQL 8.0.33:
     ins Terminal gehen und folgendes eingeben und mit Enter bestätigen<br/>
-    `sudo nano ~/.bash_profile`
-    Folgende Zeile kopieren und dort einfügen<br/>
+    `sudo nano /etc/zshrc`
+    System-Passwort eingeben und dann folgende Zeile ganz am Ende auf einer neuen Zeile eintragen<br/>
     `export PATH=/Users/Shared/DBngin/mysql/8.0.33/bin:$PATH`
     nun mit CTRL + O die Datei speichern und mit CTRL + X den Nano Editor verlassen
 - bei deployment via ydeploy, sollte folgendes sichergestellt werden:
