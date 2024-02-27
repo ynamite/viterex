@@ -110,7 +110,7 @@ _**Wichtig für Deployment ohne Deployer**: Webhosting so konfigurieren, dass de
     rewrite ^/media/(.*)                              /index.php?rex_media_type=yrewrite_default&rex_media_file=$1&$query_string;
     rewrite ^/images/([^/]*)/([^/]*)                  /index.php?rex_media_type=$1&rex_media_file=$2&$args;
     rewrite ^/imagetypes/([^/]*)/([^/]*)              /index.php?rex_media_type=$1&rex_media_file=$2;
-    rewrite ^/image/([^/]*)/([^/]*)/([^/]*)           /index.php?rex_media_type=$1&rex_media_file=$3__w$2;
+    rewrite ^/image/([^/]*)/([^/]*)/([^/]*)           /index.php?rex_media_auto_size=1&rex_media_type=$1&rex_media_file=$3__w$2;
 
     # !!! WICHTIG !!! Falls Let's Encrypt fehlschlägt, diese Zeile auskommentieren (sollte jedoch funktionieren)
     location ~ /\. { deny  all; }
