@@ -5,7 +5,6 @@ module.exports = {
   content: [
     './assets/js/**/*.js',
     './assets/css/**/*.css',
-    // './src/addons/**/*.php',
     './src/fragments/**/*.php',
     './src/templates/**/*.php',
     './src/modules/**/*.php'
