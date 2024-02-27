@@ -21,49 +21,6 @@ installPackage() {
         php bin/console package:activate "${package}" --no-interaction --quiet
         wait
         
-        if([ $package = 'bloecks' ]); then
-            php bin/console package:install "${package}"/cutncopy --no-interaction --quiet
-            wait
-            php bin/console package:activate "${package}"/cutncopy --no-interaction --quiet
-            wait
-
-            php bin/console package:install "${package}"/dragndrop --no-interaction --quiet
-            wait
-            php bin/console package:activate "${package}"/dragndrop --no-interaction --quiet
-            wait
-
-            php bin/console package:install "${package}"/status --no-interaction --quiet
-            wait
-            php bin/console package:activate "${package}"/status --no-interaction --quiet
-            wait
-        fi
-        if([ $package = 'ui_tools' ]); then
-            php bin/console package:install "${package}"/jquery-minicolors --no-interaction --quiet
-            wait
-            php bin/console package:activate "${package}"/jquery-minicolors --no-interaction --quiet
-            wait
-
-            php bin/console package:install "${package}"/selectize --no-interaction --quiet
-            wait
-            php bin/console package:activate "${package}"/selectize --no-interaction --quiet
-            wait
-        fi
-        if([ $package = 'yform' ]); then
-            php bin/console package:install "${package}"/email --no-interaction --quiet
-            wait
-            php bin/console package:activate "${package}"/email --no-interaction --quiet
-            wait
-
-            php bin/console package:install "${package}"/manager --no-interaction --quiet
-            wait
-            php bin/console package:activate "${package}"/manager --no-interaction --quiet
-            wait
-
-            php bin/console package:install "${package}"/tools --no-interaction --quiet
-            wait
-            php bin/console package:activate "${package}"/tools --no-interaction --quiet
-            wait
-        fi
         printf "${CGREEN}${package}${CNO} installed and activated!\n\n"
 }
 

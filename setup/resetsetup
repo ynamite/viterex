@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
 set -e
-
-clear
-
 CRED='\033[0;31m'
 CGREEN='\033[0;32m'
 CNO='\033[0m' # No Color

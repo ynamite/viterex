@@ -8,30 +8,6 @@ class LocalValetDriver extends LaravelValetDriver
 
   protected $hasPublicDirectory = false;
 
-  /**
-   * Emulate the REDAXO CMS .htaccess file
-   */
-  public function emulateRedaxoHtaccess($uri)
-  {
-    $uriParts = array_filter(explode('/', $uri));
-    switch ($uriParts[1]) {
-      case 'sitemap.xml':
-        $_REQUEST['rex_yrewrite_func'] = 'sitemap';
-        break;
-      case 'robots.txt':
-        $_REQUEST['rex_yrewrite_func'] = 'robots';
-        break;
-      case 'mediatypes':
-      case 'media':
-        $mmType = isset($uriParts[2]) ? $uriParts[2] : null;
-        $mmFile = isset($uriParts[3]) ? $uriParts[3] : null;
-        if ($mmType && $mmFile) {
-          $_GET['rex_media_type'] = $mmType;
-          $_GET['rex_media_file'] = $mmFile;
-        }
-        break;
-    }
-  }
 
   /**
    * Get the path to the application's front controller.
@@ -52,14 +28,6 @@ class LocalValetDriver extends LaravelValetDriver
   {
     $this->hasPublicDirectory = is_dir($sitePath . '/public/');
     return ($this->hasPublicDirectory && file_exists($sitePath . '/public/redaxo/index.php')) || file_exists($sitePath . '/redaxo/index.php');
-  }
-
-  /**
-   * Take any steps necessary before loading the front controller for this driver.
-   */
-  public function beforeLoading(string $sitePath, string $siteName, string $uri): void
-  {
-    $this->emulateRedaxoHtaccess($uri);
   }
 
   /**

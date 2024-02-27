@@ -40,7 +40,6 @@ Basierend auf [yak](https://github.com/yakamara/yak) von Thomas Blum ([tbaddade]
   - /assets/\*_/._
   - einfach erweiterbar, zum Beispiel für Fragmente  
 - Deployment via ydeploy bzw. deployment via [deployer](https://deployer.org/), Konfiguration unter setup/deploy.php
-- einfach erweiterbar
 
 <a name="requirements"></a>
 
@@ -68,11 +67,15 @@ Basierend auf [yak](https://github.com/yakamara/yak) von Thomas Blum ([tbaddade]
    _nun wird Redaxo heruntergeladen und installiert. Danach folgen die gewählten Addons und Plugins. Am Ende werden die PHP-Dependencies per Composer und per Yarn die Node-Dependencies installiert._
 7. der Vite JS Dev-Server sollte nun automatisch gestartet und im Default-Browser das Front- und Backend geöffnet werden
 8. im Backend mit den Zugangsdaten aus setup.cfg anmelden
-9. (optional) Projekt-Ordner einem eigenen Git-Repo zuweisen, mittels `git remote set-url {dein remote name, zBsp.: origin} {deine remote URL, zBsp.:https://github.com/DEIN/REPOSITORY}. 
-  _selbstverständlich kannst du GIT auch komplett aus deinem Projekt-Ordner löschen, in dem du `rm -fr .git` ausführtst_
+9. (Zur Info) es wird ein lokales Git Repository initialisiert. Dies kann nun mit einem Remote Repository verbunden werden.
+   _Beispielsweise:_
+   ```
+    git push --set-upstream "git@github.com:BENUTZERNAME/REPOSITORY_NAME.git" main
+    git remote add origin "https://github.com/BENUTZERNAME/REPOSITORY_NAME.git"
+   ```
 10. Frontend einaml mit F5 reloaden und los gehts! Happy coding! 🙌🏼
 
-**Ab sofort sollten jegliche Änderungen an Dateien (Templates & Module unter /src/ und CSS, JS Dateien unter /assets/) und sogar Anpassungen im Redaxo Backend sofort im Frontend automatisch gespiegelt werden (dank Live-Reload und HMR) – ohne nerviges, manuelles refreshen mit F5** 🍔
+**Ab sofort sollten jegliche Änderungen an Dateien (Templates, Module und Fragmente unter /src/ und CSS, JS Dateien unter /assets/) und sogar Anpassungen im Redaxo Backend sofort im Frontend automatisch gespiegelt werden (dank Live-Reload und HMR) – ohne nerviges, manuelles refreshen mit F5** 🍔
 
 - mit `CTRL + C` kann der Vite JS Dev-Server im Terminal gestoppt werden
 - mit `yarn dev` Vite JS Dev-Server starten
@@ -97,15 +100,37 @@ einfach im Projekt-Ordner `yarn build` ausführen und folgende Dateien und Ordne
 - `inc.vite.php`
 - `LICENSE.md`
 
-_**Wichtig**: Webhosting so konfigurieren, dass der Dokumentstamm (bzw. www-Root) auf den Ordner /public zeigt_
+_**Wichtig für Deployment ohne Deployer**: Webhosting so konfigurieren, dass der Dokumentstamm (bzw. www-Root) auf den Ordner /public zeigt_
 
 <a name="tips"></a>
 
 ## Tipps
 
+- bei Verwendung unter Laravel Herd (bzw. mit Nginx) müssen folgende Regeln in die herd.conf bei Laravel Herd oder in die nginx.conf, für Nginx:
+  ```
+    # YREWRITE START
+    rewrite ^/sitemap\.xml$                           /index.php?rex_yrewrite_func=sitemap last;
+    rewrite ^/robots\.txt$                            /index.php?rex_yrewrite_func=robots last;
+    rewrite ^/media[0-9]*/imagetypes/([^/]*)/([^/]*)  /index.php?rex_media_type=$1&rex_media_file=$2&$args;
+    rewrite ^/media/([^/]*)/([^/]*)                   /index.php?rex_media_type=$1&rex_media_file=$2&$args;
+    rewrite ^/media/(.*)                              /index.php?rex_media_type=yrewrite_default&rex_media_file=$1&$query_string;
+    rewrite ^/images/([^/]*)/([^/]*)                  /index.php?rex_media_type=$1&rex_media_file=$2&$args;
+    rewrite ^/imagetypes/([^/]*)/([^/]*)              /index.php?rex_media_type=$1&rex_media_file=$2;
+    rewrite ^/image/([^/]*)/([^/]*)/([^/]*)           /index.php?rex_media_type=$1&rex_media_file=$3__w$2;
+
+    # !!! WICHTIG !!! Falls Let's Encrypt fehlschlägt, diese Zeile auskommentieren (sollte jedoch funktionieren)
+    location ~ /\. { deny  all; }
+
+    # Zugriff auf diese Verzeichnisse verbieten
+    location ^~ /src { deny  all; }
+    location ^~ /var { deny  all; }
+    location ^~ /bin { deny  all; }
+    # YREWRITE END
+  ```
+  Pfad zur herd.conf für Laravel Herd: `~/Library/Application Support/Herd/config/nginx`
 - falls eine andere Redaxo Version installiert werden soll, einfach Eintrag anpassen und SHA-Vergleichssumme im Terminal anzeigen lassen, in setup/setup.cfg eintragen und setup/setup starten:<br/>
   `$ curl -Ls https://github.com/redaxo/redaxo/releases/download/5.15.1/redaxo_5.15.1.zip | shasum`
-- Um die "Ordner ist unsicher"-Fehlermeldungen in Redaxo loszuwerden, einfach `/public/assets/core/standard.js` bei “redaxo-security-self-test” die Zeile wie folgt anpassen:<br/>
+- Eine Variante, um die "Ordner ist unsicher"-Fehlermeldungen in Redaxo loszuwerden, ist in `/public/assets/core/standard.js` bei “redaxo-security-self-test” die Zeile wie folgt anpassen:<br/>
   `if (i % 2 == 0 && data != '' && data.substring(0, 6) != '<br />') {`
 - falls auf eurem System mysql im Shell nicht verfügbar sein sollte (wie mit Laravel Herd und DBngin der Fall), dann wie folgt vorgehen:
   - Für Mac OS und MySQL 8.0.33:
