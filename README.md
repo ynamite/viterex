@@ -136,3 +136,11 @@ _**Wichtig für Deployment ohne Deployer**: Webhosting so konfigurieren, dass de
 - bei deployment via ydeploy, sollte folgendes sichergestellt werden:
   - es sollte ein Unterverzeichnis als `deploymentPath` angegeben; direkt ins Webserver root zu deployen kann gefährlich sein, da ev. wichtige Dateien überschrieben werden
   - falls auf dem Webserver in der secure shell (SSH) PHP in einer älteren Version als 8.1 ausgeführt wird, funktioniert ydeploy nicht. Vor deployment sicherstellen, dass PHP >=8.1 in der Shell läuft.
+- Metanet Hosting auf SSH PHP 8.2 umstellen:
+  ```
+  alias php='/opt/php82/bin/php' 
+  echo "alias php='/opt/php82/bin/php'" >> ~/.bash_profile
+
+  export PATH=/opt/php82/bin:$PATH
+  echo "export PATH=/opt/php82/bin:\$PATH" >> ~/.bash_profile 
+  ```
