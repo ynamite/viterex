@@ -1,14 +1,13 @@
-:where(.swiper) {
-  &.swiper-fs {
-    @apply min-h-full h-[calc(100svh-var(--shoulder)-var(--footer-height))] max-h-[calc(100svh-var(--shoulder)-var(--footer-height))];
-  }
+
+.swiper-container,
+.swiper-wrapper,
+.swiper-slide,
+.swiper-slide-inner,
+.swiper-slide .img-cell,
+.swiper-slide img {
+  @apply h-full w-full;
 }
 
-:where(.swiper-container, .swiper-wrapper, .swiper-slide, .swiper-slide-inner),
-:where(.swiper-slide .img-cell, .swiper-slide img) {
-  @apply w-full h-full;
-}
-
-:where(.swiper-slide img) {
+.swiper-slide img {
   @apply object-cover;
 }

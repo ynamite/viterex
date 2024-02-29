@@ -17,8 +17,11 @@
     @apply flex flex-col min-h-svh transition-all;
     overflow-anchor: none;
   }
-  .section-padding {
-    @apply px-4 py-10;
+  .section-x-padding {
+    @apply px-4 md:px-8;
+  }
+  .section-y-padding {
+    @apply py-10 md:py-10 xl:py-20;
   }
   .page-margin {
     @apply mx-auto max-w-7xl w-full;

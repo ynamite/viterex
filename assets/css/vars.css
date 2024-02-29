@@ -6,14 +6,6 @@
   --footer-height: calc(165.78 / 16 * 1rem);
 }
 
-.home-page {
-  *,
-  ::before,
-  ::after {
-    --footer-height: calc(75 / 16 * 1rem);
-  }
-}
-
 @media screen(lg) {
   *,
   ::before,
