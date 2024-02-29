@@ -1,3 +1,10 @@
 {
-  "exclude": ["node_modules", "assets/js/vendor/*", "src"]
+  "exclude": [
+    "node_modules",
+    "src",
+    "var",
+    "vendor",
+    ".build",
+    "public"
+  ]
 }
