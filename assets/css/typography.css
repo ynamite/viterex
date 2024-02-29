@@ -67,7 +67,7 @@ body,
     }
   }
   .text-small {
-    @apply text-sm md:text-md;
+    @apply text-xs md:text-sm;
   }
   ol {
     counter-reset: list-counter;
