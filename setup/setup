@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 clear
-resetsetup
+setup/resetsetup
 
 set -e
 
@@ -193,15 +193,14 @@ ${CNO}"
 for package in ${ADDON_PACKAGES[@]}
 do
     printf "\n${CRED}Downloading package${CNO} ${package}\n"
-    php bin/console install:download "${package}" --no-interaction --quiet
-    wait
+    IFS=/ read -r package plugin <<< "$package"
+    if [ ! $plugin ]; then
+        php bin/console install:download "${package}" --no-interaction --quiet
+        wait
+    fi
     installPackage "${package}" 
-    # pids="$pids $!"
     wait
 done
-# for pid in ${pids[*]}; do
-#     wait $pid
-# done
 
 for repo in ${ADDON_REPOS[@]}
 do
