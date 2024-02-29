@@ -114,9 +114,6 @@ const swupRefresh = () => {
   let logoHref = document.getElementById('content').dataset?.logoHref
   $header.querySelector('.site-logo a').setAttribute('href', logoHref)
 
-  if (window?.ScrollTrigger) {
-    ScrollTrigger.refresh()
-  }
 }
 
 const initImages = async () => {
@@ -136,6 +133,11 @@ const initImages = async () => {
       )
     })
   }
+}
+
+const initSwipers = async () => {
+  const swiper = await import('@/js/swiper')
+  swiper.init()
 }
 
 const importModules = async () => {
