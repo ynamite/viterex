@@ -5,33 +5,25 @@
 
 @layer utilities.swiper {
   .swiper {
-    @apply w-full h-[66svh];
+    @apply aspect-video;
     &.swiper-fs {
-      @apply aspect-auto min-h-full h-[calc(100svh-var(--shoulder))] max-h-[calc(100svh-var(--shoulder))];
+      @apply aspect-auto h-[calc(100svh-var(--shoulder))] max-h-[calc(100svh-var(--shoulder))] min-h-full;
     }
-  }
-  .swiper-container,
-  .swiper-wrapper,
-  .swiper-slide,
-  .swiper-slide-inner,
-  .swiper-slide .img-cell,
-  .swiper-slide img {
-    @apply w-full h-full;
-  }
-
-  .swiper-slide img {
-    @apply object-cover;
   }
 
   .swiper-pagination {
     &.swiper-pagination-bullets.swiper-pagination-horizontal {
-      @apply flex justify-center items-center gap-3 z-20;
+      @apply z-20 flex items-center justify-center gap-3;
       .swiper-pagination-bullet {
-        @apply size-3 rounded-full bg-white mx-0 opacity-100;
+        @apply mx-0 size-3 rounded-full bg-white opacity-100;
       }
       .swiper-pagination-bullet-active {
         @apply bg-primary;
       }
     }
+  }
+  .swiper-button-prev,
+  .swiper-button-next {
+    @apply mt-0 size-10 -translate-y-1/2 rounded-full bg-accent text-white after:hidden;
   }
 }
