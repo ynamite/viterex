@@ -5,7 +5,6 @@
 
 @layer utilities.swiper {
   .swiper {
-    @apply aspect-video;
     &.swiper-fs {
       @apply aspect-auto h-[calc(100svh-var(--shoulder))] max-h-[calc(100svh-var(--shoulder))] min-h-full;
     }
