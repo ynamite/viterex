@@ -2,12 +2,14 @@ import { defineConfig, loadEnv } from 'vite'
 import liveReload from 'vite-plugin-live-reload'
 import copy from 'rollup-plugin-copy'
 import path from 'path'
+import { vite as vidstack } from 'vidstack/plugins'
 
 export default ({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) }
   return defineConfig({
     plugins: [
       //vue(),
+      vidstack({ include: /player\// }),
       liveReload([
         __dirname + '/**/*.php',
         __dirname +
