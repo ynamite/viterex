@@ -14,10 +14,13 @@ import SwupScrollPlugin from '@swup/scroll-plugin'
 // import SwupProgressPlugin from '@swup/progress-plugin'
 
 import gsap from '@/js/gsap.js'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
-gsap.registerPlugin(ScrollToPlugin)
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 import { elementIsVisibleInViewport } from '@/js/utilities.js'
+
+const style = getComputedStyle(document.documentElement)
 
 const animations = [
   {
@@ -98,8 +101,13 @@ const swup = new Swup({
  * Overwrite swup's scrollTo function
  */
 swup.scrollTo = (offsetY) => {
+  const scrollPadding = parseFloat(
+    style.getPropertyValue('scroll-padding-top'),
+    10
+  )
+
   swup.hooks.callSync('scroll:start', undefined)
-  window.scrollTo(0, offsetY)
+  window.scrollTo(0, offsetY - scrollPadding)
   swup.hooks.callSync('scroll:end', undefined)
   return
 }
