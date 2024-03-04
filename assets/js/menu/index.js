@@ -25,11 +25,11 @@ class menu {
     this.settings.animation = { ...defaults.animation, ...options.animation }
     this.settings.animation.menu = {
       ...defaults.animation.menu,
-      ...options.animation.menu
+      ...options?.animation?.menu
     }
     this.settings.animation.listItem = {
       ...defaults.animation.listItem,
-      ...options.animation.listItem
+      ...options?.animation?.listItem
     }
     this.settings.selector = selector
     this.settings.state = 'hidden'
@@ -80,7 +80,9 @@ class menu {
       this.$trigger.append($triggerLabel)
       $triggerLabel.insertAdjacentHTML('afterend', this.settings.hamburgerHtml)
 
-      document.querySelector('#menus').append(this.$trigger)
+      if (this.settings.injectToBody)
+        document.querySelector('body').append(this.$trigger)
+      else document.querySelector('#menus').append(this.$trigger)
 
       this.hamburgers = this.$trigger.querySelectorAll(
         '.' + this.settings.ns + '-hamburger-html'
