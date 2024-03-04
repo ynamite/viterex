@@ -12,7 +12,10 @@ import {
 } from '@/js/utilities.js'
 import menu from '@/js/menu'
 import swup from '@/js/swup.js'
-
+// import 'vidstack/player/styles/base.css'
+// import 'vidstack/player'
+// import 'vidstack/player/ui'
+// import 'vidstack/icons'
 window.debugMode = false
 
 const logger = new Logger()
