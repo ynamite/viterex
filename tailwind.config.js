@@ -20,5 +20,14 @@ module.exports = {
       },
     }
   },
-  plugins: [addDynamicIconSelectors()]
+  plugins: [
+    addDynamicIconSelectors(),
+    require('vidstack/tailwind.cjs')({
+      // Optimize output by specifying player selector.
+      prefix: 'media',
+      selector: '.media-player',
+      // Enables more efficient selectors.
+      webComponents: true
+    })
+  ]
 }
