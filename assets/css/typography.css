@@ -29,10 +29,15 @@ h3,
 h1,
 h2,
 h3,
+p {
+  + * {
+    @apply mt-[1.6em];
+  }
+}
+
 h4,
 h5,
 h6,
-p,
 ul,
 ol {
   + * {
@@ -44,8 +49,11 @@ ol {
   + {
     h1,
     .h1,
-    h2 {
-      @apply mt-[1.6em];
+    h2,
+    .h2,
+    h3,
+    .h3 {
+      @apply mt-[2em];
     }
   }
 }
@@ -63,11 +71,14 @@ body,
 .prose {
   :where(h3, .h3) {
     + * {
-      @apply mt-0;
+      @apply mt-[0.8em];
+      &.text-small {
+        @apply mt-[0.4em];
+      }
     }
   }
   .text-small {
-    @apply text-xs md:text-sm;
+    @apply text-sm md:text-base;
   }
   ol {
     counter-reset: list-counter;
@@ -83,13 +94,17 @@ body,
   }
   ul {
     > li {
-      @apply relative pl-7;
+      @apply pl-7;
       &::before {
         content: '';
-        @apply absolute w-2 h-2 bg-accent rounded-full top-[0.75em] left-0;
+        @apply inline-block h-[0.35rem] w-[0.35rem] -translate-x-full -translate-y-[0.15em] rounded-full bg-current;
+        /*@apply absolute w-2 h-2 bg-accent rounded-full top-[0.75em] left-0;*/
       }
     }
   }
+  &.text-center ul > li {
+    @apply pl-0;
+  }  
   iframe {
     @apply aspect-video h-auto w-full;
   }
