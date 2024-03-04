@@ -1,4 +1,13 @@
-
+.swiper {
+  media-player {
+    @apply h-full max-w-full;
+    media-provider {
+      video {
+        @apply h-full object-cover;
+      }
+    }
+  }
+}
 .swiper-container,
 .swiper-wrapper,
 .swiper-slide,
