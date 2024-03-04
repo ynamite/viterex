@@ -3,7 +3,13 @@
  * @author: Yves Torres, studio@massif.ch
  */
 import Swiper from 'swiper'
-import { Navigation, Pagination, EffectFade, Autoplay } from 'swiper/modules'
+import {
+  Navigation,
+  Pagination,
+  EffectFade,
+  Autoplay,
+  Keyboard
+} from 'swiper/modules'
 
 import { gsap } from '@/js/gsap.js'
 // import Swiper styles
@@ -11,16 +17,50 @@ import './style.css'
 
 const swipers = []
 const randomScale = gsap.utils.random(7000, 9000, true)
+
+let videoUnsubscribe = null
+
+const handleVideo = (swiper, event) => {
+  swiper.autoplay.stop()
+
+  const numSlides = swiper.slides.length
+  const index = swiper.activeIndex
+  const activeSlide = swiper.slides[index]
+  const player = activeSlide.querySelector('media-player')
+  if (player) {
+    if (videoUnsubscribe) videoUnsubscribe()
+    if (event === 'change') {
+      player.play()
+    }
+    videoUnsubscribe = player.subscribe(({ ended }) => {
+      if (ended) {
+        if (numSlides > 1) {
+          swiper.slideNext()
+          swiper.autoplay.start()
+        } else {
+          try {
+            player.play()
+          } catch (error) {
+            console.error(error)
+          }
+        }
+        videoUnsubscribe()
+      }
+    })
+    if (swiper?.previousIndex) {
+      const prevPlayer =
+        swiper.slides[swiper.previousIndex].querySelector('media-player')
+      if (prevPlayer) {
+        prevPlayer.pause()
+      }
+    }
+    return
+  } else swiper.autoplay.start()
+}
+
 const defaultConfig = {
   // slidesPerView: 1,
-  modules: [Autoplay, Navigation, Pagination, EffectFade],
-  on: {
-    init: function () {
-      gsap.delayedCall(0.5, () => {
-        ScrollTrigger.refresh()
-      })
-    }
-  },
+  modules: [Autoplay, Navigation, Pagination, EffectFade, Keyboard],
   speed: 2000,
   loop: true,
   loopPreventsSliding: false,
@@ -39,7 +79,7 @@ const defaultConfig = {
     nextEl: null,
     prevSelector: '.swiper-button-prev',
     prevEl: null,
-    enabled: false
+    enabled: true
   },
   pagination: {
     selector: '.swiper-pagination',
@@ -47,20 +87,13 @@ const defaultConfig = {
     clickable: true // swiper js 11.0.3 bug, clicks not working properly
   },
   on: {
-    transitionStart: function (swiper) {
-      // if (!swiper.pagination?.el) return;
-      // var $slide = swiper.slides[swiper.activeIndex];
-      // if ($slide.querySelector('.swiper-ol')) {
-      //     swiper.pagination.el.classList.add('dark');
-      // } else {
-      //     swiper.pagination.el.classList.remove('dark');
-      // }
+    init: (swiper) => {
+      gsap.delayedCall(1.5, () => {
+        swiper.el.parentElement.classList.add('loaded')
+      })
+
+      handleVideo(swiper, 'init')
     }
-    // transitionEnd: function () {
-    //     gsap.delayedCall(0.5, function () {
-    //         lazySizes.init();
-    //     });
-    // },
   }
 }
 
@@ -81,95 +114,6 @@ const init = () => {
     slides[0].setAttribute('data-swiper-autoplay', autoplayTimeout)
     if (numSlides > 1) {
       var config = { ...defaultConfig }
-      if ($container.closest('.row-image-swiper')) {
-        config.loop = true
-        config.slidesPerView = 'auto'
-        config.slidesPerGroup = 1
-        config.spaceBetween = 17
-        config.breakpoints = {
-          768: {
-            slidesPerView: 'auto',
-            slidesPerGroup: 1,
-            spaceBetween: 38,
-            centeredSlides: true
-          },
-          1280: {
-            slidesPerView: 'auto',
-            slidesPerGroup: 1,
-            spaceBetween: 60,
-            centeredSlides: true
-          }
-        }
-        config.speed = 600
-        config.effect = 'slide'
-        config.autoplay = {
-          pauseOnMouseEnter: true,
-          delay: 6000
-        }
-      }
-      if ($container.closest('.row-city-leads-swiper')) {
-        config.loop = false
-        config.slidesPerView = 'auto'
-        config.slidesPerGroup = 1
-        config.spaceBetween = 36
-
-        config.breakpoints = {
-          768: {
-            slidesPerView: 'auto',
-            slidesPerGroup: 1,
-            spaceBetween: 60
-            // centeredSlides: true,
-          },
-          1280: {
-            slidesPerView: 'auto',
-            slidesPerGroup: 1,
-            spaceBetween: 148
-            // centeredSlides: true,
-          }
-        }
-        config.autoplay = false
-        config.speed = 600
-        config.effect = 'slide'
-      } else if (
-        $container.closest('.row-quotes-swiper') ||
-        $container.closest('.row-gallery-swiper')
-      ) {
-        config.slidesPerView = 2
-        config.slidesPerGroup = 2
-        config.spaceBetween = 15
-        config.breakpoints = {
-          768: {
-            slidesPerView: 3,
-            slidesPerGroup: 3,
-            spaceBetween: 30,
-            navigation: {
-              enabled: true
-            }
-            // centeredSlides: true,
-          } /*,
-                    1280: {
-                        slidesPerView: 'auto',
-                        slidesPerGroup: 1,
-                        spaceBetween: 60,
-                        centeredSlides: true,
-                    },*/
-        }
-        config.speed = 700
-        config.effect = 'slide'
-        config.autoplay = {
-          pauseOnMouseEnter: true,
-          delay: autoplayTimeout
-        }
-        config.pagination.renderBullet = function (index, className) {
-          const blob = new blobshape([], {
-            growth: 6,
-            edges: 5
-          })
-          const element = document.createElement('div')
-          element.append(blob.svg)
-          return `<span class="${className}">${element.innerHTML}</span>`
-        }
-      }
 
       config.navigation.nextEl = $container.parentElement.querySelector(
         defaultConfig.navigation.nextSelector
@@ -182,6 +126,7 @@ const init = () => {
       )
 
       swiper = new Swiper($container, config)
+      swiper.on('transitionEnd', (swiper) => handleVideo(swiper, 'change'))
     }
     swipers.push(swiper)
   })
