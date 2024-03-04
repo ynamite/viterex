@@ -22,13 +22,17 @@
     "glightbox": "^3.2.0",
     "gsap": "npm:@gsap/business",
     "lazysizes": "^5.3.2",
+    "media-icons": "^1.0.0",
     "postcss-cli": "^11.0.0",
-    "swup": "^4.5.1"
+    "swiper": "^11.0.6",
+    "swup": "^4.5.1",
+    "vidstack": "^1.10.9"
+
   },
   "devDependencies": {
     "@babel/core": "^7.23.7",
     "@babel/eslint-parser": "^7.23.3",
-    "@iconify-json/ion": "^1.1.15",
+    "@iconify-json/bi": "^1.1.23",
     "@iconify/tailwind": "^0.1.4",
     "@rushstack/eslint-patch": "^1.2.0",
     "autoprefixer": "^10.4.16",
