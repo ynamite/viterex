@@ -170,6 +170,6 @@ class ViteRex
    */
   public static function getAssetsUrl()
   {
-    return self::$isDev ? rex_url::base('assets/') : self::$distUri . '/assets/';
+    return self::$isDev ? self::$viteServer . rex_url::base('assets/') : self::$distUri . '/assets/';
   }
 }
