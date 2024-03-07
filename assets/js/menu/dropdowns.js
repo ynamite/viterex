@@ -1,14 +1,17 @@
+import { gsap } from '@/js/gsap.js'
+
 const dropdowns = async (menu, event) => {
   event.stopPropagation()
 
   let $target = event.target
-  let dropdownClass = this.settings.dropdownSelector.substring(
+  let dropdownClass = menu.settings.dropdownSelector.substring(
     1,
-    this.settings.dropdownSelector.length
+    menu.settings.dropdownSelector.length
   )
   if (
-    !$target.classList.contains(dropdownClass) &&
-    !$target.classList.contains('icon')
+    (!$target.classList.contains(dropdownClass) &&
+      !$target.classList.contains('icon')) ||
+    !$target.closest(menu.settings.dropdownSelector)
   )
     return
   event.preventDefault()
