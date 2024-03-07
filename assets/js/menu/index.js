@@ -70,7 +70,7 @@ class menu {
       )
       if ($oldMenu) $oldMenu.remove()
 
-      this.$trigger = document.createElement('a')
+      this.$trigger = document.createElement('div')
       this.$trigger.classList.add('js-menu-trigger')
       this.$trigger.dataset.jsMenuTrigger = this.settings.ns
       this.$trigger.setAttribute('title', this.settings.strings.trigger)
