@@ -2,9 +2,15 @@
  * massif form
  * @author: Yves Torres, studio@massif.ch
  */
-const Utils = await import(MASSIF.assets.js.utilities)
+import {
+  Logger,
+  setFormReadonly,
+  removeAlerts,
+  scrollElementIntoView,
+  inputErrorMessage
+} from '@/js/utilities.js'
 
-const logger = new Utils.Logger()
+const logger = new Logger()
 
 const $doc = document
 const $html = document.querySelector('html')
@@ -30,7 +36,7 @@ const events = {
   ready: new Event('forms_ready')
 }
 
-class MASSIF_form {
+class form {
   constructor(selector, options) {
     logger.log('MASSIF_form', 'constructor')
 
@@ -120,7 +126,7 @@ class MASSIF_form {
           if (event.target.matches('input')) {
             let $input = event.target
             if ($input.value) {
-              Utils.removeAlerts($input.closest('.form-group'))
+              removeAlerts($input.closest('.form-group'))
             }
           }
         },
@@ -214,13 +220,13 @@ class MASSIF_form {
       .processFormData(form)
       .then(async function (response) {
         self.response[form.id] = response
-        Utils.setFormReadonly(form, false)
+        setFormReadonly(form, false)
         self.formInputsModified[form.id] = false
         self.handleForm(form, self.settings.handler)
         return response
       })
       .catch(function (error) {
-        Utils.setFormReadonly(form, false)
+        setFormReadonly(form, false)
         self.formInputsModified[form.id] = false
         console.error(error)
       })
@@ -232,7 +238,7 @@ class MASSIF_form {
     const data = new FormData(form)
     const endpoint = form.querySelector('input[name="rex-api-call"]')?.value
 
-    Utils.removeAlerts(form)
+    removeAlerts(form)
 
     const url = endpoint ? 'index.php?rex-api-call=' + endpoint : form.action
 
@@ -278,10 +284,7 @@ class MASSIF_form {
         $successMessage.classList.add('success')
         form.replaceWith($successMessage)
       }
-      Utils.scrollElementIntoView(
-        document.querySelector('#row-contact'),
-        'start'
-      )
+      scrollElementIntoView(document.querySelector('#row-contact'), 'start')
 
       return
     }
@@ -294,7 +297,7 @@ class MASSIF_form {
       $alertEntries = form.querySelectorAll('.alert-danger li')
 
       $alertEntries.forEach(function (entry, idx) {
-        const $alertElement = Utils.inputErrorMessage(entry.innerHTML)
+        const $alertElement = inputErrorMessage(entry.innerHTML)
         const $input = form.querySelector(
           '#yform-' + form.id + '-' + entry.dataset.id
         )
@@ -303,7 +306,7 @@ class MASSIF_form {
         if (idx == 0) {
           $input.querySelector('input').focus()
           setTimeout(() => {
-            Utils.scrollElementIntoView($input, 'start')
+            scrollElementIntoView($input, 'start')
           }, 100)
         }
       })
@@ -318,11 +321,10 @@ class MASSIF_form {
   }
 
   initCustomSelect = async (form) => {
-    const module = await import('/assets/theme/js/custom-select.js?v=0.0.1')
-    this.customSelect = new module.MASSIF_customSelect(form)
-
-    this.customSelect.init()
+    // const module = await import('/assets/theme/js/custom-select.js?v=0.0.1')
+    // this.customSelect = new module.MASSIF_customSelect(form)
+    // this.customSelect.init()
   }
 }
 
-export { MASSIF_form, MASSIF_form as default }
+export default form
