@@ -226,8 +226,40 @@ php bin/console cache:clear
 wait
 php bin/console be_style:compile
 wait
-php bin/console ydeploy:diff
+# php bin/console ydeploy:diff
+# wait
+mysqlCmd=$(which mysql)
+${mysqlCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} --password="${REDAXO_DB_PASSWORD}" --database=${REDAXO_DB_NAME} -e "SET NAMES utf8mb4;
+UPDATE \`rex_config\` SET \`value\` = '{\"be_hplink\":\"checked\",\"be_minnav\":\"\",\"be_minsidebar\":\"checked\",\"be_gototop\":\"checked\",\"be_tree\":\"top\",\"be_tree_menu\":\"\",\"be_tree_shortnames\":\"\",\"be_tree_showid\":\"\",\"be_tree_onlystructure\":\"checked\",\"be_tree_activemode\":\"checked\",\"be_tree_persist\":\"checked\",\"be_mediapool_usesort\":\"\",\"be_mediapool_sort\":\"name|asc\",\"be_crop\":\"\",\"be_crop_pre1\":\"\",\"be_crop_pre2\":\"\",\"be_crop_pre3\":\"\",\"be_crop_pre4\":\"\",\"be_crop_pre5\":\"\"}' WHERE \`namespace\` = 'be_tools' AND \`key\` = 'config';
+INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES 
+('massif_settings',	'address_e_mail',	'\"$MASSIF_SETTINGS_EMAIL\"'),
+('massif_settings',	'address_firma',	'\"$MASSIF_SETTINGS_FIRMA\"'),
+('massif_settings',	'address_geo_lat',	'\"$MASSIF_SETTINGS_GEO_LAT\"'),
+('massif_settings',	'address_geo_long',	'\"$MASSIF_SETTINGS_GEO_LONG\"'),
+('massif_settings',	'address_google_maps_link',	'\"$MASSIF_SETTINGS_GOOGLE_MAPS_LINK\"'),
+('massif_settings',	'address_kanton_code',	'\"$MASSIF_SETTINGS_KANTON_CODE\"'),
+('massif_settings',	'address_land',	'\"$MASSIF_SETTINGS_LAND\"'),
+('massif_settings',	'address_land_code',	'\"$MASSIF_SETTINGS_LAND_CODE\"'),
+('massif_settings',	'address_ort',	'\"$MASSIF_SETTINGS_ORT\"'),
+('massif_settings',	'address_phone',	'\"$MASSIF_SETTINGS_PHONE\"'),
+('massif_settings',	'address_plz',	'\"$MASSIF_SETTINGS_PLZ\"'),
+('massif_settings',	'address_strasse',	'\"$MASSIF_SETTINGS_STRASSE\"'),
+('phpmailer',	'archive',	'true'),
+('phpmailer',	'bcc',	'\"\"'),
+('phpmailer',	'charset',	'\"utf-8\"'),
+('phpmailer',	'confirmto',	'\"\"'),
+('phpmailer',	'detour_mode',	'true'),
+('phpmailer',	'encoding',	'\"8bit\"'),
+('phpmailer',	'errormail',	'1'),
+('phpmailer',	'from',	'\"$MASSIF_SETTINGS_EMAIL\"'),
+('phpmailer',	'fromname',	'\"$MASSIF_SETTINGS_FIRMA\"'),
+('phpmailer',	'mailer',	'\"mail\"'),
+('phpmailer',	'test_address',	'\"studio@massif.ch\"'),
+('viterex',	'favicon_master',	'\"assets\\/img\\/favicon.png\"'),
+('viterex',	'favicon_name',	'\"$MASSIF_SETTINGS_FIRMA\"');
+"
 wait
+
 
 # remove
 rm -rf public/redaxo/bin
