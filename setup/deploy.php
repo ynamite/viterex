@@ -66,6 +66,8 @@ add('shared_dirs', [
 
 add('writable_dirs', [
     'var/log',
+    '{{data_dir}}/addons/statistics',
+
 ]);
 
 add('clear_paths', [
