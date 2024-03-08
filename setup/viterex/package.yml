@@ -17,6 +17,7 @@ page:
     favicon:
       title: 'Favicon'
       icon: 'fa fa-icons'
+      customPage: true
       fields:
         [
           { name: 'master', label: 'Master img' },
