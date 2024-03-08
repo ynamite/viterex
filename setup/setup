@@ -194,9 +194,9 @@ ${CNO}"
 for package in ${ADDON_PACKAGES[@]}
 do
     printf "\n${CRED}Downloading package${CNO} ${package}\n"
-    IFS=/ read -r package plugin <<< "$package"
+    IFS=/ read -r pckg plugin <<< "$package"
     if [ ! $plugin ]; then
-        php bin/console install:download "${package}" --no-interaction --quiet
+        php bin/console install:download "${pckg}" --no-interaction --quiet
         wait
     fi
     installPackage "${package}" 
