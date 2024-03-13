@@ -159,7 +159,7 @@ mv public/redaxo/src/addons src
 cp -r setup/viterex src/addons
 mv public/redaxo/src/core src
 mv public/LICENSE.md LICENSE.md
-rm -f public/README.md public/README.de.md
+rm -f public/README.md README.de.md
 rm -f public/.htaccess
 
 cp -p setup/console bin/console
