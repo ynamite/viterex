@@ -15,6 +15,7 @@ node_modules
 !/var/data/addons/mblock/*
 !/var/data/addons/mform/*
 !/var/data/addons/ydeploy/*
+!/var/data/addons/statistics/*
 /var/data/core/*
 /var/log/*
 

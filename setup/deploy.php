@@ -26,7 +26,7 @@ $deploymentRepository = 'git@github.com:user/repo.git';
 
 // -------------------------------------------------
 
-require __DIR__ . '/src/addons/ydeploy/deploy.php';
+require __DIR__ . '/src/addons/ydeploy/deploy_yak.php';
 require __DIR__ . '/deployer.task.setup.php';
 
 $isGit = is_dir(__DIR__ . '/.git');
@@ -38,36 +38,8 @@ set(
     }
 );
 
-task('release', [
-    'deploy:info',
-    'deploy:unlock',
-    'deploy:setup',
-    'deploy:lock',
-    'deploy:upgrade',
-    'deploy:release',
-    'deploy:copy_dirs',
-    'deploy:upload',
-    'deploy:shared',
-    'deploy:dump_info',
-    'setup',
-    'database:migration',
-    'deploy:publish',
-]);
-
-set('base_dir', 'public/');
-set('cache_dir', 'var/cache');
-set('data_dir', 'var/data');
-set('src_dir', 'src');
-set('bin/console', 'bin/console');
-
 add('shared_dirs', [
-    'var/log',
-]);
-
-add('writable_dirs', [
-    'var/log',
-    '{{data_dir}}/addons/statistics',
-
+    '{{data_dir}}/addons/statistics'
 ]);
 
 add('clear_paths', [

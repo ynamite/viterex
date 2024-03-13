@@ -225,7 +225,8 @@ task('setup', new class()
     if (!$this->local) {
       upload($path, "{{release_path}}/$path");
     }
-    run('< ' . escapeshellarg($this->mysqlOptions) . ' xargs sh -c \'{{bin/mysql}} "$0" "$@" < ' . escapeshellcmd(escapeshellarg($path)) . '\'');
+    //run('< ' . escapeshellarg($this->mysqlOptions) . ' xargs sh -c \'{{bin/mysql}} "$0" "$@" < ' . escapeshellcmd(escapeshellarg($path)) . '\'');
+    run('{{bin/mysql}} $(sed "s/\'//g" ' . escapeshellarg($this->mysqlOptions) . ') < ' . escapeshellarg($path));
 
     if (!$this->local) {
       run('rm -f ' . escapeshellarg($path));
