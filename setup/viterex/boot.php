@@ -28,7 +28,8 @@ if (file_exists(rex_path::base('.env.local')))
 $devHost = $env ? $env['REDAXO_HOST_NAME'] : 'redaxo-2024.test';
 
 // is development?
-viterex::setValue('isDev', $env ? $devHost === $_SERVER['HTTP_HOST'] && $env['MODE'] !== 'production' : false);
+$isDev = $env ? isset($_SERVER['HTTP_HOST']) && $devHost === $_SERVER['HTTP_HOST'] && $env['MODE'] !== 'production' : false;
+viterex::setValue('isDev', $isDev);
 
 // dist subfolder - defined in vite.config.json
 $distDef = $env ? $env['VITE_DIST_DIR'] : '/dist';
