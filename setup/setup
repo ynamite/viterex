@@ -165,6 +165,7 @@ rm -f public/.htaccess
 cp -p setup/console bin/console
 cp setup/deploy.php deploy.php
 cp setup/deployer.task.setup.php deployer.task.setup.php
+cp setup/deployer.task.release.metanet.php deployer.task.release.metanet.php
 cp setup/index.backend.php public/redaxo/index.php
 cp setup/index.frontend.php public/index.php
 cp setup/path_provider.php src/path_provider.php
@@ -196,8 +197,10 @@ do
     printf "\n${CRED}Downloading package${CNO} ${package}\n"
     IFS=/ read -r pckg plugin <<< "$package"
     if [ ! $plugin ]; then
-        php bin/console install:download "${pckg}" --no-interaction --quiet
-        wait
+        if [ ! -d ./src/addons/$pckg ]; then
+            php bin/console install:download "${pckg}" --no-interaction --quiet
+            wait
+        fi
     fi
     installPackage "${package}" 
     wait
@@ -221,6 +224,7 @@ mv src/addons/massif/ytemplates src
 mkdir -p var/data/addons/install
 cp -f setup/redaxo_install_config.json var/data/addons/install/config.json
 wait
+mkdir -p var/data/addons/ydeploy
 
 php bin/console cache:clear
 wait
@@ -231,6 +235,38 @@ wait
 mysqlCmd=$(which mysql)
 ${mysqlCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} --password="${REDAXO_DB_PASSWORD}" --database=${REDAXO_DB_NAME} -e "SET NAMES utf8mb4;
 UPDATE \`rex_config\` SET \`value\` = '{\"be_hplink\":\"checked\",\"be_minnav\":\"\",\"be_minsidebar\":\"checked\",\"be_gototop\":\"checked\",\"be_tree\":\"top\",\"be_tree_menu\":\"\",\"be_tree_shortnames\":\"\",\"be_tree_showid\":\"\",\"be_tree_onlystructure\":\"checked\",\"be_tree_activemode\":\"checked\",\"be_tree_persist\":\"checked\",\"be_mediapool_usesort\":\"\",\"be_mediapool_sort\":\"name|asc\",\"be_crop\":\"\",\"be_crop_pre1\":\"\",\"be_crop_pre2\":\"\",\"be_crop_pre3\":\"\",\"be_crop_pre4\":\"\",\"be_crop_pre5\":\"\"}' WHERE \`namespace\` = 'be_tools' AND \`key\` = 'config';
+DELETE FROM rex_config WHERE \`namespace\` = 'phpmailer';
+INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES
+('phpmailer', 'archive', 'true'),
+('phpmailer', 'bcc', '\"\"'),
+('phpmailer', 'charset', '\"utf-8\"'),
+('phpmailer', 'confirmto', '\"\"'),
+('phpmailer', 'detour_mode', 'true'),
+('phpmailer', 'encoding', '\"8bit\"'),
+('phpmailer', 'errormail', '0'),
+('phpmailer', 'from',	'\"$MASSIF_SETTINGS_EMAIL\"'),
+('phpmailer',  'fromname',	'\"$MASSIF_SETTINGS_FIRMA\"'),
+('phpmailer', 'host', '\"localhost\"'),
+('phpmailer', 'logging', '0'),
+('phpmailer',  'mailer',	'\"mail\"'),
+('phpmailer', 'password', '\"\"'),
+('phpmailer', 'port', '587'),
+('phpmailer', 'priority', '0'),
+('phpmailer', 'security_mode', 'false'),
+('phpmailer', 'smtp_debug', '\"0\"'),
+('phpmailer', 'smtpauth', 'true'),
+('phpmailer', 'smtpsecure', '\"tls\"'),
+('phpmailer',  'test_address',	'\"studio@massif.ch\"'),
+('phpmailer', 'username', '\"\"'),
+('phpmailer', 'wordwrap', '120');
+DELETE FROM rex_config WHERE \`namespace\` = 'emailobfuscator';
+INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES 
+('emailobfuscator',	'articles',	'\"\"'),
+('emailobfuscator',	'autoload_css',	'false'),
+('emailobfuscator',	'autoload_js',	'false'),
+('emailobfuscator',	'mailto_only',	'false'),
+('emailobfuscator',	'method',	'\"rot13_unicorn\"'),
+('emailobfuscator',	'templates',	'[]');
 INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES 
 ('massif_settings',	'address_e_mail',	'\"$MASSIF_SETTINGS_EMAIL\"'),
 ('massif_settings',	'address_firma',	'\"$MASSIF_SETTINGS_FIRMA\"'),
@@ -244,23 +280,6 @@ INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES
 ('massif_settings',	'address_phone',	'\"$MASSIF_SETTINGS_PHONE\"'),
 ('massif_settings',	'address_plz',	'\"$MASSIF_SETTINGS_PLZ\"'),
 ('massif_settings',	'address_strasse',	'\"$MASSIF_SETTINGS_STRASSE\"'),
-('emailobfuscator',	'articles',	'\"\"'),
-('emailobfuscator',	'autoload_css',	'false'),
-('emailobfuscator',	'autoload_js',	'false'),
-('emailobfuscator',	'mailto_only',	'false'),
-('emailobfuscator',	'method',	'\"rot13_unicorn\"'),
-('emailobfuscator',	'templates',	'[]'),
-('phpmailer',	'archive',	'true'),
-('phpmailer',	'bcc',	'\"\"'),
-('phpmailer',	'charset',	'\"utf-8\"'),
-('phpmailer',	'confirmto',	'\"\"'),
-('phpmailer',	'detour_mode',	'true'),
-('phpmailer',	'encoding',	'\"8bit\"'),
-('phpmailer',	'errormail',	'1'),
-('phpmailer',	'from',	'\"$MASSIF_SETTINGS_EMAIL\"'),
-('phpmailer',	'fromname',	'\"$MASSIF_SETTINGS_FIRMA\"'),
-('phpmailer',	'mailer',	'\"mail\"'),
-('phpmailer',	'test_address',	'\"studio@massif.ch\"'),
 ('viterex',	'favicon_master',	'\"assets\\/img\\/favicon.png\"'),
 ('viterex',	'favicon_name',	'\"$MASSIF_SETTINGS_FIRMA\"');
 "
