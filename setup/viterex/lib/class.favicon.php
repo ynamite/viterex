@@ -19,7 +19,9 @@ class Favicon
   public static function generateFaviconData()
   {
     try {
-      $shellOutput = exec('source ~/.zshrc && cd ' . rex_path::base() . ' && yarn generate-favicon 2>&1');
+      $envPath = exec('echo $PATH');
+      putenv('PATH=' . $envPath . ':' . getenv('HOME') . '/.nvm/versions/node/v20.11.0/bin');
+      $shellOutput = exec('cd ' . rex_path::base() . ' && yarn generate-favicon 2>&1');
       if (!str_contains($shellOutput, 'Done'))
         throw new rex_exception($shellOutput);
       $favIconData = rex_file::get(rex_path::base('faviconData.json'));
