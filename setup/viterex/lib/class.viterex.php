@@ -70,9 +70,11 @@ class ViteRex
    */
   public static function getCriticalCss($loadInDev = false)
   {
-    if (self::$isDev && !$loadInDev) return;
-    $manifestArray = self::getManifestArray();
     $key = 'assets/css/critical.css';
+    if (self::$isDev && !$loadInDev) {
+      return '<link rel="stylesheet" href="' . self::$viteServer . $key . '">';
+    };
+    $manifestArray = self::getManifestArray();
     $criticalCss = isset($manifestArray[$key]) ? $manifestArray[$key] : null;
     if (!$criticalCss) return;
     $criticalCssPath = self::$distPath . '/' . $criticalCss['file'];
