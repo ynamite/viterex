@@ -121,7 +121,11 @@ const closeMenu = (menu, event) => {
     gsap.delayedCall(0.01, function () {
       $html.classList.remove(menu.settings.ns + '-opened')
       $html.classList.remove(menu.settings.ns + '-open')
-      window.scrollY = menu.settings.currentScrollPosition
+      if (!event?.closeMenuOnAnchorClick) {
+        $html.classList.add('disable-smooth-scroll')
+        window.scrollTo(0, menu.settings.currentScrollPosition)
+        $html.classList.remove('disable-smooth-scroll')
+      }
     })
     let to = { ...menu.settings.animation.menu.from }
     to.overwrite = true
