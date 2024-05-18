@@ -10,7 +10,7 @@
       @apply pr-[--scrollbarwidth];
     }
     &.disable-smooth-scroll {
-      @apply scroll-auto;
+      @apply !scroll-auto;
     }
   }
   body {
