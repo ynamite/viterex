@@ -34,7 +34,10 @@ const events = (menu) => {
         element,
         'click',
         `closeMenuOnAnchorClick.${menu.settings.ns}`,
-        (event) => closeMenu(menu, event)
+        (event) => {
+          event.closeMenuOnAnchorClick = true
+          return closeMenu(menu, event)
+        }
       )
     })
   }
