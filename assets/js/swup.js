@@ -90,7 +90,7 @@ const swup = new Swup({
     }),
     new SwupRouteNamePlugin(),
     new SwupScrollPlugin({
-      doScrollingRightAway: true,
+      // doScrollingRightAway: true,
       shouldResetScrollPosition: (link) => !link.matches('.backlink')
     })
   ]
