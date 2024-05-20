@@ -53,19 +53,6 @@ downloadPackageFromRepo() (
 
     local name=$repo
 
-    for repoRename in ${ADDON_REPOS_RENAME[@]}
-    do
-        set -e
-        if [ -d ./src/addons/redaxo_${repoRename} ]; then
-            mv ./src/addons/redaxo_${repoRename} ./src/addons/${repoRename};
-            name=${repoRename}
-        fi
-    done
-
-    if([ "$name" = 'massif' ]); then
-        cp "setup/redaxo_massif_install.sql" src/addons/massif/install.sql
-    fi
-
     installPackage "${name}"
     wait
 
@@ -199,14 +186,6 @@ do
         wait
     fi
     installPackage "${package}" 
-    wait
-done
-
-for repo in ${ADDON_REPOS[@]}
-do
-    set -e
-    IFS=/ read -r user repo <<< "$repo"
-    downloadPackageFromRepo $user $repo
     wait
 done
 
