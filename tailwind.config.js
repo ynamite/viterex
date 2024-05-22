@@ -1,15 +1,23 @@
 /** @type {import('tailwindcss').Config} */
 import { addDynamicIconSelectors } from '@iconify/tailwind'
+import fluid, {
+  extract,
+  screens, fontSize
+} from 'fluid-tailwind'
 
 module.exports = {
-  content: [
-    './assets/js/**/*.js',
-    './assets/css/**/*.css',
-    './src/fragments/**/*.php',
-    './src/templates/**/*.php',
-    './src/modules/**/*.php'
-  ],
+  content: {
+    files: [
+      './assets/js/**/*.js',
+      './assets/css/**/*.css',
+      './src/fragments/**/*.php',
+      './src/templates/**/*.php',
+      './src/modules/**/*.php'
+    ],
+    extract
+  },
   theme: {
+    screens, fontSize,
     fontFamily: {
       roboto: ['Roboto', 'sans-serif']
     },
@@ -28,6 +36,9 @@ module.exports = {
       selector: '.media-player',
       // Enables more efficient selectors.
       webComponents: true
+    }),
+    fluid({
+      checkSC144: false // default: true
     })
   ]
 }
