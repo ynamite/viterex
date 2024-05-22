@@ -23,6 +23,7 @@ node_modules
 .vscode/*
 !.vscode/extensions.json
 .idea
+.yarnrc.yml
 .npmrc
 .DS_Store
 *.suo

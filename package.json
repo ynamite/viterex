@@ -19,7 +19,7 @@
     "@swup/route-name-plugin": "^4.1.0",
     "@swup/scroll-plugin": "^3.3.2",
     "glightbox": "^3.3.0",
-    "gsap": "npm:@gsap/shockingly@latest",
+    "gsap": "npm:@gsap/business@latest",
     "lazysizes": "^5.3.2",
     "media-icons": "^1.0.0",
     "postcss-cli": "^11.0.0",
