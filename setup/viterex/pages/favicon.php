@@ -79,6 +79,7 @@ echo $fragment->parse('core/page/section.php');
                 body: data,
                 headers: {}
             })
+            console.log(response);
             if (response) {
                 window.location.reload();
             }
