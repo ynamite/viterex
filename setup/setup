@@ -300,7 +300,7 @@ composer install --no-interaction --quiet
 
 # execute yarn
 yarn
-yarn upgrade-interactive --latest
+yarn upgrade-interactive
 
 # open front and backend
 open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/"
