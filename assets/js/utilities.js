@@ -2,8 +2,7 @@
  * massif utilities
  * @author: Yves Torres, studio@massif.ch
  */
-import { gsap } from '@/js/gsap.js'
-import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+import { gsap, ScrollToPlugin } from '@/js/gsap.js'
 
 gsap.registerPlugin(ScrollToPlugin)
 
@@ -173,7 +172,8 @@ function scrollElementIntoView($el, offset = 0) {
   document.documentElement.classList.add('disable-smooth-scroll')
   let style = getComputedStyle(document.documentElement)
   let scrollPadding =
-    parseFloat(style.getPropertyValue('scroll-padding-top'), 10) + offset
+    parseFloat(style.getPropertyValue('scroll-padding-top'), 10) +
+    parseInt(offset, 10)
   gsap.to(window, {
     scrollTo: {
       y: $el,
@@ -283,7 +283,7 @@ function countChars() {
 // returns an error message for input fields
 function inputErrorMessage(msg) {
   const element = document.createElement('div')
-  element.classList.add('alert-danger', 'text-smaller')
+  element.classList.add('alert-danger')
   element.innerHTML = msg
   return element
 }

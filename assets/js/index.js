@@ -11,6 +11,8 @@ import {
   decryptEmailaddresses
 } from '@/js/utilities.js'
 import menu from '@/js/menu'
+import form from '@/js/form'
+import accordion from '@/js/accordion'
 import swup from '@/js/swup.js'
 // import 'vidstack/player/styles/base.css'
 // import 'vidstack/player'
@@ -91,6 +93,17 @@ const init = async () => {
   }
 
   await initImages()
+
+  const accordions = new accordion({
+    openDuration: 0.3,
+    closeOthers: true,
+    parentSelector: '[data-accordion-parent]'
+  })
+  accordions.init()
+
+  const forms = new form('.rex-yform', {})
+  forms.init()
+
   // const swipers = await initSwipers();
 
 }

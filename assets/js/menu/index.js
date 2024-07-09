@@ -70,10 +70,13 @@ class menu {
       )
       if ($oldMenu) $oldMenu.remove()
 
-      this.$trigger = document.createElement('div')
+      this.$trigger = document.createElement('button')
       this.$trigger.classList.add('js-menu-trigger')
       this.$trigger.dataset.jsMenuTrigger = this.settings.ns
       this.$trigger.setAttribute('title', this.settings.strings.trigger)
+      this.$trigger.setAttribute('aria-expanded', true)
+      this.$trigger.setAttribute('aria-controls', this.settings.ns)
+      this.$menu.querySelector('.main-nav').setAttribute('id', this.settings.ns)
       let $triggerLabel = document.createElement('span')
       $triggerLabel.setAttribute('hidden', true)
       $triggerLabel.innerHTML = this.settings.strings.trigger

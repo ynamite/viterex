@@ -2,6 +2,7 @@
  * massif form
  * @author: Yves Torres, studio@massif.ch
  */
+import './style.css'
 import {
   Logger,
   setFormReadonly,
@@ -284,7 +285,7 @@ class form {
         $successMessage.classList.add('success')
         form.replaceWith($successMessage)
       }
-      scrollElementIntoView(document.querySelector('#row-contact'), 'start')
+      scrollElementIntoView($successMessage)
 
       return
     }
@@ -306,7 +307,7 @@ class form {
         if (idx == 0) {
           $input.querySelector('input').focus()
           setTimeout(() => {
-            scrollElementIntoView($input, 'start')
+            scrollElementIntoView($input, 100)
           }, 100)
         }
       })

@@ -13,9 +13,7 @@ import SwupRouteNamePlugin from '@swup/route-name-plugin'
 import SwupScrollPlugin from '@swup/scroll-plugin'
 // import SwupProgressPlugin from '@swup/progress-plugin'
 
-import gsap from '@/js/gsap.js'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+import { gsap, ScrollTrigger, ScrollToPlugin} from '@/js/gsap.js'
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 import { elementIsVisibleInViewport } from '@/js/utilities.js'

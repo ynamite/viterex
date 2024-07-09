@@ -4,12 +4,12 @@
  */
 import { gsap } from 'gsap'
 
-// import { Flip } from 'gsap/Flip'
 import { CustomEase } from 'gsap/CustomEase'
-// import { ScrollTrigger } from 'gsap/ScrollTrigger'
-// import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+import { Flip } from 'gsap/Flip'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 
-gsap.registerPlugin(/*ScrollTrigger, ScrollToPlugin,*/ CustomEase)
+gsap.registerPlugin(CustomEase)
 
-export { CustomEase, gsap }
+export { gsap, CustomEase, ScrollTrigger, ScrollToPlugin, Flip }
 export default gsap

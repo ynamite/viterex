@@ -1,6 +1,5 @@
 import { addEvent } from '@/js/eventbus.js'
-import { gsap } from '@/js/gsap.js'
-import { Flip } from 'gsap/Flip'
+import { gsap, Flip } from '@/js/gsap.js'
 
 gsap.registerPlugin(Flip)
 

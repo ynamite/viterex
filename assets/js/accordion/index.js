@@ -123,11 +123,17 @@ class accordion {
       .closest(this.settings.parentSelector)
       .querySelectorAll('.accordion-open')
     if ($openItems.length) {
+      console.log('closeOthers', $openItems)
       $openItems.forEach(($item) => {
-        const $itemTrigger = $item.querySelector('[data-accordion]')
+        const $itemTrigger = $item.dataset?.accordion
+          ? $item
+          : $item.querySelector('[data-accordion]')
+        const id = $itemTrigger.dataset?.accordion
         const $itemLabel = $itemTrigger.querySelector('span')
         const $itemIcon = $itemTrigger.querySelector('.icon')
-        const $itemExp = $item.querySelector('[data-accordion-id]')
+        const $itemExp = document.querySelector(
+          '[data-accordion-id="' + id + '"]'
+        )
         this.closeItem($itemTrigger, $itemLabel, $itemIcon, $itemExp)
       })
     }
@@ -146,7 +152,7 @@ class accordion {
 
     $exp.removeAttribute('hidden')
     self.settings[id].state = !self.settings[id].state
-    $trigger.parentElement.classList.add('accordion-open')
+    $trigger.classList.add('accordion-open')
 
     await self.handleCallbacks('beforeOpen', $exp, $trigger)
     gsap.from($exp, {
@@ -178,7 +184,7 @@ class accordion {
 
     if ($label && $trigger.dataset?.accordionLabel)
       $label.innerHTML = $trigger.dataset.accordionLabel
-    $trigger.parentElement.classList.remove('accordion-open')
+    $trigger.classList.remove('accordion-open')
     await gsap.to($exp, {
       height: 0.001,
       opacity: 0.001,
