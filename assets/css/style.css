@@ -1,8 +1,16 @@
-@layer utilities, typography, layout;
+@layer tailwind, utilities, typography, layout;
 
-@import 'tailwind' layer(utilities.tailwind);
-@import 'typography' layer(utilities.tailwind);
+@import 'utilities' layer(utilities);
+@import 'webfonts' layer(typography);
+@import 'typography' layer(typography);
 @import 'vars' layer(layout.vars);
-@import 'webfonts';
-@import 'layout';
-@import 'modules';
+@import 'layout' layer(layout);
+
+@layer tailwind.base {
+  @tailwind base;
+}
+@layer tailwind.components {
+  @tailwind components;
+}
+@tailwind utilities;
+@tailwind variants;

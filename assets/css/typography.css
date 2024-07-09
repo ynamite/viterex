@@ -1,61 +1,26 @@
+@counter-style custom {
+  system: cyclic;
+  symbols: '–';
+  suffix: ' ';
+}
+
 body {
   @apply antialiased;
 }
 
 h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  @apply font-black;
-}
-
-h1,
 .h1 {
-  @apply text-2xl lg:text-3xl;
+  @apply hyphens-auto text-balance font-normal leading-[1.1] ~text-[3rem]/[3.75rem] md:leading-[1.05] lg:leading-[1];
 }
 
 h2,
 .h2 {
-  @apply text-xl lg:text-2xl;
+  @apply hyphens-auto text-balance font-normal ~text-[1.875rem]/[2.5rem] ~leading-[2.5625rem]/[3.125rem];
 }
 
 h3,
 .h3 {
-  @apply text-xl lg:text-2xl;
-}
-
-h1,
-h2,
-h3,
-p {
-  + * {
-    @apply mt-[1.6em];
-  }
-}
-
-h4,
-h5,
-h6,
-ul,
-ol {
-  + * {
-    @apply mt-[0.8em];
-  }
-}
-
-* {
-  + {
-    h1,
-    .h1,
-    h2,
-    .h2,
-    h3,
-    .h3 {
-      @apply mt-[2em];
-    }
-  }
+  @apply font-bold ~text-base/xl;
 }
 
 /**
@@ -64,18 +29,53 @@ ol {
 
 body,
 .text-default {
-  @apply text-sm lg:text-base;
+  @apply ~text-base/xl;
 }
 
-
 .prose {
-  :where(h3, .h3) {
+  h1,
+  h2,
+  h3,
+  p {
+    + *:where(:not(ul, ol)) {
+      @apply mt-[1.25em];
+    }
+  }
+
+  * {
+    + {
+      h1,
+      .h1,
+      h2,
+      .h2,
+      h3,
+      .h3 {
+        @apply mt-[1.25em];
+      }
+    }
+  }
+
+  h4,
+  h5,
+  h6,
+  ul,
+  ol {
     + * {
       @apply mt-[0.8em];
+    }
+  }
+
+  h3,
+  .h3 {
+    + * {
+      @apply mt-[0.2em];
       &.text-small {
         @apply mt-[0.4em];
       }
     }
+  }
+  p {
+    @apply hyphens-auto;
   }
   .text-small {
     @apply text-sm md:text-base;
@@ -93,18 +93,11 @@ body,
     }
   }
   ul {
-    > li {
-      @apply pl-7;
-      &::before {
-        content: '';
-        @apply inline-block h-[0.35rem] w-[0.35rem] -translate-x-full -translate-y-[0.15em] rounded-full bg-current;
-        /*@apply absolute w-2 h-2 bg-accent rounded-full top-[0.75em] left-0;*/
-      }
-    }
+    @apply list-[custom] pl-[1em];
   }
   &.text-center ul > li {
     @apply pl-0;
-  }  
+  }
   iframe {
     @apply aspect-video h-auto w-full;
   }
@@ -113,12 +106,19 @@ body,
   }
 }
 
+.anchor-icon {
+  @apply inline-flex gap-[0.3em] [&_i]:transition-transform [&_i]:duration-300;
+  &:hover i {
+    @apply translate-x-2;
+  }
+}
+
 .prose,
 .footer {
   a:where(:not(.icon, .button)) {
-    @apply bg-left-bottom hover:bg-right-bottom bg-gradient-to-r from-current to-current bg-[length:100%_0.06875rem] bg-no-repeat hover:bg-[length:0%_0.06875rem] transition-[background-size] duration-500 ease-[cubic-bezier(.25,.8,.25,1)];
+    @apply bg-gradient-to-r from-current to-current bg-[length:100%_0.06875rem] bg-left-bottom bg-no-repeat transition-[background-size] duration-500 ease-[cubic-bezier(.25,.8,.25,1)] hover:bg-[length:0%_0.06875rem] hover:bg-right-bottom;
     &:where(.maps-links, .phone-number) {
-      @apply bg-right-bottom hover:bg-left-bottom bg-[length:0%_0.06875rem] hover:bg-[length:100%_0.06875rem];
+      @apply bg-[length:0%_0.06875rem] bg-right-bottom hover:bg-[length:100%_0.06875rem] hover:bg-left-bottom;
     }
   }
 }
@@ -145,12 +145,3 @@ body,
     filter: grayscale(100%);
   }
 } */
-
-/**
- * Use this directive to control where Tailwind injects the hover, focus,
- * responsive, dark mode, and other variants of each class.
- *
- * If omitted, Tailwind will append these classes to the very end of
- * your stylesheet by default.
- */
-@tailwind variants;

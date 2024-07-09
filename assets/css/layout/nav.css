@@ -1,23 +1,45 @@
 .js-menu-trigger {
-  --width: 28px;
-  --height: 19px;
+  --width: 60px;
+  --height: 52px;
   --bar-height: 3px;
-  @apply top-[0.575rem] right-4 aspect-square flex items-center justify-center;
-}
-
-.js-menu {
-  @apply pt-[var(--shoulder)] flex-col px-4 items-center;
-}
-
-.menu[data-menu-mobile] {
-  .main-nav {
-    @apply py-8 text-5xl text-center;
-    a {
-      @apply block py-6;
-    }
+  @apply absolute right-0 top-1/2 flex -translate-y-1/2 items-center justify-center;
+  .icon {
+    @apply ~h-[2.25rem]/[3.25rem] ~w-[2.625rem]/[5rem];
+  }
+  .b {
+    @apply h-[0.1875rem] rounded-md ~w-[2.625rem]/[5rem];
+  }
+  .b-c {
+    @apply mt-[calc(0.1875rem/2*-1)];
+  }
+  .b-b {
+    @apply mt-[calc(0.1875rem*-1)];
   }
 }
 
+
+.js-menu {
+  @apply flex-col justify-center bg-white ~gap-4/8 ~px-4/8 ~py-14/28;
+}
+
+.menu[data-menu-mobile] {
+  .rex-navi1 {
+    @apply ~text-3xl/6xl;
+    a {
+      @apply block transition-colors duration-300 ~py-2/4;
+      span {
+        @apply relative block;
+      }
+    }
+    > li {
+      &.rex-current > a,
+      &.rex-active > a,
+      > a:hover {
+        @apply text-accent;
+      }
+    }
+  }
+}
 .menu[data-menu-desktop][data-menu-id='main-menu'] {
   @apply hidden;
   .rex-navi1 {

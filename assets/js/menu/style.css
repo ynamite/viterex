@@ -44,7 +44,6 @@
     }
     .b-c {
       top: 50%;
-      right: 0;
       margin-top: calc(var(--bar-height) / 2 * -1);
       transition: all 0.175s;
       &:after {
@@ -65,7 +64,7 @@
     }
     .b-t,
     .b-b {
-      transition: opacity 0.175s;
+      transition: all 0.175s;
     }
     &.active {
       .icon {

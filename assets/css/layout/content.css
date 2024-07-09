@@ -1,6 +1,5 @@
-.section-padding {
-  &.first-row {
-    @apply pt-8 md:pt-16;
+.default-content {
+  &.last-row {
+    @apply ~pb-24/48;
   }
 }
-

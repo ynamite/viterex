@@ -1,0 +1,40 @@
+@layer swup {
+  main:focus {
+    outline: none;
+  }
+
+  html {
+    &.is-changing {
+      a {
+        @apply pointer-events-none;
+      }
+    }
+    &.is-animating {
+      @apply cursor-progress;
+      .transition-duration-helper {
+        @apply visible;
+      }
+    }
+  }
+
+  .transition-duration-helper {
+    @apply invisible duration-500;
+  }
+
+  #transition-fx {
+    @apply fixed left-0 top-0 z-[22] hidden min-h-svh w-[100svw];
+  }
+
+  .swup-progress-bar {
+    @apply z-[100] h-1 bg-accent;
+  }
+}
+
+@layer emailobfuscator {
+  span.unicorn {
+    @apply before:content-['@'];
+    > span {
+      @apply p-0 absolute m-[-1px] h-[1px] w-[1px] overflow-hidden border-0 border-none;
+    }
+  }
+}

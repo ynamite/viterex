@@ -1,0 +1,38 @@
+@layer utilities.form {
+  .rex-yform-wrap {
+    form {
+      @apply grid grid-cols-1 ~gap-4/8;
+    }
+    .form-group {
+      @apply grid grid-cols-1 ~gap-1/2;
+      input[type='text'],
+      textarea {
+        @apply bg-slate-100 outline-primary ~px-2/4 ~py-1/2;
+      }
+    }
+    .formcheckbox {
+      > label {
+        @apply flex gap-3;
+      }
+      input[type='checkbox'] {
+        @apply sr-only;
+      }
+      .form-helper {
+        @apply relative top-1 w-5;
+        @apply before:absolute after:absolute;
+        @apply before:inset-0 before:block before:aspect-square before:bg-slate-300;
+        @apply after:inset-[0.125rem] after:block after:aspect-square after:bg-primary;
+        @apply after:opacity-0 after:transition-all after:duration-300;
+      }
+      input[type='checkbox']:focus + .form-helper {
+        @apply before:outline before:outline-primary;
+      }
+      input[type='checkbox']:checked + .form-helper {
+        @apply after:opacity-100;
+      }
+    }
+    .alert-danger {
+      @apply -mt-1 bg-red-100 text-red-800 ~text-sm/base ~px-2/4 ~py-1/2;
+    }
+  }
+}
