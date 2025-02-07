@@ -1,89 +1,38 @@
 @layer utilities.menu {
-  .js-menu {
-    position: fixed;
-    inset: 0;
-    width: 100dvw;
-    height: 100dvh;
-    z-index: 20;
-    overflow-y: auto;
-    display: none;
-    background: white;
-  }
-
   .js-menu-trigger {
-    --width: 26px;
-    --height: 17px;
-    --bar-height: 2px;
-    z-index: 23;
-    position: fixed;
-    right: 0;
-    top: 0;
-    cursor: pointer;
     .icon {
-      display: block;
-      position: relative;
-      margin: auto;
-      width: var(--width);
-      height: var(--height);
-      transition: all 0.175s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+      @apply flex aspect-[64/36] flex-col justify-between transition-transform duration-300 ease-in-out ~w-[2.5rem]/[4rem];
     }
     .b {
-      width: var(--width);
-      height: var(--bar-height);
-      border-radius: 0;
-      display: block;
-      position: absolute;
-      transform-origin: center;
-    }
-    .b,
-    .b-c:after {
-      background: currentColor;
-    }
-    .b-t {
-      top: 0;
-    }
-    .b-c {
-      top: 50%;
-      margin-top: calc(var(--bar-height) / 2 * -1);
-      transition: all 0.175s;
-      &:after {
-        display: inherit;
-        content: '';
-        height: inherit;
-        width: inherit;
-        border-radius: inherit;
-        top: 0;
-        opacity: 0;
-        transform-origin: inherit;
-        transition: inherit;
-      }
-    }
-    .b-b {
-      top: 100%;
-      margin-top: calc(var(--bar-height) * -1);
-    }
-    .b-t,
-    .b-b {
-      transition: all 0.175s;
+      @apply relative w-full bg-current transition-all duration-300 ~h-[0.3125rem]/[0.4375rem];
     }
     &.active {
+      @apply text-accent;
       .icon {
-        transform: rotate(135deg);
-        transition: all 0.175s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+        @apply rotate-180;
+      }
+      .b {
+        @apply origin-center;
+      }
+      .b-t {
+        @apply top-1/2 rotate-45;
       }
       .b-c {
-        width: 100%;
-        transition: all 0.175s cubic-bezier(0.55, 0.055, 0.675, 0.19);
-        &:after {
-          transform: rotate(90deg);
-          opacity: 1;
-        }
+        @apply w-0 opacity-0;
       }
-      .b-t,
       .b-b {
-        transition: opacity 0.175s;
-        opacity: 0;
+        @apply bottom-1/2 translate-y-full -rotate-45;
       }
     }
+  }
+  .js-menu {
+    position: fixed;
+    z-index: 10;
+    display: none;
+    width: 100dvw;
+    height: 100dvh;
+    overflow-y: auto;
+    background: white;
+    inset: 0;
   }
 }

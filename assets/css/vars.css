@@ -1,9 +1,25 @@
 *,
 ::before,
 ::after {
+
+  --clr-primary: #000000;
+  --clr-accent: #c4092a;
+  --clr-secondary: #50b3d8;
+
   --shoulder: calc(65 / 16 * 1rem);
   --spacer: 1rem;
-  --footer-height: calc(165.78 / 16 * 1rem);
+
+  --min: 20;
+  --max: 40;
+  --bpLow: 640;
+  --bpHigh: 1536;
+  --slope: calc((var(--max) - var(--min)) / (var(--bpHigh) - var(--bpLow)));
+  --intercept: calc((var(--min) - var(--bpLow) * var(--slope)));
+  --padding: clamp(
+    var(--min) / 16 * 1rem,
+    (var(--intercept) / 16 * 1rem) + (var(--slope) * 100 * 1vw),
+    var(--max) / 16 * 1rem
+  );
 }
 
 @media screen(lg) {

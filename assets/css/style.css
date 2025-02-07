@@ -1,10 +1,11 @@
-@layer tailwind, utilities, typography, layout;
+@layer tailwind.base, tailwind.components, utilities, typography, layout;
 
 @import 'utilities' layer(utilities);
 @import 'webfonts' layer(typography);
 @import 'typography' layer(typography);
 @import 'vars' layer(layout.vars);
 @import 'layout' layer(layout);
+@import 'components';
 
 @layer tailwind.base {
   @tailwind base;
@@ -14,3 +15,4 @@
 }
 @tailwind utilities;
 @tailwind variants;
+

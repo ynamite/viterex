@@ -1,13 +1,27 @@
-@import 'swiper/css' layer(utilities.swiper);
-@import 'swiper/css/navigation' layer(utilities.swiper);
-@import 'swiper/css/pagination' layer(utilities.swiper);
-@import 'swiper/css/effect-fade' layer(utilities.swiper);
+@import 'swiper/css' layer(swiper);
+@import 'swiper/css/navigation' layer(swiper);
+@import 'swiper/css/pagination' layer(swiper);
+@import 'swiper/css/effect-fade' layer(swiper);
 
-@layer utilities.swiper {
+@layer vendor.swiper {
   .swiper {
+    @apply flex w-full;
     &.swiper-fs {
-      @apply aspect-auto h-[calc(100svh-var(--shoulder))] max-h-[calc(100svh-var(--shoulder))] min-h-full;
+      @apply aspect-auto min-h-dvh;
+      .swiper-container {
+        @apply absolute inset-0 flex flex-1;
+      }
+      .swiper-wrapper {
+        @apply h-auto flex-1;
+      }
     }
+  }
+
+  .swiper-container {
+    @apply grid;
+  }
+  .swiper-wrapper {
+    @apply min-w-0;
   }
 
   .swiper-pagination {

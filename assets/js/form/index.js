@@ -10,6 +10,8 @@ import {
   scrollElementIntoView,
   inputErrorMessage
 } from '@/js/utilities.js'
+import CustomSelect from '@/js/form/CustomSelect.js'
+import AjaxChimp from '@/js/form/AjaxChimp.js'
 
 const logger = new Logger()
 
@@ -61,9 +63,6 @@ class form {
     this.forms.forEach((form) => {
       if (form.dataset?.state === 'ready') return
       this.initForm(form)
-      if (this.settings.customSelect) {
-        this.initCustomSelect(form)
-      }
       form.dataset.state = 'ready'
     })
   }
@@ -81,8 +80,23 @@ class form {
         if (typeof callback === 'function') callback()
       })
     }
-    form.setAttribute('enctype', 'application/x-www-form-urlencoded')
-    form.enctype = 'application/x-www-form-urlencoded'
+    if (this.settings.customSelect) {
+      this.initCustomSelect(form)
+    }
+
+    if (!form.classList.contains('mailchimp')) {
+      form.setAttribute('enctype', 'application/x-www-form-urlencoded')
+      form.enctype = 'application/x-www-form-urlencoded'
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault()
+        form.classList.add('submitting')
+        return self.submitForm(form)
+      })
+    } else {
+      self.initMailChimp(form)
+    }
+
     form.addEventListener(
       'click',
       (event) => {
@@ -97,11 +111,7 @@ class form {
       },
       true
     )
-    form.addEventListener('submit', (event) => {
-      event.preventDefault()
-      form.classList.add('submitting')
-      return self.submitForm(form)
-    })
+
     form.addEventListener('change', (event) => {
       const element = event.target
       if (!element.matches('input')) return
@@ -322,9 +332,25 @@ class form {
   }
 
   initCustomSelect = async (form) => {
-    // const module = await import('/assets/theme/js/custom-select.js?v=0.0.1')
-    // this.customSelect = new module.MASSIF_customSelect(form)
-    // this.customSelect.init()
+    this.customSelect = new CustomSelect(form)
+    this.customSelect.init()
+  }
+
+  initMailChimp = (form) => {
+    const responseDiv = form.querySelector('.mailchimp-response')
+    const ajaxChimp = AjaxChimp()
+    ajaxChimp.init(form, {
+      language: 'de',
+      responseDiv: responseDiv,
+      callback: () => {
+        form.classList.remove('submitting')
+        setTimeout(() => {
+          responseDiv.innerHTML = ''
+          responseDiv.setAttribute('hidden', true)
+          responseDiv.removeAttribute('style')
+        }, 4000)
+      }
+    })
   }
 }
 

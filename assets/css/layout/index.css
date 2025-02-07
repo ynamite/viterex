@@ -4,7 +4,7 @@
 @import 'content.css';
 
 html {
-  @apply scroll-mt-[--shoulder] scroll-pt-[--shoulder] overflow-y-scroll scroll-smooth;
+  @apply scroll-pt-[--shoulder] overflow-y-scroll scroll-smooth;
   &.main-menu-opened {
     @apply max-md:pr-[--scrollbarwidth];
   }
@@ -15,21 +15,31 @@ html {
 body {
   @apply flex min-h-svh flex-col transition-all;
   overflow-anchor: none;
+}.p-default {
+  @apply p-[var(--padding)];
 }
-.section-x-padding {
-  @apply ~px-8/16;
+.section-px {
+  @apply ~px-5/12;
 }
-.section-y-padding {
-  @apply ~py-12/24;
+.section-py {
+  @apply ~py-5/12;
+}
+.section-p {
+  @apply section-px section-py;
 }
 .page-margin {
-  @apply mx-auto w-full lg:max-w-[90svw];
+  @apply mx-auto w-full lg:max-w-[90svw] xl:max-w-[102.5rem];
 }
 .content-wrap {
   @apply flex flex-1 flex-col;
 }
 .content-main {
-  @apply grid flex-1 grid-rows-[auto,1fr];
+  @apply flex-1 pt-[var(--shoulder)];
+}
+.home-page {
+  .content-main {
+    @apply md:pt-0;
+  }
 }
 
 .img-cell {

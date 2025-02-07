@@ -1,3 +1,11 @@
+import { createSpring } from '@/js/CreateSpring'
+
+const spring = createSpring({
+  stiffness: 80,
+  damping: 20
+})
+const springLis = createSpring()
+
 const defDuration = 0.6
 
 const $html = document.querySelector('html')
@@ -11,10 +19,8 @@ const defaults = {
   eventNamePrefix: 'menu',
   hamburgerHtml:
     '<div class="icon"><i class="b b-t"></i><i class="b b-c"></i><i class="b b-b"></i></div>',
-  hamburgerHtmlDesktop:
-    '<div class="icon"><i class="b b-t"></i><i class="b b-c"></i><i class="b b-b"></i></div>',
   listItemsSelector:
-    '.rex-navi1 >li,.rex-navi2 >li, .article-nav a, .lang-nav a, .footer__claim, .footer__company, .footer__articles',
+    '.rex-navi1 >li,.rex-navi2 >li, .article-nav a, .lang-nav a',
   dropdownSelector: '.has-dropdown',
   strings: {
     trigger: 'Hauptnavigations-Menü    öffnen'
@@ -22,18 +28,18 @@ const defaults = {
   animation: {
     defDuration: defDuration,
     menu: {
-      from: isMobile || isTablet ? { yPercent: -100 } : { yPercent: -100 },
+      from: isMobile || isTablet ? { yPercent: -100 } : { xPercent: 100 },
       to:
         isMobile || isTablet
           ? {
               yPercent: 0,
-              ease: 'menueasing',
+              ease: spring,
               overwrite: true,
               duration: defDuration
             }
           : {
-              yPercent: 0,
-              ease: 'menueasing',
+              xPercent: 0,
+              ease: spring,
               overwrite: true,
               duration: defDuration
             }
@@ -42,28 +48,28 @@ const defaults = {
       from:
         isMobile || isTablet
           ? { y: 10, autoAlpha: 0 }
-          : { y: 10, autoAlpha: 0 },
+          : { x: -10, autoAlpha: 0 },
       to:
         isMobile || isTablet
           ? {
               y: 0,
+              ease: springLis,
               autoAlpha: 1,
-              overwrite: true,
-              duration: 0.2,
+              duration: 0.6,
               clearProps: true
             }
           : {
-              y: 0,
+              x: 0,
+              ease: springLis,
               autoAlpha: 1,
-              overwrite: true,
-              duration: 0.2,
+              duration: 0.6,
               clearProps: true
             }
     }
   },
   reInit: true,
   closeOnClick: false,
-  closeOnClickEmptySpace: false
+  closeOnClickOutside: false
 }
 
 export default defaults

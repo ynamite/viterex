@@ -9,11 +9,6 @@ const logger = new Logger()
 const $doc = document
 const $html = $doc.querySelector('html')
 
-CustomEase.create(
-  'menueasing',
-  'M0,0 C0,0 0.1331,0.00299 0.21367,0.0142 0.28084,0.02355 0.32414,0.03298 0.38773,0.05396 0.4465,0.07336 0.48593,0.09003 0.53837,0.12135 0.59106,0.15282 0.62566,0.17978 0.66983,0.22244 0.71086,0.26206 0.73557,0.29357 0.76689,0.34203 0.80392,0.39932 0.82341,0.43958 0.85139,0.50331 0.87878,0.56567 0.89148,0.60453 0.91138,0.67106 0.94944,0.79827 1,1 1,1 '
-)
-
 const toggleMenu = () => {
   logger.log('Menu', 'toggleMenu')
 
@@ -60,8 +55,8 @@ const openMenu = (menu, event) => {
     addEvent(
       $doc,
       'click',
-      `closeOnClickEmptySpace.${menu.settings.ns}`,
-      (event) => closeOnClickEmptySpace(menu, event)
+      `closeOnClickOutside.${menu.settings.ns}`,
+      (event) => closeOnClickOutside(menu, event)
     )
     addEvent(
       $doc,
@@ -97,12 +92,14 @@ const toggleListItems = async (menu, toggle = 'on') => {
   let delayFactor = 50
   if (toggle == 'off') {
     delayFactor = 25
+    to.y = menu.settings.animation.listItem.from.y
     to.autoAlpha = 0
     delete to.clearProps
     $items = [...$items].reverse()
   }
   $items.forEach(function ($item, i) {
     let delay = i == 0 ? delayFactor : delayFactor * (i + 0.5)
+    if (i === 0 && toggle == 'off') delay = 0
     promises.push(timeOut($item, to, delay))
   })
   return Promise.all(promises)
@@ -141,7 +138,7 @@ const closeMenu = (menu, event) => {
 
     gsap.to(menu.$mobileMenu, to)
 
-    removeEvent(`closeOnClickEmptySpace.${menu.settings.ns}`)
+    removeEvent(`closeOnClickOutside.${menu.settings.ns}`)
     removeEvent(`closeOnEscapePress.${menu.settings.ns}`)
     removeEvent(`dropdowns.${menu.settings.ns}`)
   }
@@ -160,12 +157,12 @@ const closeMenu = (menu, event) => {
   // callback();
 }
 
-const closeOnClickEmptySpace = (menu, event) => {
+const closeOnClickOutside = (menu, event) => {
   if (
-    !menu.settings.closeOnClickEmptySpace ||
+    !menu.settings.closeOnClickOutside ||
     event.target.closest(menu.selector)
     // !(
-    //     menu.settings.closeOnClickEmptySpace &&
+    //     menu.settings.closeOnClickOutside &&
     //     event.target.closest(menu.selector)
     // ) &&
     // !(menu.settings.closeOnClick && event.target.closest('a'))
@@ -197,6 +194,6 @@ export {
   toggleMenu,
   openMenu,
   closeMenu,
-  closeOnClickEmptySpace,
+  closeOnClickOutside,
   closeOnEscapePress
 }

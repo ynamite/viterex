@@ -218,7 +218,6 @@ printf "\n${CRED}Installing and activating package${CNO} ViteRex\n"
 php bin/console package:install "viterex" --no-interaction --quiet
 
 mv src/addons/massif/fragments src
-mv src/addons/massif/ytemplates src
 
 
 mkdir -p var/data/addons/install

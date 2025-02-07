@@ -8,6 +8,17 @@ body {
   @apply antialiased;
 }
 
+/**
+ * custom classes
+ */
+
+body,
+.text-default {
+  @apply ~text-base/xl;
+}
+
+.prose {
+
 h1,
 .h1 {
   @apply hyphens-auto text-balance font-normal leading-[1.1] ~text-[3rem]/[3.75rem] md:leading-[1.05] lg:leading-[1];
@@ -23,16 +34,6 @@ h3,
   @apply font-bold ~text-base/xl;
 }
 
-/**
- * custom classes
- */
-
-body,
-.text-default {
-  @apply ~text-base/xl;
-}
-
-.prose {
   h1,
   h2,
   h3,
@@ -113,35 +114,61 @@ body,
   }
 }
 
-.prose,
-.footer {
+.prose {
   a:where(:not(.icon, .button)) {
-    @apply bg-gradient-to-r from-current to-current bg-[length:100%_0.06875rem] bg-left-bottom bg-no-repeat transition-[background-size] duration-500 ease-[cubic-bezier(.25,.8,.25,1)] hover:bg-[length:0%_0.06875rem] hover:bg-right-bottom;
-    &:where(.maps-links, .phone-number) {
-      @apply bg-[length:0%_0.06875rem] bg-right-bottom hover:bg-[length:100%_0.06875rem] hover:bg-left-bottom;
+    @apply underline-a;
+    &:where(.maps-links, .links-underlined-i) {
+      @apply underline-a-i;
+    }
+  }
+  p:has(> a > img) {
+    @apply flex flex-wrap gap-4;
+    a {
+      @apply col-span-full bg-none;
     }
   }
 }
 
-/**
- * This injects Tailwind's component classes and any component classes
- * registered by plugins.
- */
-/* @layer components {
-  .btn {
-    @apply rounded border border-[#e2e8f0] px-8 py-2 transition duration-300 hover:bg-white hover:text-primary;
+.links-color-hover {
+  a:where(:not(.icon, .button)) {
+    @apply hover:font-medium hover:text-accent;
   }
-} */
+}
 
-/**
- * This injects Tailwind's utility classes and any utility classes registered
- * by plugins.
- */
-/* @layer utilities {
-  .filter-none {
-    filter: none;
+.links-underlined {
+  a:where(:not(.icon, .button)) {
+    @apply underline-a;
   }
-  .filter-grayscale {
-    filter: grayscale(100%);
+}
+.button-underlined {
+  :where(button) {
+    @apply underline-a hover:text-accent;
   }
-} */
+}
+
+.links-underlined-i {
+  a:where(:not(.icon, .button)) {
+    @apply underline-a;
+    @apply underline-a-i;
+  }
+}
+
+.links-swap {
+  li {
+    @apply relative overflow-clip pr-[1em];
+    &.rex-current > a,
+    &.rex-active > a,
+    > a:hover {
+      @apply before:translate-y-0 before:skew-y-0 before:opacity-100;
+      span {
+        @apply -translate-y-full;
+      }
+    }
+  }
+  a {
+    @apply before:absolute before:translate-y-full before:whitespace-nowrap before:font-bold before:text-accent before:opacity-0 before:transition-all before:duration-300 before:ease-in-out before:content-[attr(title)];
+    span {
+      @apply relative block transition-all duration-300 ease-in-out;
+    }
+  }
+}

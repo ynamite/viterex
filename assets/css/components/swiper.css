@@ -1,4 +1,7 @@
 .swiper {
+  &.swiper-fs {
+    @apply min-h-[calc(100dvh-(var(--padding)*2))];
+  }
   media-player {
     @apply h-full max-w-full;
     media-provider {

@@ -19,12 +19,14 @@ module.exports = {
   theme: {
     screens, fontSize,
     fontFamily: {
-      roboto: ['Roboto', 'sans-serif']
+      sans: ['Roboto', 'sans-serif']
     },
     extend: {
       colors: {
-        primary: '#2F5A33',
-        accent: '#9F8158',
+        primary:
+          'hsl(from var(--clr-primary) h s l / calc(100% * <alpha-value>))',
+        secondary: 'hsl(from var(--clr-secondary) h s l / <alpha-value>)',
+        accent: 'hsl(from var(--clr-accent) h s l / calc(100% * <alpha-value>))'
       },
     }
   },

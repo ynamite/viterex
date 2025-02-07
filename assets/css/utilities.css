@@ -38,3 +38,29 @@
     }
   }
 }
+
+.underline-a,
+.custom-underline {
+  @apply bg-gradient-to-r from-current to-current bg-[length:100%_0.06875rem] bg-[left_calc(100%-0.1em)] bg-no-repeat transition-[background-size,color] duration-[500ms,300ms] ease-[cubic-bezier(.25,.8,.25,1)];
+  @apply [text-shadow:1px_1px_0_#fff,_-1px_1px_0_#fff];
+}
+
+.underline-a-i,
+.custom-underline-i {
+  @apply bg-[length:0%_0.06875rem] bg-[right_calc(100%-0.1em)];
+}
+.underline-a:hover {
+  @apply bg-[length:0%_0.06875rem] bg-[right_calc(100%-0.1em)];
+}
+.underline-a-i:hover {
+  @apply bg-[length:100%_0.06875rem] bg-[left_calc(100%-0.1em)];
+}
+
+/*.hr-not-top:not(.is-changing, .is-animating, .is-rendering)*/
+.hr-not-top {
+  .header {
+    @apply bg-white/90 backdrop-blur-md;
+    @apply lg:pt-[var(--padding)];
+  }
+  
+}
