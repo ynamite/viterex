@@ -12,7 +12,9 @@ module.exports = {
       './assets/css/**/*.css',
       './src/fragments/**/*.php',
       './src/templates/**/*.php',
-      './src/modules/**/*.php'
+      './src/modules/**/*.php',
+      './src/addons/massif/**/*.php',
+      './src/addons/project/**/*.php'
     ],
     extract
   },
