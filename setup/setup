@@ -296,10 +296,10 @@ yarn upgrade-interactive
 open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/"
 open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/redaxo/"
 
+git init
+git add .
+git commit -m "initial commit"
 if [ $GITLAB_NAMESPACE && $GITLAB_REPO_NAME ]; then
-    git init
-    git add .
-    git commit -m "initial commit"
     git push --set-upstream "git@gitlab.com:${GITLAB_NAMESPACE}/${GITLAB_REPO_NAME}.git" main
     git remote add origin "https://gitlab.com/${GITLAB_NAMESPACE}/${GITLAB_REPO_NAME}.git"
 fi
