@@ -14,6 +14,7 @@ if ('cli' !== PHP_SAPI) {
 *   Deployment-Host-Konfiguration
 */
 
+$localPhpBinary = '$HOME/Library/Application\ Support/Herd/bin/php';
 $deploymentName = 'mein-deployment';
 $deploymentHost = 'example.com';
 $deploymentPort = '22';
@@ -34,38 +35,12 @@ $isGit = is_dir(__DIR__ . '/.git');
 set(
     'bin/php',
     function () {
-        return '$HOME/Library/Application\ Support/Herd/bin/php';
+        return $localPhpBinary;
     }
 );
 
-task('release', [
-    'deploy:info',
-    'deploy:unlock',
-    'deploy:setup',
-    'deploy:lock',
-    'deploy:upgrade',
-    'deploy:release',
-    'deploy:copy_dirs',
-    'deploy:upload',
-    'deploy:shared',
-    'deploy:dump_info',
-    'setup',
-    'database:migration',
-    'deploy:publish',
-]);
-
-set('base_dir', 'public/');
-set('cache_dir', 'var/cache');
-set('data_dir', 'var/data');
-set('src_dir', 'src');
-set('bin/console', 'bin/console');
-
 add('shared_dirs', [
-    'var/log',
-]);
-
-add('writable_dirs', [
-    'var/log',
+    '{{data_dir}}/addons/statistics'
 ]);
 
 add('clear_paths', [
@@ -78,6 +53,13 @@ add('clear_paths', [
     'tailwind.config.js',
     'vite.config.js',
     'main.js',
+    '.yarn',
+    '.prettierrc',
+    'jsconfig.json',
+    'browserslistrc',
+    'LocalValetDriver.php',
+    'composer.json',
+    '.eslintrc.cjs',
 ]);
 
 // Hosts
@@ -98,29 +80,31 @@ host($deploymentName)
 
 if ($isGit) {
     set('repository', $deploymentRepository);
-    set('branch', static fn () => runLocally('{{bin/git}} rev-parse --abbrev-ref HEAD'));
+    set('branch', static fn() => runLocally('{{bin/git}} rev-parse --abbrev-ref HEAD'));
 } else {
     set('branch', 'main');
 
     desc('Updates code');
     task('deploy:update_code', function () {
-        foreach ([
-            'assets',
-            'bin',
-            'public',
-            'src',
-            'var',
-            '.env',
-            'package.json',
-            'postcss.config.js',
-            'stylelint.config.js',
-            'tailwind.config.js',
-            'vite.config.js',
-            'main.js',
-            'yarn.lock',
-            'LICENSE.md',
-            'README.md',
-        ] as $src) {
+        foreach (
+            [
+                'assets',
+                'bin',
+                'public',
+                'src',
+                'var',
+                '.env',
+                'package.json',
+                'postcss.config.js',
+                'stylelint.config.js',
+                'tailwind.config.js',
+                'vite.config.js',
+                'main.js',
+                'yarn.lock',
+                'LICENSE.md',
+                'README.md',
+            ] as $src
+        ) {
             upload($src, '{{release_path}}/', ['options' => ['--recursive', '--relative']]);
         }
         cd('{{release_path}}/var/data/core');
