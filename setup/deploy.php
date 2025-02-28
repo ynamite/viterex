@@ -52,6 +52,13 @@ add('clear_paths', [
     'tailwind.config.js',
     'vite.config.js',
     'main.js',
+    '.yarn',
+    '.prettierrc',
+    'jsconfig.json',
+    'browserslistrc',
+    'LocalValetDriver.php',
+    'composer.json',
+    '.eslintrc.cjs',
 ]);
 
 // Hosts
@@ -72,29 +79,31 @@ host($deploymentName)
 
 if ($isGit) {
     set('repository', $deploymentRepository);
-    set('branch', static fn () => runLocally('{{bin/git}} rev-parse --abbrev-ref HEAD'));
+    set('branch', static fn() => runLocally('{{bin/git}} rev-parse --abbrev-ref HEAD'));
 } else {
     set('branch', 'main');
 
     desc('Updates code');
     task('deploy:update_code', function () {
-        foreach ([
-            'assets',
-            'bin',
-            'public',
-            'src',
-            'var',
-            '.env.local',
-            'package.json',
-            'postcss.config.js',
-            'stylelint.config.js',
-            'tailwind.config.js',
-            'vite.config.js',
-            'main.js',
-            'yarn.lock',
-            'LICENSE.md',
-            'README.md',
-        ] as $src) {
+        foreach (
+            [
+                'assets',
+                'bin',
+                'public',
+                'src',
+                'var',
+                '.env.local',
+                'package.json',
+                'postcss.config.js',
+                'stylelint.config.js',
+                'tailwind.config.js',
+                'vite.config.js',
+                'main.js',
+                'yarn.lock',
+                'LICENSE.md',
+                'README.md',
+            ] as $src
+        ) {
             upload($src, '{{release_path}}/', ['options' => ['--recursive', '--relative']]);
         }
         cd('{{release_path}}/var/data/core');

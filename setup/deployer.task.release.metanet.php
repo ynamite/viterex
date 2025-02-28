@@ -7,6 +7,10 @@ use Deployer\Task\Context;
 
 set('writable_mode', 'chmod');
 
+add('clear_paths', [
+  'deployer.task.release.metanet.php',
+]);
+
 task('deploy:setAlias', function () {
   $host = Context::get()->getHost();
   $local = $host instanceof Localhost;
