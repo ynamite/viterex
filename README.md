@@ -61,19 +61,25 @@ Basierend auf [yak](https://github.com/yakamara/yak) von Thomas Blum ([tbaddade]
 2. dieses Repo klonen – ggf. geklontes Directory umbenennen, das ist nun der Projekt-Ordner
 3. Projekt-Ordner als vhost mounten (über installierten Webserver)
 4. im Terminal in den Projekt-Ordner wechseln
-5. `setup/setup.cfg` in einem Editor anpassen. __Wichtig:__ unbedingt REDAXO_ERROR_EMAIL ausfüllen!
+5. `setup/setup.cfg` in einem Editor anpassen. __Wichtig:__ unbedingt REDAXO_ERROR_EMAIL und REDAXO_ADMIN_EMAIL ausfüllen!
    _die Einträge beginnend mit `VITE_` am besten unverändert lassen, ausser man weiss, was man tut\_ 😌
-6. Skript `setup/setup` im Projekt-Verzeichnis im Terminal ausführen. __Achtung:__ falls eine DB mit dem angegebenen Namen bereits besteht, wird im setup Ordner ein Backup angelegt und die bestehende DB neu angelegt!
+6. Skript `./setup/setup` im Projekt-Verzeichnis im Terminal ausführen. __Achtung:__ falls eine DB mit dem angegebenen Namen bereits besteht, wird im setup Ordner ein Backup angelegt und die bestehende DB neu angelegt!
    _nun wird Redaxo heruntergeladen und installiert. Danach folgen die gewählten Addons und Plugins. Am Ende werden die PHP-Dependencies per Composer und per Yarn die Node-Dependencies installiert._
-7. der Vite JS Dev-Server sollte nun automatisch gestartet und im Default-Browser das Front- und Backend geöffnet werden
-8. im Backend mit den Zugangsdaten aus setup.cfg anmelden
-9. (Zur Info) es wird ein lokales Git Repository initialisiert. Dies kann nun mit einem Remote Repository verbunden werden.
-   _Beispielsweise:_
+7. den Projekt-Ordner nun mit dem gewünschten Package-Manager initialisieren, die Packages aus der package.json installieren.
+  - mit Yarn: `yarn`
+  - mit npm: `npm i`
+  - mit pnpm: `pnpm i`
+8. starte den Vite Dev-Server über deinen Package Manager.
+  - mit Yarn: `yarn dev`
+  - mit npm: `npm run dev`
+  - mit pnpm: `pnpm run dev`
+9. im Redaxo Backend wie gewohnt mit den Zugangsdaten aus setup.cfg anmelden
+10. (Zur Info) es wird automatisch ein lokales Git Repository initialisiert. Dies kann nun mit einem Remote Repository verbunden werden oder, falls kein Git gewünscht ist, kann man den Ordner .git sowie die Datei .gitignore aus dem Projekt-Ordner löschen.
+   _Um ein Repo zu verbinden:_
    ```
-    git push --set-upstream "git@github.com:BENUTZERNAME/REPOSITORY_NAME.git" main
     git remote add origin "https://github.com/BENUTZERNAME/REPOSITORY_NAME.git"
    ```
-10. Frontend einaml mit F5 reloaden und los gehts! Happy coding! 🙌🏼
+11. Frontend einaml mit F5 reloaden und los gehts! Happy coding! 🙌🏼
 
 **Ab sofort sollten jegliche Änderungen an Dateien (Templates, Module und Fragmente unter /src/ und CSS, JS Dateien unter /assets/) und sogar Anpassungen im Redaxo Backend sofort im Frontend automatisch gespiegelt werden (dank Live-Reload und HMR) – ohne nerviges, manuelles refreshen mit F5** 🍔
 
