@@ -211,7 +211,9 @@ wait
 php bin/console be_style:compile
 wait
 
-
+# insert redaxo_base.sql and set config
+# also replace login data in default template for better DX
+sed -i '' "s|{REDAXO_LOGIN_DATA}|Benutzer: ${REDAXO_ADMIN_USERNAME}<br />Passwort: ${REDAXO_ADMIN_PASSWORD}|g" setup/redaxo_base.sql
 mysqlCmd=$(which mysql)
 ${mysqlCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} --password="${REDAXO_DB_PASSWORD}" --database=${REDAXO_DB_NAME} < setup/redaxo_base.sql
 wait
