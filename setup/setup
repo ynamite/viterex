@@ -94,23 +94,19 @@ Reading config file
     REDAXO shasum: ${CNO}$REDAXO_SHA${CRED}
 ${CNO}"
 
-# rename env
-if [ -f .env ]; then
-    echo -e "${CGREEN}.env was copied to .env.local${CNO}"
-    ENV_LOCAL_CONTENT='VITE_DEV_SERVER="'${VITE_DEV_SERVER}'"
+# create env.local
+ENV_CONTENT='VITE_DEV_SERVER="'${VITE_DEV_SERVER}'"
 VITE_DEV_SERVER_PORT="'${VITE_DEV_SERVER_PORT}'"
 VITE_ENTRY_POINT="'${VITE_ENTRY_POINT}'"
 VITE_PUBLIC_DIR="'${VITE_PUBLIC_DIR}'"
 VITE_DIST_DIR="'${VITE_DIST_DIR}'"
 REDAXO_HOST_NAME="'${REDAXO_HOST_NAME}'"
 MODE="development"';
-    echo "$ENV_LOCAL_CONTENT" >> ".env"
-    echo -e "${CGREEN}.env updated with VITE config${CNO}"
-    cp .env .env.local
-    echo -e "${CGREEN}.env copied to .env.local ${CNO}"
+touch .env.local
+echo "$ENV_CONTENT" >> ".env.local"
+echo -e "${CGREEN}.env.local created with VITE config${CNO}"
 
-fi
-
+# remove old files
 rm -rf tmp
 rm -rf public
 
@@ -233,7 +229,7 @@ wait
 # wait
 mysqlCmd=$(which mysql)
 ${mysqlCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} --password="${REDAXO_DB_PASSWORD}" --database=${REDAXO_DB_NAME} -e "SET NAMES utf8mb4;
-UPDATE \`rex_config\` SET \`value\` = '{\"be_hplink\":\"checked\",\"be_minnav\":\"\",\"be_minsidebar\":\"checked\",\"be_gototop\":\"checked\",\"be_tree\":\"top\",\"be_tree_menu\":\"\",\"be_tree_shortnames\":\"\",\"be_tree_showid\":\"\",\"be_tree_onlystructure\":\"checked\",\"be_tree_activemode\":\"checked\",\"be_tree_persist\":\"checked\",\"be_mediapool_usesort\":\"\",\"be_mediapool_sort\":\"name|asc\",\"be_crop\":\"\",\"be_crop_pre1\":\"\",\"be_crop_pre2\":\"\",\"be_crop_pre3\":\"\",\"be_crop_pre4\":\"\",\"be_crop_pre5\":\"\"}' WHERE \`namespace\` = 'be_tools' AND \`key\` = 'config';
+UPDATE \`rex_user\` SET \`name\` = 'Yves Torres', \`description\` = 'MASSIF Web Studio', \`email\` = '$REDAXO_ADMIN_EMAIL' WHERE \`id\` = 1;
 DELETE FROM rex_config WHERE \`namespace\` = 'phpmailer';
 INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES
 ('phpmailer', 'archive', 'true'),
@@ -258,14 +254,6 @@ INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES
 ('phpmailer',  'test_address',	'\"studio@massif.ch\"'),
 ('phpmailer', 'username', '\"\"'),
 ('phpmailer', 'wordwrap', '120');
-DELETE FROM rex_config WHERE \`namespace\` = 'emailobfuscator';
-INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES 
-('emailobfuscator',	'articles',	'\"\"'),
-('emailobfuscator',	'autoload_css',	'false'),
-('emailobfuscator',	'autoload_js',	'false'),
-('emailobfuscator',	'mailto_only',	'false'),
-('emailobfuscator',	'method',	'\"rot13_unicorn\"'),
-('emailobfuscator',	'templates',	'[]');
 INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES 
 ('massif_settings',	'address_e_mail',	'\"$MASSIF_SETTINGS_EMAIL\"'),
 ('massif_settings',	'address_firma',	'\"$MASSIF_SETTINGS_FIRMA\"'),
@@ -281,6 +269,8 @@ INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES
 ('massif_settings',	'address_strasse',	'\"$MASSIF_SETTINGS_STRASSE\"'),
 ('viterex',	'favicon_master',	'\"assets\\/img\\/favicon.png\"'),
 ('viterex',	'favicon_name',	'\"$MASSIF_SETTINGS_FIRMA\"');
+INSERT INTO \`rex_yrewrite_domain\` (\`id\`, \`domain\`, \`mount_id\`, \`start_id\`, \`notfound_id\`, \`clangs\`, \`clang_start\`, \`clang_start_auto\`, \`clang_start_hidden\`, \`robots\`, \`title_scheme\`, \`description\`, \`auto_redirect\`, \`auto_redirect_days\`) VALUES
+(1,	'$REDAXO_HOST_PROTOCOL://$REDAXO_HOST_NAME/',	0,	1,	2,	'',	1,	0,	0,	'User-agent: *\r\nDisallow:',	'%T / %SN',	'',	1,	0);
 "
 wait
 
@@ -298,6 +288,7 @@ rm -rf setup
 composer install --no-interaction --quiet
 
 # execute yarn
+touch yarn.lock
 yarn
 yarn upgrade-interactive
 
@@ -305,11 +296,13 @@ yarn upgrade-interactive
 open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/"
 open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/redaxo/"
 
-git init
-git add .
-git commit -m "initial commit"
-git push --set-upstream "git@gitlab.com:${GITLAB_NAMESPACE}/${GITLAB_REPO_NAME}.git" main
-git remote add origin "https://gitlab.com/${GITLAB_NAMESPACE}/${GITLAB_REPO_NAME}.git"
+if [ $GITLAB_NAMESPACE && $GITLAB_REPO_NAME ]; then
+    git init
+    git add .
+    git commit -m "initial commit"
+    git push --set-upstream "git@gitlab.com:${GITLAB_NAMESPACE}/${GITLAB_REPO_NAME}.git" main
+    git remote add origin "https://gitlab.com/${GITLAB_NAMESPACE}/${GITLAB_REPO_NAME}.git"
+fi
 
 
 
