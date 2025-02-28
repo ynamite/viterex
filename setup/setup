@@ -157,7 +157,6 @@ cp setup/index.backend.php public/redaxo/index.php
 cp setup/index.frontend.php public/index.php
 cp setup/path_provider.php src/path_provider.php
 cp setup/_htaccess public/.htaccess
-cp setup/_yarnrc.yml .yarnrc.yml
 
 
 echo -e "${CGREEN}File structure${CNO} was successfully created"
