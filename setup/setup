@@ -53,12 +53,17 @@ downloadPackageFromRepo() (
 
     local name=$repo
 
+    for repoRename in ${ADDON_REPOS_RENAME[@]}
+    do
+        set -e
+        if [ -d ./src/addons/redaxo_${repoRename} ]; then
+            mv ./src/addons/redaxo_${repoRename} ./src/addons/${repoRename};
+            name=${repoRename}
+        fi
+    done
+
     installPackage "${name}"
     wait
-
-    if([ "$name" = 'massif' ]); then
-        rm -f src/addons/massif/install.sql
-    fi
 
     sleep .1 # Waits 0.1 seconds.
     wait
@@ -82,21 +87,17 @@ Reading config file
 ${CNO}"
 
 # rename env
-if [ -f .env ]; then
-    echo -e "${CGREEN}.env was copied to .env.local${CNO}"
-    ENV_LOCAL_CONTENT='VITE_DEV_SERVER="'${VITE_DEV_SERVER}'"
+# create env.local
+ENV_CONTENT='VITE_DEV_SERVER="'${VITE_DEV_SERVER}'"
 VITE_DEV_SERVER_PORT="'${VITE_DEV_SERVER_PORT}'"
 VITE_ENTRY_POINT="'${VITE_ENTRY_POINT}'"
 VITE_PUBLIC_DIR="'${VITE_PUBLIC_DIR}'"
 VITE_DIST_DIR="'${VITE_DIST_DIR}'"
 REDAXO_HOST_NAME="'${REDAXO_HOST_NAME}'"
 MODE="development"';
-    echo "$ENV_LOCAL_CONTENT" >> ".env"
-    echo -e "${CGREEN}.env updated with VITE config${CNO}"
-    cp .env .env.local
-    echo -e "${CGREEN}.env copied to .env.local ${CNO}"
-
-fi
+touch .env.local
+echo "$ENV_CONTENT" >> ".env.local"
+echo -e "${CGREEN}.env.local created with VITE config${CNO}"
 
 rm -rf tmp
 rm -rf public
@@ -146,7 +147,7 @@ mv public/redaxo/src/addons src
 cp -r setup/viterex src/addons
 mv public/redaxo/src/core src
 mv public/LICENSE.md LICENSE.md
-rm -f public/README.md public/README.de.md
+rm -f public/README.md README.de.md
 rm -f public/.htaccess
 
 cp -p setup/console bin/console
@@ -156,6 +157,7 @@ cp setup/index.backend.php public/redaxo/index.php
 cp setup/index.frontend.php public/index.php
 cp setup/path_provider.php src/path_provider.php
 cp setup/_htaccess public/.htaccess
+cp setup/_yarnrc.yml .yarnrc.yml
 
 
 echo -e "${CGREEN}File structure${CNO} was successfully created"
@@ -180,51 +182,83 @@ ${CNO}"
 for package in ${ADDON_PACKAGES[@]}
 do
     printf "\n${CRED}Downloading package${CNO} ${package}\n"
-    IFS=/ read -r package plugin <<< "$package"
+    IFS=/ read -r pckg plugin <<< "$package"
     if [ ! $plugin ]; then
-        php bin/console install:download "${package}" --no-interaction --quiet
-        wait
+        if [ ! -d ./src/addons/$pckg ]; then
+            php bin/console install:download "${pckg}" --no-interaction --quiet
+            wait
+        fi
     fi
     installPackage "${package}" 
+    wait
+done
+
+for repo in ${ADDON_REPOS[@]}
+do
+    set -e
+    IFS=/ read -r user repo <<< "$repo"
+    downloadPackageFromRepo $user $repo
     wait
 done
 
 printf "\n${CRED}Installing and activating package${CNO} ViteRex\n"
 php bin/console package:install "viterex" --no-interaction --quiet
 
+mkdir -p var/data/addons/ydeploy
 
 
 php bin/console cache:clear
 wait
 php bin/console be_style:compile
 wait
-php bin/console ydeploy:diff
+
+
+mysqlCmd=$(which mysql)
+${mysqlCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} --password="${REDAXO_DB_PASSWORD}" --database=${REDAXO_DB_NAME} < setup/redaxo_base.sql
 wait
+${mysqlCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} --password="${REDAXO_DB_PASSWORD}" --database=${REDAXO_DB_NAME} -e "SET NAMES utf8mb4;
+DELETE FROM rex_config WHERE \`namespace\` = 'phpmailer';
+INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES
+('phpmailer', 'archive', 'true'),
+('phpmailer', 'bcc', '\"\"'),
+('phpmailer', 'charset', '\"utf-8\"'),
+('phpmailer', 'confirmto', '\"\"'),
+('phpmailer', 'detour_mode', 'true'),
+('phpmailer', 'encoding', '\"8bit\"'),
+('phpmailer', 'errormail', '0'),
+('phpmailer', 'from',	'\"$MASSIF_SETTINGS_EMAIL\"'),
+('phpmailer',  'fromname',	'\"$MASSIF_SETTINGS_FIRMA\"'),
+('phpmailer', 'host', '\"localhost\"'),
+('phpmailer', 'logging', '0'),
+('phpmailer',  'mailer',	'\"mail\"'),
+('phpmailer', 'password', '\"\"'),
+('phpmailer', 'port', '587'),
+('phpmailer', 'priority', '0'),
+('phpmailer', 'security_mode', 'false'),
+('phpmailer', 'smtp_debug', '\"0\"'),
+('phpmailer', 'smtpauth', 'true'),
+('phpmailer', 'smtpsecure', '\"tls\"'),
+('phpmailer',  'test_address',	'\"studio@massif.ch\"'),
+('phpmailer', 'username', '\"\"'),
+('phpmailer', 'wordwrap', '120');
+INSERT INTO \`rex_yrewrite_domain\` (\`id\`, \`domain\`, \`mount_id\`, \`start_id\`, \`notfound_id\`, \`clangs\`, \`clang_start\`, \`clang_start_auto\`, \`clang_start_hidden\`, \`robots\`, \`title_scheme\`, \`description\`, \`auto_redirect\`, \`auto_redirect_days\`) VALUES
+(1,	'$REDAXO_HOST_PROTOCOL://$REDAXO_HOST_NAME/',	0,	1,	2,	'',	1,	0,	0,	'User-agent: *\r\nDisallow:',	'%T / %SN',	'',	1,	0);
+"
+wait
+
 
 # remove
 rm -rf public/redaxo/bin
 rm -rf public/redaxo/src
 rm -f public/.gitignore.example
 rm -f README.md
+rm -f viterex.jpg
 rm -rf tmp
 rm -rf .git
 rm -rf setup
 
 composer install --no-interaction --quiet
 
-# execute yarn
-yarn
-yarn upgrade-interactive --latest
-
-# open front and backend
-open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/"
-open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/redaxo/"
-
 git init
 git add .
 git commit -m "initial commit"
-
-
-
-# start vite
-yarn dev
