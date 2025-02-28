@@ -16,6 +16,7 @@
 
 namespace Ynamite\ViteRex;
 
+use rex;
 use rex_file;
 use rex_path;
 use rex_url;
@@ -70,9 +71,11 @@ class ViteRex
    */
   public static function getCriticalCss($loadInDev = false)
   {
-    if (self::$isDev && !$loadInDev) return;
-    $manifestArray = self::getManifestArray();
     $key = 'assets/css/critical.css';
+    if (self::$isDev && !$loadInDev) {
+      return '<link rel="stylesheet" href="' . self::$viteServer . $key . '">';
+    };
+    $manifestArray = self::getManifestArray();
     $criticalCss = isset($manifestArray[$key]) ? $manifestArray[$key] : null;
     if (!$criticalCss) return;
     $criticalCssPath = self::$distPath . '/' . $criticalCss['file'];
@@ -171,5 +174,69 @@ class ViteRex
   public static function getAssetsUrl()
   {
     return self::$isDev ? self::$viteServer . rex_url::base('assets/') : self::$distUri . '/assets/';
+  }
+
+  /**
+   *  get current git branch
+   *  @return string
+   */
+  public static function getGitBranch()
+  {
+    $contents = rex_file::get(rex_path::base('.git/HEAD')); //read the file
+    $explodedstring = explode("/", $contents, 3); //seperate out by the "/" in the string
+    return trim($explodedstring[2]); //get the one that is always the branch name
+  }
+
+  /**
+   *  check if dev branch is active if in dev mode or display warning
+   *  @return void
+   */
+  public static function checkGitBranch($branch = 'dev')
+  {
+    if (!\file_exists(rex_path::base('.git'))) return;
+    if (self::$isDev) {
+      $currentBranch = self::getGitBranch();
+      if ($currentBranch !== $branch)
+        echo '<div style="z-index: 1000; position: sticky; top: 0; left: 0; right: 0; background: red; color: white; padding: 1rem; font-size: 1.5rem; text-align: center;">You are not on the dev branch! Current branch: ' . $branch . '</div>';
+    }
+  }
+
+  /**
+   *  check if debug mode is active and set it if not
+   *  @return void
+   */
+  public static function checkDebugMode()
+  {
+    if (!rex::isLiveMode()) {
+      if (self::$isDev) {
+        if (!rex::isDebugMode()) {
+          self::setDebugMode(true);
+        }
+      } else {
+        if (rex::isDebugMode()) {
+          self::setDebugMode(false);
+        }
+      }
+    }
+  }
+
+  /**
+   *  set debug mode
+   *  @param boolean $mode Debug mode to set
+   *  @return void
+   */
+  public static function setDebugMode($mode)
+  {
+    $configFile = rex_path::coreData('config.yml');
+    $config =
+      rex_file::getConfig($configFile);
+
+    if (!is_array($config['debug'])) {
+      $config['debug'] = [];
+    }
+
+    $config['debug']['enabled'] = $mode;
+    rex::setProperty('debug', $mode);
+    rex_file::putConfig($configFile, $config);
   }
 }
