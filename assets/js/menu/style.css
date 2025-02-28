@@ -1,18 +1,28 @@
 @layer utilities.menu {
   .js-menu-trigger {
+    --bar-space: 5.5%;
+    @apply fixed right-0 top-0 z-20;
+    @apply ~top-5/12 ~right-5/12;
     .icon {
-      @apply flex aspect-[64/36] flex-col justify-between transition-transform duration-300 ease-in-out ~w-[2.5rem]/[4rem];
+      @apply flex aspect-[6/4] flex-col justify-between transition-transform duration-300 ease-in-out ~w-[2.5rem]/[4rem];
     }
     .b {
-      @apply relative w-full bg-current transition-all duration-300 ~h-[0.3125rem]/[0.4375rem];
+      @apply h-[calc(100%/3-var(--bar-space)*2)];
+      @apply absolute w-full origin-center bg-current transition-all duration-300;
+    }
+    .b-t {
+      @apply top-0;
+    }
+    .b-c {
+      @apply top-1/2 -translate-y-1/2;
+    }
+    .b-b {
+      @apply bottom-0;
     }
     &.active {
-      @apply text-accent;
+      @apply text-white;
       .icon {
         @apply rotate-180;
-      }
-      .b {
-        @apply origin-center;
       }
       .b-t {
         @apply top-1/2 rotate-45;
@@ -26,13 +36,7 @@
     }
   }
   .js-menu {
-    position: fixed;
-    z-index: 10;
-    display: none;
-    width: 100dvw;
-    height: 100dvh;
-    overflow-y: auto;
-    background: white;
-    inset: 0;
+    @apply fixed inset-0 z-10 hidden h-dvh w-dvw overflow-y-auto bg-primary;
+    @apply flex-col justify-center ~gap-4/8 ~px-4/8 ~py-14/28;
   }
 }

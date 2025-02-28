@@ -1,6 +1,7 @@
 
+
 .js-menu {
-  @apply flex-col justify-center bg-white ~gap-4/8 ~px-4/8 ~py-14/28;
+  @apply flex-col justify-center ~gap-4/8 ~px-4/8 ~py-14/28;
 }
 
 .menu[data-menu-mobile] {

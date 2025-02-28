@@ -11,6 +11,12 @@ import {
 import { addEvent, removeAllEvents } from '@/js/eventbus.js'
 import { Logger } from '@/js/utilities.js'
 import { gsap } from '@/js/gsap.js'
+import { createSpring } from '@/js/CreateSpring'
+
+const spring = createSpring({
+  stiffness: 80,
+  damping: 20
+})
 
 const logger = new Logger()
 
@@ -123,7 +129,6 @@ class accordion {
       .closest(this.settings.parentSelector)
       .querySelectorAll('.accordion-open')
     if ($openItems.length) {
-      console.log('closeOthers', $openItems)
       $openItems.forEach(($item) => {
         const $itemTrigger = $item.dataset?.accordion
           ? $item
@@ -160,6 +165,7 @@ class accordion {
       opacity: 0.001,
       duration: self.settings.openDuration,
       clearProps: true,
+      ease: spring,
       onComplete: () => {
         self.handleCallbacks('afterOpen', $exp, $trigger)
         if (window?.ScrollTrigger)
@@ -190,6 +196,7 @@ class accordion {
       opacity: 0.001,
       duration: self.settings.openDuration,
       clearProps: true,
+      ease: spring,
       onComplete: () => {
         if (window?.ScrollTrigger)
           gsap.delayedCall(0.1, () => ScrollTrigger.refresh())

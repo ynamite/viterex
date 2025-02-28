@@ -23,7 +23,7 @@ const defaults = {
     '.rex-navi1 >li,.rex-navi2 >li, .article-nav a, .lang-nav a',
   dropdownSelector: '.has-dropdown',
   strings: {
-    trigger: 'Hauptnavigations-Menü    öffnen'
+    trigger: 'Hauptnavigations-Menü öffnen'
   },
   animation: {
     defDuration: defDuration,

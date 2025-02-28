@@ -1,4 +1,4 @@
-@import 'header.css';
+/* @import 'header.css'; */
 @import 'nav.css';
 @import 'button.css';
 @import 'content.css';
@@ -15,8 +15,6 @@ html {
 body {
   @apply flex min-h-svh flex-col transition-all;
   overflow-anchor: none;
-}.p-default {
-  @apply p-[var(--padding)];
 }
 .section-px {
   @apply ~px-5/12;

@@ -5,7 +5,7 @@
 @import 'typography' layer(typography);
 @import 'vars' layer(layout.vars);
 @import 'layout' layer(layout);
-@import 'components';
+/* @import 'components'; */
 
 @layer tailwind.base {
   @tailwind base;

@@ -18,7 +18,7 @@
   }
 
   .swiper-container {
-    @apply grid;
+    @apply relative grid overflow-clip;
   }
   .swiper-wrapper {
     @apply min-w-0;

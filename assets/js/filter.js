@@ -1,11 +1,26 @@
-import { addEvent } from '@/js/eventbus.js'
-import { gsap, Flip } from '@/js/gsap.js'
+import { addEvent, removeEvent } from '@/js/eventbus.js'
+import { createSpring } from '@/js/CreateSpring'
+import { gsap } from '@/js/gsap.js'
+import { Flip } from '@gsap/business/Flip'
 
 gsap.registerPlugin(Flip)
+
+const spring = createSpring({
+  stiffness: 80,
+  damping: 20
+})
 
 let animating = false
 
 const defaults = {
+  id: null,
+  filterWrap: null,
+  filters: null,
+  elementsToFilter: null,
+  filterLabel: null,
+  filterLabelSelector: '[data-filter-label]',
+  element: null,
+  filterValue: null,
   callbacks: {
     init: null,
     beforeFilter: null,
@@ -13,96 +28,111 @@ const defaults = {
   }
 }
 
-const setActive = (element, items) => {
-  items.forEach((item) => {
-    item.classList.remove('active')
+const setActive = (element, elementsToFilter) => {
+  elementsToFilter.forEach((element) => {
+    element.classList.remove('active')
   })
   element.classList.add('active')
 }
 
-const applyFilter = async (value, items) => {
-  const state = Flip.getState(items)
-  const parent = items[0].parentNode
-  // parent.originalHeight = parent.originalHeight || parent.offsetHeight
-  const parentRectFrom = parent.getBoundingClientRect()
+const applyFilter = async (filterValue, elementsToFilter) => {
+  const state = Flip.getState(elementsToFilter)
+  const parent = elementsToFilter[0].parentNode
+  gsap.set(parent, { minHeight: parent.offsetHeight })
+  // const parentRectFrom = parent.getBoundingClientRect()
 
-  for (const item of items) {
-    item.originalDisplayStyle =
-      item.originalDisplayStyle || window.getComputedStyle(item).display
-    if (value === 'all') {
-      item.style.display = item.originalDisplayStyle
-      continue
-    }
-    const itemValues = item.dataset?.filter?.split(' ')
-    if (itemValues.includes(value)) {
-      item.style.display = item.originalDisplayStyle
-      continue
-    }
-    item.style.display = 'none'
-  }
-  if (animating) return
-  animating = true
-
-  const parentRectTo = await parent.getBoundingClientRect()
-  if (parentRectFrom.height > parentRectTo.height) {
-    gsap.fromTo(
-      parent,
-      {
-        height: parentRectFrom.height
-      },
-      {
-        height: parentRectTo.height,
-        duration: 0.3
-      }
-    )
+  for (const element of elementsToFilter) {
+    element.originalDisplayStyle =
+      element.originalDisplayStyle || window.getComputedStyle(element).display
+    element.style.display = 'none'
   }
 
   await Flip.from(state, {
     absoluteOnLeave: true,
-    ease: 'power1.inOut',
+    onLeave: (elements) =>
+      gsap.to(elements, { opacity: 0, scale: 0, duration: 0.4, ease: spring })
+  })
+
+  const finalState = Flip.getState(elementsToFilter)
+
+  for (const element of elementsToFilter) {
+    if (filterValue === 'all') {
+      element.style.display = element.originalDisplayStyle
+      continue
+    }
+    const itemValues = element.dataset?.filterValue?.split(' / ')
+    console.log('itemValues', itemValues, filterValue)
+    if (itemValues.includes(filterValue)) {
+      element.style.display = element.originalDisplayStyle
+      continue
+    }
+  }
+
+  await Flip.from(finalState, {
     onEnter: (elements) =>
       gsap.fromTo(
         elements,
         { opacity: 0, scale: 0 },
-        { opacity: 1, scale: 1, duration: 0.3 }
-      ),
-    onLeave: (elements) =>
-      gsap.to(elements, { opacity: 0, scale: 0, duration: 0.3 })
+        { opacity: 1, scale: 1, duration: 0.6, ease: spring }
+      )
   })
-  await gsap.to(parent, {
-    height: 'auto',
-    duration: 0.3,
-    clearProps: 'height'
-  })
+  gsap.set(parent, { clearProps: 'minHeight' })
   animating = false
 }
 
-const init = async (element, items, options = {}) => {
-  if (!element) return
-  if (!items) return
+const init = async (filterWrap, options = {}) => {
+  removeEvent('filter')
+
   const settings = { ...defaults, ...options }
-  settings.callbacks = { ...defaults.callbacks, ...options.callbacks }
-  const handleCallback = async (
-    type,
-    item = null,
-    element = null,
-    items = null,
-    filterItems = null
-  ) => {
-    if (typeof settings.callbacks[type] === 'function')
-      await settings.callbacks[type](item, element, items, filterItems)
+  const callbacks = { ...defaults.callbacks, ...options.callbacks }
+
+  settings.filterWrap = filterWrap
+  if (!settings.filterWrap) {
+    console.log('Filter wrap element not found')
+    return
   }
-  const filterItems = element.querySelectorAll('.filter-item')
-  await handleCallback('init', element, items, filterItems)
-  filterItems.forEach((item) => {
-    addEvent(item, 'click', 'filter', async (event) => {
+  settings.id = filterWrap.dataset.filter
+  if (!settings.id) {
+    console.log('Filter wrap element must have an id')
+    return
+  }
+  settings.filters = Array.from(
+    filterWrap.querySelectorAll('[data-filter-value]')
+  )
+  if (!settings.filters) {
+    console.log('Filters not found', `[data-filter-value]`)
+    return
+  }
+  settings.elementsToFilter = document.querySelector(
+    `[data-filter-elements="${settings.id}"]`
+  ).children
+  if (!settings.elementsToFilter) {
+    console.log(
+      'Filter elements not found',
+      `[data-filter-elements="${settings.id}"]`
+    )
+    return
+  }
+
+  const handleCallback = async (type, settings = {}) => {
+    if (typeof callbacks[type] === 'function') await callbacks[type](settings)
+  }
+
+  settings.filterLabel = filterWrap.querySelector(settings.filterLabelSelector)
+
+  await handleCallback('init', settings)
+  settings.filters.forEach((element) => {
+    // const element = event.target
+    addEvent(element, 'click', 'filter', async (event) => {
       event.preventDefault()
-      const item = event.target
-      const value = item.dataset.filter
-      await handleCallback('beforeFilter', item, element, items, filterItems)
-      setActive(item, filterItems)
-      await applyFilter(value, items)
-      await handleCallback('afterFilter', item, element, items, filterItems)
+
+      settings.filterValue = element.dataset.filterValue
+      settings.element = element
+
+      await handleCallback('beforeFilter', settings)
+      setActive(settings.element, settings.filters)
+      await applyFilter(settings.filterValue, settings.elementsToFilter)
+      await handleCallback('afterFilter', settings)
     })
   })
 }

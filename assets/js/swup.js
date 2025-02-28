@@ -12,22 +12,12 @@ import SwupA11yPlugin from '@swup/a11y-plugin'
 import SwupMorphPlugin from 'swup-morph-plugin'
 import SwupRouteNamePlugin from '@swup/route-name-plugin'
 import SwupScrollPlugin from '@swup/scroll-plugin'
-import SwupFragmentPlugin from '@swup/fragment-plugin'
-import routeTransitions, {
-  transitionIn,
-  fragmentOptions
-} from '@/js/routeTransitions'
-
-// import SwupProgressPlugin from '@swup/progress-plugin'
+import routeTransitions from '@/js/routeTransitions'
 
 import { gsap, ScrollTrigger, ScrollToPlugin } from '@/js/gsap.js'
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
-// import { elementIsVisibleInViewport } from '@/js/utilities.js'
-
 const style = getComputedStyle(document.documentElement, null)
-
-const fragmentPlugin = new SwupFragmentPlugin(fragmentOptions)
 
 const swup = new Swup({
   ignoreVisit: (url, { el } = {}) =>
@@ -38,10 +28,11 @@ const swup = new Swup({
     el?.closest('[data-modal]') ||
     el?.closest('.glightbox'),
   containers: ['#content'],
-  // animateHistoryBrowsing: true,
   native: true,
   plugins: [
-    new SwupPreloadPlugin(),
+    new SwupPreloadPlugin({
+      preloadHoveredLinks: process.env.NODE_ENV !== 'development'
+    }),
     new SwupBodyClassPlugin(),
     new SwupHeadPlugin({
       persistAssets: true
@@ -51,14 +42,12 @@ const swup = new Swup({
       respectReducedMotion: false
     }),
     new SwupMorphPlugin({
-      containers: ['#menus', '#footer']
+      containers: ['#menus', '#footer', '#swup-css']
     }),
     new SwupRouteNamePlugin(),
     new SwupScrollPlugin({
-      // doScrollingRightAway: true,
       shouldResetScrollPosition: (link) => !link.matches('.back-btn')
-    }),
-    fragmentPlugin
+    })
   ]
 })
 
@@ -87,47 +76,12 @@ swup.scrollTo = (offsetY) => {
     style.getPropertyValue('scroll-padding-top'),
     10
   )
-  const offset = getCustomPropertyValue(document.documentElement, '--padding')
+  // const offset = getCustomPropertyValue(document.documentElement, '--padding')
   swup.hooks.callSync('scroll:start', undefined)
-  window.scrollTo(0, offsetY - scrollPadding + offset)
+  window.scrollTo(0, offsetY - scrollPadding)
   swup.hooks.callSync('scroll:end', undefined)
   return
 }
-
-/**
- * handle frragment rules on swup clicks
- */
-
-swup.hooks.on('link:click', (visit) => {
-  /*
-   * scroll to top on click to anchor pointing to portfolio-detail
-   */
-  const dataName = visit.trigger.el.dataset?.swupTarget
-  if (dataName) {
-    if (dataName === 'portfolio-detail') {
-      fragmentPlugin.setRules([
-        ...fragmentOptions.rules.map((rule) => ({ ...rule, scroll: true }))
-      ])
-      return
-    }
-  }
-  fragmentPlugin.setRules([
-    ...fragmentOptions.rules.map((rule) => ({ ...rule, scroll: false }))
-  ])
-})
-
-swup.hooks.on('visit:start', (visit) => {
-  if (visit?.fragmentVisit?.name === 'filter') {
-    visit.animation.name = 'filter'
-    visit.animation.animate = true
-  }
-})
-
-swup.hooks.on('visit:end', (visit) => {
-  if (visit.history.popstate && visit?.fragmentVisit?.name !== 'filter') {
-    transitionIn(0.75)
-  }
-})
 
 export { style, getCustomPropertyValue }
 export default swup

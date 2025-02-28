@@ -1,8 +1,13 @@
 import './custom-select.css'
 import { Logger } from '@/js/utilities.js'
 import { gsap } from '@/js/gsap.js'
-import Springer from '@/js/Springer'
-import { addEvent } from '@/js/eventbus.js'
+import { addEvent } from '@/js/eventbus.js' 
+import { createSpring } from '@/js/CreateSpring'
+
+const spring = createSpring({
+  stiffness: 80,
+  damping: 20
+})
 
 const logger = new Logger({
   force: false
@@ -15,7 +20,7 @@ const defaults = {
   selector: 'div[data-custom-select]',
   iconHtml: `<i class="icon icon-[bi--chevron-down]"></i>`,
   label: true,
-  ease: Springer()
+  ease: spring
 }
 
 let debounceTimeout
