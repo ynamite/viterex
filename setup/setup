@@ -227,6 +227,7 @@ php bin/console be_style:compile
 wait
 # php bin/console ydeploy:diff
 # wait
+sed -i '' "s|{REDAXO_LOGIN_DATA}|Benutzer: ${REDAXO_ADMIN_USERNAME}<br />Passwort: ${REDAXO_ADMIN_PASSWORD}|g" setup/redaxo_massif_install.sql
 mysqlCmd=$(which mysql)
 ${mysqlCmd} -h ${REDAXO_DB_HOST} -u ${REDAXO_DB_USER} --password="${REDAXO_DB_PASSWORD}" --database=${REDAXO_DB_NAME} -e "SET NAMES utf8mb4;
 UPDATE \`rex_user\` SET \`name\` = 'Yves Torres', \`description\` = 'MASSIF Web Studio', \`email\` = '$REDAXO_ADMIN_EMAIL' WHERE \`id\` = 1;
