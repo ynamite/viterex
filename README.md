@@ -1,4 +1,4 @@
-# ViteRex 🚀 _Supercharged REDAXO Frontend development with Vite JS_
+# ViteRex 1.2.0 🚀 _Supercharged REDAXO Frontend development with Vite JS_
 
 ![ViteRex](viterex.jpg)
 
@@ -73,13 +73,14 @@ Basierend auf [yak](https://github.com/yakamara/yak) von Thomas Blum ([tbaddade]
   - mit Yarn: `yarn dev`
   - mit npm: `npm run dev`
   - mit pnpm: `pnpm run dev`
-9. im Redaxo Backend wie gewohnt mit den Zugangsdaten aus setup.cfg anmelden
-10. (Zur Info) es wird automatisch ein lokales Git Repository initialisiert. Dies kann nun mit einem Remote Repository verbunden werden oder, falls kein Git gewünscht ist, kann man den Ordner .git sowie die Datei .gitignore aus dem Projekt-Ordner löschen.
+9. öffne die lokale URL und melde dich im Backend an.
+10. Los gehts! Happy coding! 🙌🏼
+
+*(Zur Info)* es wird automatisch ein lokales Git Repository initialisiert. Dies kann nun mit einem Remote Repository verbunden werden oder, falls kein Git gewünscht ist, kann man den Ordner .git sowie die Datei .gitignore aus dem Projekt-Ordner löschen.
    _Um ein Repo zu verbinden:_
    ```
     git remote add origin "https://github.com/BENUTZERNAME/REPOSITORY_NAME.git"
    ```
-11. Frontend einaml mit F5 reloaden und los gehts! Happy coding! 🙌🏼
 
 **Ab sofort sollten jegliche Änderungen an Dateien (Templates, Module und Fragmente unter /src/ und CSS, JS Dateien unter /assets/) und sogar Anpassungen im Redaxo Backend sofort im Frontend automatisch gespiegelt werden (dank Live-Reload und HMR) – ohne nerviges, manuelles refreshen mit F5** 🍔
 

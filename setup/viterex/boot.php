@@ -4,7 +4,6 @@
  * Inspired by https://github.com/andrefelipe/vite-php-setup
  *
  *  @author      ynamite @ GitHub <https://github.com/ynamite/viterex>
- *  @version     1.0.0
  *
  *  For copyright and license information, please view the LICENSE
  *  file that was distributed with this source code.
