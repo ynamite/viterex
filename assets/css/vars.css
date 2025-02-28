@@ -2,13 +2,13 @@
 ::before,
 ::after {
 
-  --clr-primary: #000000;
-  --clr-accent: #c4092a;
+  --clr-primary: #1b1a21;
+  --clr-accent: #ff269e;
   --clr-secondary: #50b3d8;
 
   --shoulder: calc(65 / 16 * 1rem);
   --spacer: 1rem;
-  
+
   --ease-spring-1: linear(
     0,
     0.006,
