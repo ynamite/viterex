@@ -32,6 +32,7 @@ $devHost = $env ? $env['REDAXO_HOST_NAME'] : 'redaxo-2024.test';
 $isDev = $env ? isset($_SERVER['HTTP_HOST']) && $devHost === $_SERVER['HTTP_HOST'] && $env['MODE'] !== 'production' : false;
 viterex::setValue('isDev', $isDev);
 viterex::checkGitBranch('main');
+viterex::checkDebugMode();
 
 // dist subfolder - defined in vite.config.json
 $distDef = $env ? $env['VITE_DIST_DIR'] : '/dist';

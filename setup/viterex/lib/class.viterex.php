@@ -16,6 +16,7 @@
 
 namespace Ynamite\ViteRex;
 
+use rex;
 use rex_file;
 use rex_path;
 use rex_url;
@@ -198,5 +199,44 @@ class ViteRex
       if ($currentBranch !== $branch)
         echo '<div style="z-index: 1000; position: sticky; top: 0; left: 0; right: 0; background: red; color: white; padding: 1rem; font-size: 1.5rem; text-align: center;">You are not on the dev branch! Current branch: ' . $branch . '</div>';
     }
+  }
+
+  /**
+   *  check if debug mode is active and set it if not
+   *  @return void
+   */
+  public static function checkDebugMode()
+  {
+    if (!rex::isLiveMode()) {
+      if (self::$isDev) {
+        if (!rex::isDebugMode()) {
+          self::setDebugMode(true);
+        }
+      } else {
+        if (rex::isDebugMode()) {
+          self::setDebugMode(false);
+        }
+      }
+    }
+  }
+
+  /**
+   *  set debug mode
+   *  @param boolean $mode Debug mode to set
+   *  @return void
+   */
+  public static function setDebugMode($mode)
+  {
+    $configFile = rex_path::coreData('config.yml');
+    $config =
+      rex_file::getConfig($configFile);
+
+    if (!is_array($config['debug'])) {
+      $config['debug'] = [];
+    }
+
+    $config['debug']['enabled'] = $mode;
+    rex::setProperty('debug', $mode);
+    rex_file::putConfig($configFile, $config);
   }
 }
