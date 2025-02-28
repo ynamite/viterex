@@ -22,21 +22,23 @@ if (rex_addon::get('developer')->isAvailable()) {
     rex_developer_manager::setBasePath(rex_path::src());
 }
 
-$env = @parse_ini_file(rex_path::base('.env'));
+$env = null;
 if (file_exists(rex_path::base('.env.local')))
     $env = @parse_ini_file(rex_path::base('.env.local'));
+
 $devHost = $env ? $env['REDAXO_HOST_NAME'] : 'redaxo-2024.test';
 
 // is development?
 $isDev = $env ? isset($_SERVER['HTTP_HOST']) && $devHost === $_SERVER['HTTP_HOST'] && $env['MODE'] !== 'production' : false;
 viterex::setValue('isDev', $isDev);
+viterex::checkGitBranch('main');
 
 // dist subfolder - defined in vite.config.json
 $distDef = $env ? $env['VITE_DIST_DIR'] : '/dist';
 
 // defining some base urls and paths
 viterex::setValue('distUri', $distDef);
-$distPath = rex_path::base(ltrim($env['VITE_PUBLIC_DIR'], '/') . $distDef);
+$distPath = $env ? rex_path::base(ltrim($env['VITE_PUBLIC_DIR'], '/') . $distDef) : rex_path::base('public' . $distDef);
 viterex::setValue('distPath', $distPath);
 
 // deafult server address, port and entry point can be customized in env.local

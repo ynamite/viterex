@@ -174,4 +174,29 @@ class ViteRex
   {
     return self::$isDev ? self::$viteServer . rex_url::base('assets/') : self::$distUri . '/assets/';
   }
+
+  /**
+   *  get current git branch
+   *  @return string
+   */
+  public static function getGitBranch()
+  {
+    $contents = rex_file::get(rex_path::base('.git/HEAD')); //read the file
+    $explodedstring = explode("/", $contents, 3); //seperate out by the "/" in the string
+    return trim($explodedstring[2]); //get the one that is always the branch name
+  }
+
+  /**
+   *  check if dev branch is active if in dev mode or display warning
+   *  @return void
+   */
+  public static function checkGitBranch($branch = 'dev')
+  {
+    if (!\file_exists(rex_path::base('.git'))) return;
+    if (self::$isDev) {
+      $currentBranch = self::getGitBranch();
+      if ($currentBranch !== $branch)
+        echo '<div style="z-index: 1000; position: sticky; top: 0; left: 0; right: 0; background: red; color: white; padding: 1rem; font-size: 1.5rem; text-align: center;">You are not on the dev branch! Current branch: ' . $branch . '</div>';
+    }
+  }
 }
