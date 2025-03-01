@@ -1,4 +1,4 @@
-# ViteRex 1.2.0 🚀 _Supercharged REDAXO Frontend development with Vite JS_
+# ViteRex 1.2.1 🚀 _Supercharged REDAXO Frontend development with Vite JS_
 
 ![ViteRex](viterex.jpg)
 
@@ -26,12 +26,13 @@ Basierend auf [yak](https://github.com/yakamara/yak) von Thomas Blum ([tbaddade]
 
 ## Features
 
-- automatische Redaxo Installation per Terminal, inkl. gewünschter Addons und Plugins
+- super schnelle Redaxo Installation per Terminal, inkl. gewünschter Addons und Plugins
 - modular – konfigurierbar über eine Konfigurationsdatei unter /setup/setup.cfg
 - lokale Entwicklungsumgebung mit Node und [Vite JS](https://vitejs.dev/)
 - native JS module imports (und CSS imports per JS, oder Assets imports wie CSS, SVG, Bilder, JSON, etc., inklusive Transformationen und so)
 - alles was NPM bzw. Yarn zu bieten haben
 - [Tailwind CSS](https://tailwindcss.com/)
+- [Fluid TW](https://fluid.tw/)
 - Vite JS bzw. [rollup.js](https://rollupjs.org/) als Bundler/Minifier (inkl. PostCSS mit CSS Nesting und Autoprefixer)
 - Live-Reload bzw. HMR für Templates, Struktur, URL (beliebig erweiterbar)
   - /src/templates/\*_/._
