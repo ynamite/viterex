@@ -20,6 +20,7 @@
     "eslint": "^9.21.0",
     "eslint-config-prettier": "^10.0.2",
     "eslint-plugin-prettier": "^5.2.3",
+    "fluid-tailwind": "^1.0.4",
     "postcss": "^8.5.3",
     "postcss-import": "^16.1.0",
     "postcss-nesting": "^13.0.1",
