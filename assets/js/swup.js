@@ -31,6 +31,7 @@ const swup = new Swup({
   native: true,
   plugins: [
     new SwupPreloadPlugin({
+      preloadInitialPage: false,
       preloadHoveredLinks: process.env.NODE_ENV !== 'development'
     }),
     new SwupBodyClassPlugin(),
@@ -42,7 +43,7 @@ const swup = new Swup({
       respectReducedMotion: false
     }),
     new SwupMorphPlugin({
-      containers: ['#menus', '#footer', '#swup-css']
+      containers: ['#menus', '#footer']
     }),
     new SwupRouteNamePlugin(),
     new SwupScrollPlugin({
