@@ -33,6 +33,9 @@ module.exports = {
     }
   },
   plugins: [
+    require('@tailwindcss/typography')({
+      className: 'tw-prose'
+    }),
     addDynamicIconSelectors(),
     require('vidstack/tailwind.cjs')({
       // Optimize output by specifying player selector.
