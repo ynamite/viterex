@@ -38,34 +38,34 @@ const transition = async (selector, itemSelector, params = {}) => {
 }
 
 const transitionOut = async () => {
-  transition('.anim', '.item', { y: -50, direction: 'to' })
-  transition('#list', '.item', { y: -50, direction: 'to' })
-  transition('#portfolio-detail', '.item', { y: -50, direction: 'to' })
+  // transition('.anim', '.item', { y: -50, direction: 'to' })
+  // transition('#list', '.item', { y: -50, direction: 'to' })
+  // transition('#portfolio-detail', '.item', { y: -50, direction: 'to' })
 }
 const transitionIn = async (delay = 0) => {
-  transition('.anim', '.item', { y: 50, clearProps: true, delay: delay })
-  transition('#list', '.item', { y: 50, clearProps: true, delay: delay })
-  transition('#portfolio-detail', '.item', {
-    y: 50,
-    clearProps: true,
-    direction: 'from'
-  })
+  // transition('.anim', '.item', { y: 50, clearProps: true, delay: delay })
+  // transition('#list', '.item', { y: 50, clearProps: true, delay: delay })
+  // transition('#portfolio-detail', '.item', {
+  //   y: 50,
+  //   clearProps: true,
+  //   direction: 'from'
+  // })
 }
 
 const routeTransitions = [
-  {
-    from: '(.*)',
-    to: 'filter',
-    out: async (done) => {
-      await transitionOut()
-      done()
-    },
-    in: async (done) => {
-      ScrollTrigger.update()
-      transitionIn()
-      done()
-    }
-  },
+  // {
+  //   from: '(.*)',
+  //   to: 'filter',
+  //   out: async (done) => {
+  //     await transitionOut()
+  //     done()
+  //   },
+  //   in: async (done) => {
+  //     ScrollTrigger.update()
+  //     transitionIn()
+  //     done()
+  //   }
+  // },
   {
     from: '(.*)',
     to: '(.*)',
@@ -88,14 +88,14 @@ const fragmentOptions = {
       name: 'filter',
       from: '/(projekte|team)/:filter?',
       to: '/(projekte|team)/:filter?',
-      containers: ['#filter-wrap'],
+      containers: ['#filter-projects'],
       scroll: false
     }
   ],
   debug: false
 }
 
-transitionIn(0.2)
+// transitionIn(0.2)
 
 export { transitionOut, transitionIn, fragmentOptions }
 export default routeTransitions

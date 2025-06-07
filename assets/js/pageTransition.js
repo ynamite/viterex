@@ -52,15 +52,15 @@ const build = () => {
 }
 
 const pageTransition = async (type = 'in') => {
-  return new Promise((resolve) => {
-    gsap.delayedCall(0.4, resolve)
-  })
-  return
-  if (type === 'in') {
-    await tl.tweenFromTo('startIn', 'startOut')
-  } else {
-    await tl.play('startOut')
-  }
+  // return new Promise((resolve) => {
+  //   gsap.delayedCall(0.4, resolve)
+  // })
+  // return
+  // if (type === 'in') {
+  //   await tl.tweenFromTo('startIn', 'startOut')
+  // } else {
+  //   await tl.play('startOut')
+  // }
 }
 
 // build()
