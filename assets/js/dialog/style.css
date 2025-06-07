@@ -1,0 +1,21 @@
+dialog {
+  @apply fixed inset-0 z-50 m-0 block h-auto min-h-screen w-screen max-w-full animate-[scale-down_0.5s_forwards] overflow-hidden p-0 transition-opacity duration-500 ease-[var(--ease-squish-3)];
+  .dialog-content {
+    @apply relative z-10 m-0 size-full overflow-auto;
+  }
+  .dialog-background {
+    @apply absolute inset-0;
+  }
+}
+
+dialog[open] {
+  @apply animate-[slide-in-up_0.5s_forwards];
+}
+
+dialog:not([open]) {
+  @apply pointer-events-none opacity-0;
+}
+
+dialog::backdrop {
+  @apply backdrop-blur-sm;
+}
