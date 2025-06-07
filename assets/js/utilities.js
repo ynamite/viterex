@@ -388,21 +388,6 @@ function limitNumberWithinRange(num, min, max) {
   return Math.min(Math.max(parsed, MIN), MAX)
 }
 
-const setBodyScrollLock = async (action, element) => {
-  //   const bodyScrollLock = await import(jsVendorPath + 'bodyScrollLock.js')
-  //   switch (action) {
-  //     case 'on':
-  //       bodyScrollLock.enableBodyScroll(element)
-  //       break
-  //     case 'off':
-  //       bodyScrollLock.disableBodyScroll(element)
-  //       break
-  //     case 'clear':
-  //       bodyScrollLock.clearAllBodyScrollLocks()
-  //       break
-  //   }
-}
-
 const setVh = (suffix = '') => {
   var vh = window.innerHeight * 0.01
   document.documentElement.style.setProperty('--vh' + suffix, vh + 'px')
@@ -591,7 +576,6 @@ export {
   browserIsIE,
   retainScrollPosition,
   getScrollBarWidth,
-  setBodyScrollLock,
   setVh,
   scrollElementIntoView,
   wrapInner,

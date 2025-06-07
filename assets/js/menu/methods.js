@@ -1,3 +1,4 @@
+import { lock, unlock } from 'tua-body-scroll-lock'
 import { addEvent, removeEvent } from '@/js/eventbus.js'
 import dropdowns from './dropdowns.js'
 
@@ -49,6 +50,8 @@ const openMenu = (menu, event) => {
     gsap.delayedCall(0.01, function () {
       $html.classList.add(menu.settings.ns + '-opened')
     })
+    lock(menu.$mobileMenu.firstElementChild)
+
     // Utils.setBodyScrollLock('off', menu.$mobileMenu);
     // $html.classList.add('disable-smooth-scroll');
     toggleListItems(menu)
@@ -113,7 +116,7 @@ const closeMenu = (menu, event) => {
 
   let callback = function () {
     if (!$html.classList.contains(menu.settings.ns + '-open')) return
-
+    unlock(menu.$mobileMenu.firstElementChild)
     // Utils.setBodyScrollLock('on', menu.$mobileMenu);
     gsap.delayedCall(0.01, function () {
       $html.classList.remove(menu.settings.ns + '-opened')
