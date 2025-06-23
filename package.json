@@ -7,7 +7,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "generate-favicon": "real-favicon generate var/data/addons/viterex/faviconDescription.json faviconData.json public",
-    "deploy": "./vendor/bin/dep deploy"
+    "deploy": "./.tools/bin/dep deploy"
   },
   "dependencies": {
     "@gsap/business": "^3.12.7",
