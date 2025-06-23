@@ -306,9 +306,42 @@ open "${REDAXO_HOST_PROTOCOL}://${REDAXO_HOST_NAME}/redaxo/"
 git init
 git add .
 git commit -m "initial commit"
-if [ $GITLAB_NAMESPACE && $GITLAB_REPO_NAME ]; then
-    git push --set-upstream "git@gitlab.com:${GITLAB_NAMESPACE}/${GITLAB_REPO_NAME}.git" main
-    git remote add origin "https://gitlab.com/${GITLAB_NAMESPACE}/${GITLAB_REPO_NAME}.git"
+if [ $GIT_PROVIDER && $GIT_NAMESPACE && $GIT_REPO_NAME ]; then
+    if [$GIT_PROVIDER = 'github.com']; then
+        # Check if authenticated with GitHub CLI
+        if gh auth status >/dev/null 2>&1; then
+            echo "✅ GitHub authenticated"
+        else
+        gh auth login --with-token < ~/.gh_token || {
+            echo "❌ Failed to authenticate with GitHub" >&2
+            exit 1
+        }
+        fi
+        if gh auth status >/dev/null 2>&1; then
+            gh repo create "${GIT_NAMESPACE}"/"${GIT_REPO_NAME}" --private --description "" || {
+                echo "❌ Failed to create GitHub repository: ${GIT_NAMESPACE}/${GIT_REPO_NAME}" >&2
+                exit 1
+            } 
+            echo "✅ Successfully created GitHub repository: ${GIT_NAMESPACE}/${GIT_REPO_NAME}"
+        fi
+
+    else if [$GIT_PROVIDER = 'gitlab.com']; then
+        # Check if authenticated with GitLab CLI
+        if glab auth status >/dev/null 2>&1; then
+            echo "✅ GitLab authenticated"
+        else
+        glab auth login --with-token < ~/.gl_token || {
+            echo "❌ Failed to authenticate with GitLab" >&2
+            exit 1
+        }
+        fi
+    else
+        echo "❌ Unsupported GIT_PROVIDER: ${GIT_PROVIDER}" >&2
+        exit 1
+    fi
+    git push --set-upstream "git@${GIT_PROVIDER}:${GIT_NAMESPACE}/${GIT_REPO_NAME}.git" main
+    git remote add origin "git@${GIT_PROVIDER}:${GIT_NAMESPACE}/${GIT_REPO_NAME}.git"
+
 fi
 
 
