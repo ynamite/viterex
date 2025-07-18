@@ -1,16 +1,5 @@
 <?php
 /*
- * Redaxo CMS VITE JIT development
- * Inspired by https://github.com/andrefelipe/vite-php-setup
- *
- *  @author      ynamite @ GitHub <https://github.com/ynamite/viterex>
- *  @version     1.0.0
- *
- *  For copyright and license information, please view the LICENSE
- *  file that was distributed with this source code.
- *
- *  ------------------------------------------------------------------------------------------------
- *
  *  Class with utility functions for loading scripts in templates
  */
 
@@ -93,6 +82,9 @@ class ViteRex
   public static function getManifestArray()
   {
     $manifest = rex_file::get(self::$viteManifestPath);
+    if (!$manifest) {
+      return [];
+    }
     return array_reverse(json_decode($manifest, true));
   }
 
@@ -207,15 +199,13 @@ class ViteRex
    */
   public static function checkDebugMode()
   {
-    if (!rex::isLiveMode()) {
-      if (self::$isDev) {
-        if (!rex::isDebugMode()) {
-          self::setDebugMode(true);
-        }
-      } else {
-        if (rex::isDebugMode()) {
-          self::setDebugMode(false);
-        }
+    if (self::$isDev) {
+      if (!rex::isDebugMode()) {
+        self::setDebugMode(true);
+      }
+    } else {
+      if (rex::isDebugMode()) {
+        self::setDebugMode(false);
       }
     }
   }
