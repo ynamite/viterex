@@ -61,6 +61,14 @@ add('clear_paths', [
     '.eslintrc.cjs',
 ]);
 
+// delete shared/media directory if it exists
+before('deploy:success', function () {
+    if (test('[ -d {{deploy_path}}/shared/media ]')) {
+        run('rm -rf {{deploy_path}}/shared/media');
+    }
+});
+
+
 // Hosts
 host($deploymentName)
     ->setHostname($deploymentHost)
