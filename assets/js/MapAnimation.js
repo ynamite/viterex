@@ -1,5 +1,5 @@
 import { gsap, ScrollTrigger } from '@/js/gsap.js'
-import { DrawSVGPlugin } from '@gsap/business/DrawSVGPlugin'
+import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin'
 import { createSpring } from '@/js/CreateSpring'
 import swup from '@/js/swup.js'
 

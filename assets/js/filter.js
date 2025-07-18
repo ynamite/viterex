@@ -1,7 +1,7 @@
 import { addEvent, removeEvent } from '@/js/eventbus.js'
 import { createSpring } from '@/js/CreateSpring'
 import { gsap } from '@/js/gsap.js'
-import { Flip } from '@gsap/business/Flip'
+import { Flip } from 'gsap/Flip'
 
 gsap.registerPlugin(Flip)
 
