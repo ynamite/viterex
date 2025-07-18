@@ -35,6 +35,7 @@ class LocalValetDriver extends LaravelValetDriver
    */
   public function isStaticFile(string $sitePath, string $siteName, string $uri)/*: string|false */
   {
+
     $publicPath = $this->getPublicPath($sitePath) . trim($uri, '/');
     if ($this->isActualFile($publicPath)) {
       return $publicPath;
@@ -74,5 +75,39 @@ class LocalValetDriver extends LaravelValetDriver
     }
 
     return null;
+  }
+
+  /**
+   * Get the logs paths for the application to show in Herds log viewer.
+   */
+  public function logFilesPaths()
+  {
+    return ["/var/log"];
+  }
+
+  /**
+   * Display information about the application in the information tab of the Sites UI.
+   * For Laravel, it's the output of the `php artisan about` command.
+   */
+  public function siteInformation(string $sitePath, string $phpBinary): array
+  {
+    $output = shell_exec('herd php bin/console system:report 2>&1');
+    if ($output === null) {
+      return [];
+    }
+    $output = trim($output);
+    if (empty($output)) {
+      return [];
+    }
+
+    return [
+      "Overview" => [
+        "Site" => $sitePath,
+        // "Runway operational" => true,
+      ],
+      "System Info" => [
+        "output" => $output
+      ],
+    ];
   }
 }
