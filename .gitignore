@@ -7,6 +7,7 @@ node_modules
 
 /public/media/*
 !/public/media/.redaxo
+/public/assets/addons/tinymce/generated/profiles.js
 
 /var/cache/*
 !/var/cache/.*
@@ -16,7 +17,7 @@ node_modules
 !/var/data/addons/mform/*
 !/var/data/addons/ydeploy/*
 !/var/data/addons/statistics/*
-/var/data/core/*
+/var/data/core/config.yml
 /var/log/*
 
 # Editor directories and files
@@ -24,6 +25,7 @@ node_modules
 !.vscode/extensions.json
 .idea
 .yarnrc.yml
+.yarn
 .npmrc
 .DS_Store
 *.suo
