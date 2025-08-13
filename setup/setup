@@ -148,6 +148,7 @@ mkdir -p bin
 mkdir -p src
 mkdir -p var
 
+mv assets src
 mv public/redaxo/bin/* bin
 mv public/redaxo/cache var
 mv public/redaxo/data var
@@ -274,7 +275,7 @@ INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES
 ('massif_settings',	'address_phone',	'\"$MASSIF_SETTINGS_PHONE\"'),
 ('massif_settings',	'address_plz',	'\"$MASSIF_SETTINGS_PLZ\"'),
 ('massif_settings',	'address_strasse',	'\"$MASSIF_SETTINGS_STRASSE\"'),
-('viterex',	'favicon_master',	'\"assets\\/img\\/favicon.png\"'),
+('viterex',	'favicon_master',	'\"src\\/assets\\/img\\/favicon.png\"'),
 ('viterex',	'favicon_name',	'\"$MASSIF_SETTINGS_FIRMA\"');
 INSERT INTO \`rex_yrewrite_domain\` (\`id\`, \`domain\`, \`mount_id\`, \`start_id\`, \`notfound_id\`, \`clangs\`, \`clang_start\`, \`clang_start_auto\`, \`clang_start_hidden\`, \`robots\`, \`title_scheme\`, \`description\`, \`auto_redirect\`, \`auto_redirect_days\`) VALUES
 (1,	'$REDAXO_HOST_PROTOCOL://$REDAXO_HOST_NAME/',	0,	1,	2,	'',	1,	0,	0,	'User-agent: *\r\nDisallow:',	'%T / %SN',	'',	1,	0);

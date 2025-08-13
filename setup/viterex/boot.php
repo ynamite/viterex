@@ -43,7 +43,7 @@ viterex::setValue('distPath', $distPath);
 
 // deafult server address, port and entry point can be customized in env.local
 viterex::setValue('viteServer', $env ? $env['VITE_DEV_SERVER'] . ':' . $env['VITE_DEV_SERVER_PORT'] : 'http://localhost:3000');
-viterex::setValue('viteEntryPoint', $env ? $env['VITE_ENTRY_POINT'] : '/main.js');
+viterex::setValue('viteEntryPoint', $env ? $env['VITE_ENTRY_POINT'] : '/index.js');
 
 $manifest = 'manifest.json';
 $manifestPath = $distPath . '/' . $manifest;

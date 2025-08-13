@@ -11,9 +11,10 @@ export default ({ mode }) => {
       //vue(),
       vidstack({ include: /player\// }),
       liveReload([
-        __dirname + '/**/*.php',
+        __dirname + '/public/**/*.php',
+        __dirname + '/src/**/*.php',
         __dirname +
-          '/assets/**/(*.svg|*.png|*.jpg|*.jpeg|*.webp|*.avif|*.gif|*.woff|*.woff2)',
+          '/src/assets/**/(*.svg|*.png|*.jpg|*.jpeg|*.webp|*.avif|*.gif|*.woff|*.woff2)',
         __dirname + '/var/cache/addons/(structure|url)/**'
       ])
     ],
@@ -29,7 +30,7 @@ export default ({ mode }) => {
     base:
       process.env.NODE_ENV === 'development' ? '/' : process.env.VITE_DIST_DIR,
     resolve: {
-      alias: [{ find: '@', replacement: path.resolve(__dirname, 'assets') }]
+      alias: [{ find: '@', replacement: path.resolve(__dirname, 'src/assets') }]
     },
 
     build: {
@@ -52,7 +53,7 @@ export default ({ mode }) => {
         // cache: false,
         input: {
           main: path.resolve(__dirname + process.env.VITE_ENTRY_POINT),
-          critical: path.resolve(__dirname + '/assets/css/critical.css')
+          critical: path.resolve(__dirname + '/src/assets/css/critical.css')
         },
         output: {},
         // output: {
@@ -64,7 +65,7 @@ export default ({ mode }) => {
           copy({
             targets: [
               {
-                src: 'assets/img/**/*',
+                src: 'src/assets/img/**/*',
                 dest: 'public/dist/assets/img'
               }
             ],
