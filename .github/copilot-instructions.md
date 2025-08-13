@@ -2,27 +2,62 @@
 
 ## Projektübersicht
 
-Dies ist eine REDAXO CMS Installation (Version 5.x) in einem Docker Container. REDAXO ist ein deutsches Content Management System, das seit 2004 entwickelt wird und auf Flexibilität und Einfachheit setzt.
+Dies ist eine REDAXO CMS Installation (Version 5.x). REDAXO ist ein deutsches Content Management System, das seit 2004 entwickelt wird und auf Flexibilität und Einfachheit setzt.
 
 ## Wichtige Prinzipien für Copilot
 
 ### 1. Präferiere Quellcode-Analyse vor allgemeinem Wissen
 
 - **IMMER** zuerst die vorhandenen Dateien und Klassen in diesem Projekt analysieren
+- **IMMER**: Kommentare in Englisch schreiben, um die Verständlichkeit für internationale Entwickler zu gewährleisten.
+- **IMMER** zuerst die vorhandenen Dateien und Klassen in diesem Projekt analysieren
+- **IMMER** den Redaxo-Cache über die Konsole löschen, um sicherzustellen, dass Änderungen sofort wirksam werden `bin/console cache:clear`
+- **IMMER** die Core-System-Logs in `var/log/system.log` überprüfen, um Fehler und Warnungen zu identifizieren
+- **IMMER** die Core-Dateien in `src/core/` und Addon-Dateien in `src/addons/` untersuchen, um die tatsächliche Implementierung zu verstehen.
+- **IMMER** für allgemeine SQL-Abfragen die `rex_sql` Klasse verwenden und die Methoden analysieren, um Datenbankoperationen durchzuführen
 - **NICHT** auf generelles REDAXO-Wissen zurückgreifen, sondern die tatsächlich vorhandenen APIs verwenden
 - Bei Unsicherheiten die entsprechenden Core-Dateien in `src/core/` untersuchen
+- **NICHT**: `README.md` nicht auf Englisch übersetzen, da es sich um eine deutsche REDAXO Installation handelt und die Zielgruppe deutschsprachig ist.
+- **NICHT** die Konsole mit `rm -rf var/cache/*` leeren, sondern den Redaxo Cache über die Konsole löschen
+- **NICHT** auf generelles REDAXO-Wissen zurückgreifen, sondern die tatsächlich vorhandenen APIs verwenden
+- Bei Unsicherheiten die entsprechenden Core-Dateien in `src/core/` untersuchen
+- REDAXO bietet eine mächtige Konsole über das console-Skript, mit dem man PHP-Code ausführen und testen kann
+  - Beispiel: `php bin/console project:run-snippet "echo rex_url::backend();"` gibt die Backend-URL aus
+  - Beispiel: `php bin/console project:run-snippet "echo rex_sql::factory()->getTableColumns('rex_user');"` listet die Spalten der `rex_user` Tabelle auf
+  - Beispiel: `php bin/console project:run-snippet "var_dump(rex_addon::get('massif_settings')->getConfig());"` gibt die Konfiguration des `massif_settings` Addons aus
+  - es können auch Konsolen-Befehle erstellt werden, die dann über `php bin/console *Befehl*` ausgeführt werden können
+
 
 ### 2. REDAXO API-Klassen recherchieren z.B:
 
 Wichtige Core-Klassen, die analysiert werden sollten:
 
-- `rex_url` - URL-Generierung (in `src/core/lib/util/url.php`)
-- `rex_sql` - Datenbankoperationen (in `src/core/lib/sql/sql.php`)
-- `rex_fragment` - Template-Fragmente
-- `rex_view` - View-Helper
-- `rex_i18n` - Internationalisierung
-- `rex_config` - Konfiguration
 - `rex_addon` - Addon-Verwaltung
+- `rex_addon_interface` - Addon-Interface
+- `rex_config` - Konfiguration
+- `rex_dir` - Verzeichnisoperationen
+- `rex_extension` - Event-basierte Erweiterungen
+- `rex_file` - Dateioperationen
+- `rex_fragment` - Template-Fragmente
+- `rex_i18n` - Internationalisierung
+- `rex_request`, `rex_post` und `rex_get` - HTTP-Anfragen
+- `rex_response` - HTTP-Antworten
+- `rex_sql` - Datenbankoperationen (in `src/core/lib/sql/sql.php`)
+- `rex_sql_exception` - Datenbank-Fehlerbehandlung
+- `rex_url` - URL-Generierung (in `src/core/lib/util/url.php`)
+- `rex_view` - Backend View-Helper
+
+Wichtige benutzerdefinierte Addons:
+
+- `massif` - Massiv-Addon für erweiterte Funktionen
+- `massif_settings` - Globale Einstellungen für die Webseite
+- `viterex` - Viterex Addon für Frontend-Entwicklung mit Vite JS
+
+Wichtige benutzerdefinierte Klassen:
+
+- `massif_img` - Bildverarbeitung und -optimierung
+- `massif_utils` - Hilfsfunktionen des Massif-Addons. Vor allem die statische Methode `parse`
+
 
 ### 3. Addon-spezifische APIs erforschen
 
@@ -38,8 +73,32 @@ Verfügbare Addons (in `src/addons/` und Assets in `public/assets/addons/`):
 - **Watson** - Backend-Suche und Quick-Actions
 - **CKE5** - CKEditor 5 Integration
 - **UIKit Collection** - UIKit-Komponenten
+- **Developer** - Entwickler-Tools und Module
+- **massif** - Massif-Addon für erweiterte Funktionen
+- **massif_settings** - Globale Einstellungen für die Webseite
+- **viterex** - Viterex Addon für Frontend-Entwicklung mit Vite JS
 
 ## Frontend-Entwicklung
+
+Wenn immer möglich auf weitere Packages und Plugins verzichten.
+Ziel ist es, die Anzahl der Abhängigkeiten zu minimieren und die Performance zu optimieren.
+
+### CSS-Framework-Hierarchie
+
+1. **Tailwind CSS v3** - Utility-First CSS Framework
+2. **Fluid.tw** - Fluid Responsive Design
+
+### JS-Framework
+1. **Vanilla Javascript**
+2. **LazySizes** - Lazy Loading für Bilder und iframes
+3. **GSAP** - Animationen und Transitionen
+4. **Swup JS** - Seitenübergänge und -animationen
+5. **Swiper JS** - Touch-freundliche Slider und Karussells
+6. **Three.js** - 3D-Grafiken und Animationen
+7. **Store** - Zustandverwaltung für komplexe Anwendungen (Eigenentwicklung als Test, allenfalls verwerfen)
+
+
+## Backend-Entwicklung
 
 ### CSS-Framework-Hierarchie
 
@@ -99,7 +158,14 @@ REDAXO hat ein eingebautes Theme-System:
 4. **Konfiguration** - `rex_config` für Einstellungen verwenden
 5. **Addon-API** - `rex_addon::get()` für Addon-spezifische Funktionen
 6. **Hooks** - `rex_extension` für Event-basierte Erweiterungen nutzen
-7. **Cache-Management** - `rex_cache` für Caching-Strategien
+7. **Cache-Management** - `rex_addon::get(*addon-key*)->getCachePath($file)` Caching Verzeichniss für Addons verwenden
+
+- **Wichtig**: Redaxo verfügt über KEINE Klasse `rex_cache` für Cache-Management, sondern nutzt die `rex_addon` Klasse für Addon-spezifische Caches
+- **Wichtig**: der Cache muss manuell erzeugt und verwaltet werden. Zum Beispiel:
+  - `rex_file::putCache(rex_addon::get(*addon-key*)->getCachePath($file), $data)`
+  - `rex_file::getCache(rex_addon::get(*addon-key*)->getCachePath($file), $default)`
+  - `rex_file::delete(rex_addon::get(*addon-key*)->getCachePath($file))`
+
 8. **Dateioperationen** - `rex_file` für Datei-Handling
 9. **Media-Handling** - `rex_media` für Medienoperationen
 10. **Formulare** - `rex_form` für Formular-Generierung und Validierung
@@ -191,7 +257,7 @@ REDAXO hat ein eingebautes Theme-System:
 
 ### Log-Dateien
 
-- Backend-Logs in `var/data/log/`
+- Backend-Logs in `var/log/`
 - Eigene Logs via `rex_logger::log()` erstellen
 
 ### Performance
