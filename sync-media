@@ -10,5 +10,5 @@ if [ -z "$REMOTE_SERVER" ]; then
   echo "❌ Remote server is not set. Please set the REMOTE_SERVER variable in the script."
   exit 1
 fi
-rsync -e "ssh -tt" -avz --progress -e "ssh -p 2121" "$REMOTE_SERVER_USER@$REMOTE_SERVER:$REMOTE_PATH/shared/public/media" "$LOCAL_PATH/"
+rsync -e "ssh -tt" -avz --progress -e "ssh -p 2121" "$REMOTE_SERVER_USER@$REMOTE_SERVER:$REMOTE_PATH/shared/public/media/*" "$LOCAL_PATH/"
 echo "✅ Media files synced successfully."

@@ -3,6 +3,11 @@ composer install --no-interaction
 echo 
 yarn
 cp .env .env.local
+# test if var/data/addons/ydeploy exists, if not create it
+if [ ! -d "var/data/addons/ydeploy" ]; then
+  echo "Creating var/data/addons/ydeploy directory..."
+  mkdir -p var/data/addons/ydeploy
+fi
 # add some line breaks
 echo
 echo
