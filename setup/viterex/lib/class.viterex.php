@@ -6,6 +6,7 @@
 namespace Ynamite\ViteRex;
 
 use rex;
+use rex_be_controller;
 use rex_file;
 use rex_path;
 use rex_url;
@@ -185,6 +186,16 @@ class ViteRex
    */
   public static function checkGitBranch($branch = 'dev')
   {
+    $isMediaPool = false;
+    if (rex::isBackend()) {
+      $pagePart1 = rex_be_controller::getCurrentPagePart(1);
+      $pagePart2 = rex_be_controller::getCurrentPagePart(2);
+      $isMediaPool = $pagePart1 === 'mediapool';
+      $isUploaderEndpoint = $pagePart1 === 'uploader' && $pagePart2 === 'endpoint';
+      if ($isMediaPool || $isUploaderEndpoint) {
+        return;
+      }
+    }
     if (!\file_exists(rex_path::base('.git'))) return;
     if (self::$isDev) {
       $currentBranch = self::getGitBranch();
