@@ -1,6 +1,7 @@
 /.build
 node_modules
 /vendor
+/.tools
 *.local
 
 /public/dist
