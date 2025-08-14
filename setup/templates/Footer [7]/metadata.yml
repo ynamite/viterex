@@ -1,0 +1,9 @@
+name: '* Footer'
+key: footer
+active: false
+attributes:
+    ctype: {  }
+    modules:
+        1: { all: '1' }
+    categories:
+        all: '1'

@@ -1,0 +1,9 @@
+name: MJML/Mail
+key: mjml
+active: false
+attributes:
+    ctype: {  }
+    modules:
+        1: { 0: '151', 1: '157', 2: '156', all: 0 }
+    categories:
+        all: '1'

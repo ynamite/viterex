@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 composer install --no-interaction
+git submodule update --init --recursive
 echo 
 yarn
 cp .env .env.local

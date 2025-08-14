@@ -1,0 +1,9 @@
+name: '* Default Modal/Overlay'
+key: modal
+active: true
+attributes:
+    ctype: {  }
+    modules:
+        1: { 0: '163', all: 0 }
+    categories:
+        all: '1'

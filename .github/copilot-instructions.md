@@ -22,9 +22,9 @@ Dies ist eine REDAXO CMS Installation (Version 5.x). REDAXO ist ein deutsches Co
 - **NICHT** auf generelles REDAXO-Wissen zurückgreifen, sondern die tatsächlich vorhandenen APIs verwenden
 - Bei Unsicherheiten die entsprechenden Core-Dateien in `src/core/` untersuchen
 - REDAXO bietet eine mächtige Konsole über das console-Skript, mit dem man PHP-Code ausführen und testen kann
-  - Beispiel: `php bin/console project:run-snippet "echo rex_url::backend();"` gibt die Backend-URL aus
-  - Beispiel: `php bin/console project:run-snippet "echo rex_sql::factory()->getTableColumns('rex_user');"` listet die Spalten der `rex_user` Tabelle auf
-  - Beispiel: `php bin/console project:run-snippet "var_dump(rex_addon::get('massif_settings')->getConfig());"` gibt die Konfiguration des `massif_settings` Addons aus
+  - Beispiel: `php bin/console massif:exec-php "echo rex_url::backend();"` gibt die Backend-URL aus
+  - Beispiel: `php bin/console massif:exec-php "echo rex_sql::factory()->getTableColumns('rex_user');"` listet die Spalten der `rex_user` Tabelle auf
+  - Beispiel: `php bin/console massif:exec-php "var_dump(rex_addon::get('massif_settings')->getConfig());"` gibt die Konfiguration des `massif_settings` Addons aus
   - es können auch Konsolen-Befehle erstellt werden, die dann über `php bin/console *Befehl*` ausgeführt werden können
 
 
@@ -63,6 +63,7 @@ Wichtige benutzerdefinierte Klassen:
 
 Verfügbare Addons (in `src/addons/` und Assets in `public/assets/addons/`):
 
+- **Project** - projektspezifische Anpassungen und Funktionen
 - **YForm** - Formular-Builder und Tabellen-Manager
 - **YRewrite** - URL-Rewriting und SEO
 - **MBlock** - Flexible Content-Blöcke
