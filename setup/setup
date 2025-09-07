@@ -121,7 +121,6 @@ mv public/redaxo/bin/* bin
 mv public/redaxo/cache var
 mv public/redaxo/data var
 mv public/redaxo/src/addons src
-cp -r setup/viterex src/addons
 mv public/redaxo/src/core src
 mv public/LICENSE.md LICENSE.md
 rm -f public/README.md README.de.md
@@ -177,11 +176,6 @@ done
 #      installPackage "${repo}"
 #     wait
 # done
-
-printf "\n${CRED}Installing and activating package${CNO} ViteRex\n"
-composer install --working-dir=src/addons/viterex --optimize-autoloader --no-interaction --quiet
-php bin/console package:install "viterex" --no-interaction --quiet
-
 
 # mv src/addons/massif/fragments src
 mkdir -p src/addons/project/fragments
@@ -245,9 +239,7 @@ INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES
 ('massif_settings',	'address_ort',	'\"$MASSIF_SETTINGS_ORT\"'),
 ('massif_settings',	'address_phone',	'\"$MASSIF_SETTINGS_PHONE\"'),
 ('massif_settings',	'address_plz',	'\"$MASSIF_SETTINGS_PLZ\"'),
-('massif_settings',	'address_strasse',	'\"$MASSIF_SETTINGS_STRASSE\"'),
-('viterex',	'favicon_master',	'\"src\\/assets\\/img\\/favicon.png\"'),
-('viterex',	'favicon_name',	'\"$MASSIF_SETTINGS_FIRMA\"');
+('massif_settings',	'address_strasse',	'\"$MASSIF_SETTINGS_STRASSE\"');
 INSERT INTO \`rex_yrewrite_domain\` (\`id\`, \`domain\`, \`mount_id\`, \`start_id\`, \`notfound_id\`, \`clangs\`, \`clang_start\`, \`clang_start_auto\`, \`clang_start_hidden\`, \`robots\`, \`title_scheme\`, \`description\`, \`auto_redirect\`, \`auto_redirect_days\`) VALUES
 (1,	'$REDAXO_HOST_PROTOCOL://$REDAXO_HOST_NAME/',	0,	1,	2,	'',	1,	0,	0,	'User-agent: *\r\nDisallow:',	'%T / %SN',	'',	1,	0);
 "
@@ -273,13 +265,17 @@ rsync -a --ignore-existing tmp-assets/ ./
 rm -rf tmp-assets
 
 git init
+git submodule add git@github.com:ynamite/viterex-addon.git src/addons/viterex/.
 git submodule add git@github.com:ynamite/redaxo_massif.git src/addons/massif/.
 git submodule add git@github.com:ynamite/massif_settings.git src/addons/massif_settings/.
 git submodule add git@github.com:ynamite/massif_dnd_sorter.git src/addons/massif_dnd_sorter/.
 git submodule update --init --recursive
+installPackage "viterex"
+composer install --working-dir=src/addons/viterex --optimize-autoloader --no-interaction --quiet
 installPackage "massif"
 installPackage "massif_settings"
 installPackage "massif_dnd_sorter"
+printf "\n${CRED}Installing and activating package${CNO} ViteRex\n"
 
 # execute yarn
 yarn
