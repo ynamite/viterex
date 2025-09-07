@@ -1,0 +1,21 @@
+{
+  "name": "ynamite/viterex",
+  "require": {
+    "php": ">=8.1"
+  },
+  "require-dev": {
+    "vlucas/phpdotenv": "^5.6"
+  },
+  "autoload": {
+    "classmap": [
+      "lib/"
+    ]
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true,
+    "platform": {
+      "php": "8.3.24"
+    }
+  }
+}

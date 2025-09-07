@@ -5,88 +5,163 @@
 
 namespace Ynamite\ViteRex;
 
+use Dotenv\Dotenv;
 use rex;
 use rex_be_controller;
 use rex_file;
+use rex_finder;
 use rex_path;
 use rex_url;
+use rex_ydeploy;
+
+use function file_exists;
+use function str_starts_with;
+use function strtolower;
 
 /** @api */
-class ViteRex
+final class ViteRex
 {
-  /** @var boolean */
-  private static $isDev = false;
-  /** @var string */
-  private static $distUri = '';
-  /** @var string */
-  private static $distPath = '';
-  /** @var string */
-  private static $viteServer = '';
-  /** @var string */
-  private static $viteEntryPoint = '';
-  /** @var string */
-  private static $viteManifestPath = '';
+  private static ?self $instance = null;
 
-  /**
-   *  outputs tags and paths for assets in dev and production environments
-   *  @return string html
-   */
-  public static function getAssets()
+  // private string $distUri = '';
+  // private string $distPath = '';
+  // private string $viteServer = '';
+  // private string $viteEntryPoint = '';
+  // private string $viteManifestPath = '';
+
+  private string $buildPath;
+  private string $buildUrl;
+  private string $devServerUrl;
+  private string $entryPoint;
+  private bool $isDev;
+  private array $manifest = [];
+  private string $manifestPath;
+
+  public function __construct()
   {
-    $html = '';
-    if (self::$isDev) {
-      $html .= '<script type="module" crossorigin src="' . self::$viteServer . self::$viteEntryPoint . '"></script>';
-    } else {
-      $manifestArray = self::getManifestArray();
-      if (is_array($manifestArray)) {
-        foreach ($manifestArray as $key => $dependency) {
-          if (isset($dependency['isEntry']) && $dependency['isEntry'] === true) {
-            $pathInfo = pathinfo($dependency['file']);
-            if ($pathInfo['extension'] !== 'js') continue;
-            $cssFiles = isset($dependency['css']) ? $dependency['css'] : [];
-            foreach ($cssFiles as $cssFile) {
-              $html .= '<link rel="stylesheet" href="' . self::$distUri . '/' . $cssFile . '">';
-            }
-            $html .= '<script type="module" crossorigin src="' . self::$distUri  . '/' . $dependency['file'] . '"></script>';
-          }
-        }
-      }
+    $dotenv = Dotenv::createImmutable(rex_path::base(), ['.env', '.env.local', '.env.development', '.env.production'], false);
+    $dotenv->load();
+
+    $this->buildUrl = $_ENV['VITE_DIST_DIR'] ?: '/dist';
+    $this->buildPath = isset($_ENV['VITE_PUBLIC_DIR']) ? rex_path::base(ltrim($_ENV['VITE_PUBLIC_DIR'], '/') . $this->buildUrl) : rex_path::base('public' . $this->buildUrl);
+    $this->devServerUrl = isset($_ENV['VITE_DEV_SERVER']) ? $_ENV['VITE_DEV_SERVER'] . ':' . $_ENV['VITE_DEV_SERVER_PORT'] : 'http://localhost:3000';
+    $this->entryPoint = $_ENV['VITE_ENTRY_POINT'] ?: '/index.js';
+    $this->manifestPath = $this->buildPath . '/.vite/manifest.json';
+
+    $this->isDev = $this->isDevServerRunning();
+    // dd($this->devServerUrl);
+
+    $this->checkGitBranch('main');
+    $this->checkDebugMode();
+  }
+
+  public static function factory(): self
+  {
+    if (self::$instance) {
+      return self::$instance;
     }
-    return $html;
+
+    return self::$instance = new self();
+  }
+
+  private function isDevServerRunning(): bool
+  {
+    // Check if Vite dev server is accessible
+    $context = stream_context_create([
+      'http' => [
+        'timeout' => 1,
+        'ignore_errors' => true,
+      ],
+      'ssl' => [
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+      ]
+    ]);
+    return @file_get_contents($this->devServerUrl . '/@vite/client', false, $context) !== false;
   }
 
   /**
-   *  outputs critical css in production for a specific article
-   *  @return string html
+   *  outputs tags and paths for assets in dev and production environments
+   *  @return array<string> html
    */
-  public static function getCriticalCss($loadInDev = false)
+  public static function getAssets(): array
   {
-    $key = 'assets/css/critical.css';
-    if (self::$isDev && !$loadInDev) {
-      return '<link rel="stylesheet" href="' . self::$viteServer . $key . '">';
-    };
-    $manifestArray = self::getManifestArray();
-    $criticalCss = isset($manifestArray[$key]) ? $manifestArray[$key] : null;
-    if (!$criticalCss) return;
-    $criticalCssPath = self::$distPath . '/' . $criticalCss['file'];
-    if (!file_exists($criticalCssPath)) return;
-    $html = '<style>';
-    $html .= rex_file::get($criticalCssPath);
-    $html .= '</style>';
-    return $html;
+    $instance = self::factory();
+
+    // preload webfonts
+    $webfontsPreload = $instance->getWebfontsPreload();
+
+    if ($instance->isDev) {
+      return [
+        'preload' => $webfontsPreload,
+        'criticalCSS' => '',
+        'css' => '<link rel="stylesheet" href="' . self::getAssetsUrl() . 'css/style.css" media="all">', // Vite injects CSS in dev mode
+        'js' => '<script type="module" src="' . $instance->devServerUrl . '/@vite/client"></script>' .
+          '<script type="module" src="' . $instance->devServerUrl . $instance->entryPoint . '"></script>'
+      ];
+    }
+
+    // Production: Read manifest.json
+    $manifest = $instance->getManifestArray();
+    $entryPoint = trim($instance->entryPoint, '/');
+    $entry = $manifest[$entryPoint];
+
+    $criticalPath = $instance->buildPath . "/assets/critical.css";
+    $criticalCSS = file_exists($criticalPath) ? '<style>' . rex_file::get($criticalPath) . '</style>' : '';
+
+    return [
+      'preload' => $webfontsPreload,
+      'criticalCSS' => $criticalCSS,
+      'css' => '<link rel="stylesheet" href="' . $instance->buildUrl . '/' . $entry['css'][0] . '" media="print" onload="this.media=\'all\'">',
+      'js' => '<script type="module" src="' . $instance->buildUrl . '/' . $entry['file'] . '"></script>'
+    ];
+  }
+
+  /**
+   * Get preload links for webfonts
+   * 
+   * @return string
+   */
+  public function getWebfontsPreload(): string
+  {
+    $preloadArray = [];
+
+    if ($this->isDev) {
+      foreach (rex_finder::factory(self::getAssetsPath() . 'fonts')->filesOnly()->sort() as $file) {
+        $preloadArray[] = '<link rel="preload" href="' . self::getAssetsUrl() . 'fonts/' . $file->getFilename() . '" as="font" type="font/' . $file->getExtension() . '" crossorigin>';
+      }
+    } else {
+      $manifest = $this->getManifestArray();
+      $entryPoint = trim($this->entryPoint, '/');
+      $entry = $manifest[$entryPoint];
+
+      // Preload web fonts
+      foreach ($entry['assets'] as $asset) {
+        // check if is font woff2|woff|ttf|otf
+        $extension = pathinfo($asset, PATHINFO_EXTENSION);
+        if (in_array(strtolower($extension), ['woff2', 'woff', 'ttf', 'otf'])) {
+          $preloadArray[] = '<link rel="preload" href="' . $this->buildUrl . '/' . $asset . '" as="font" type="font/' . $extension . '" crossorigin>';
+        }
+      }
+    }
+    return implode("\n", $preloadArray);
   }
 
   /**
    *  get manifest data as array
    *  @return array
    */
-  public static function getManifestArray()
+  public function getManifestArray(): array
   {
-    $manifest = rex_file::get(self::$viteManifestPath);
-    if (!$manifest) {
-      return [];
+    if (!empty($this->manifest)) {
+      return $this->manifest;
     }
-    return array_reverse(json_decode($manifest, true));
+    $manifest = rex_file::get($this->manifestPath);
+    if (!$manifest) {
+      $this->manifest = [];
+    }
+    $this->manifest = array_reverse(json_decode($manifest, true));
+    return $this->manifest;
   }
 
   /**
@@ -95,7 +170,7 @@ class ViteRex
    *  @param string $value Value to set
    *  @return void
    */
-  public static function setValue($key, $value)
+  public static function setValue($key, $value): void
   {
     self::${$key} = $value;
   }
@@ -106,9 +181,9 @@ class ViteRex
    *  @param string $dir Directory to get from
    *  @return string
    */
-  public static function getAsset($name, $dir = '')
+  public static function getAsset($file, $dir = ''): string|null
   {
-    return rex_file::get(self::getAssetsPath() . $dir . '/' . $name);
+    return rex_file::get(self::getAssetsPath() . $dir . '/' . $file);
   }
 
   /**
@@ -116,7 +191,7 @@ class ViteRex
    *  @param string $filename Filename to get
    *  @return string
    */
-  public static function getImg($name)
+  public static function getImg($name): string|null
   {
     return self::getAsset($name, 'img');
   }
@@ -126,7 +201,7 @@ class ViteRex
    *  @param string $filename Filename to get
    *  @return string
    */
-  public static function getCss($name)
+  public static function getCss($name): string
   {
     return self::getAsset($name, 'css');
   }
@@ -136,7 +211,7 @@ class ViteRex
    *  @param string $filename Filename to get
    *  @return string
    */
-  public static function getFont($name)
+  public static function getFont($name): string
   {
     return self::getAsset($name, 'fonts');
   }
@@ -146,7 +221,7 @@ class ViteRex
    *  @param string $filename Filename to get
    *  @return string
    */
-  public static function getJs($name)
+  public static function getJs($name): string
   {
     return self::getAsset($name, 'js');
   }
@@ -155,25 +230,27 @@ class ViteRex
    *  get assets path
    *  @return string
    */
-  public static function getAssetsPath()
+  public static function getAssetsPath(): string
   {
-    return self::$isDev ? rex_path::base('assets/') : self::$distPath . '/assets/';
+    $instance = self::factory();
+    return $instance->isDev ? rex_path::base('src/assets/') : $instance->buildPath . '/assets/';
   }
 
   /**
    *  get assets url
    *  @return string
    */
-  public static function getAssetsUrl()
+  public static function getAssetsUrl(): string
   {
-    return self::$isDev ? self::$viteServer . rex_url::base('assets/') : self::$distUri . '/assets/';
+    $instance = self::factory();
+    return $instance->isDev ? $instance->devServerUrl . rex_url::base('src/assets/') : $instance->buildUrl . '/assets/';
   }
 
   /**
    *  get current git branch
    *  @return string
    */
-  public static function getGitBranch()
+  public static function getGitBranch(): string
   {
     $contents = rex_file::get(rex_path::base('.git/HEAD')); //read the file
     $explodedstring = explode("/", $contents, 3); //seperate out by the "/" in the string
@@ -184,7 +261,7 @@ class ViteRex
    *  check if dev branch is active if in dev mode or display warning
    *  @return void
    */
-  public static function checkGitBranch($branch = 'dev')
+  public function checkGitBranch($branch = 'dev'): void
   {
     $isMediaPool = false;
     if (rex::isBackend()) {
@@ -196,8 +273,8 @@ class ViteRex
         return;
       }
     }
-    if (!\file_exists(rex_path::base('.git'))) return;
-    if (self::$isDev) {
+    if (!file_exists(rex_path::base('.git'))) return;
+    if ($this->isDev) {
       $currentBranch = self::getGitBranch();
       if ($currentBranch !== $branch)
         echo '<div style="z-index: 1000; position: sticky; top: 0; left: 0; right: 0; background: red; color: white; padding: 1rem; font-size: 1.5rem; text-align: center;">You are not on the dev branch! Current branch: ' . $branch . '</div>';
@@ -208,15 +285,18 @@ class ViteRex
    *  check if debug mode is active and set it if not
    *  @return void
    */
-  public static function checkDebugMode()
+  public function checkDebugMode(): void
   {
-    if (self::$isDev) {
-      if (!rex::isDebugMode()) {
+    $isDebugMode = rex::isDebugMode();
+    if ($this->isDev) {
+      if (!$isDebugMode) {
         self::setDebugMode(true);
       }
     } else {
-      if (rex::isDebugMode()) {
+      if (self::isProductionDeployment() && $isDebugMode) {
         self::setDebugMode(false);
+      } else if (!$isDebugMode) {
+        self::setDebugMode(true);
       }
     }
   }
@@ -226,7 +306,7 @@ class ViteRex
    *  @param boolean $mode Debug mode to set
    *  @return void
    */
-  public static function setDebugMode($mode)
+  public static function setDebugMode($mode): void
   {
     $configFile = rex_path::coreData('config.yml');
     $config =
@@ -239,5 +319,19 @@ class ViteRex
     $config['debug']['enabled'] = $mode;
     rex::setProperty('debug', $mode);
     rex_file::putConfig($configFile, $config);
+  }
+
+  /**
+   * Check if the current environment is a production deployment
+   * @return bool
+   */
+  public static function isProductionDeployment(): bool
+  {
+    $ydeploy = rex_ydeploy::factory();
+    if ($ydeploy->isDeployed()) {
+      $stage = strtolower($ydeploy->getStage());
+      return str_starts_with($stage, 'prod');
+    }
+    return false;
   }
 }
