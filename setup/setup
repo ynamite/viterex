@@ -32,14 +32,17 @@ downloadPackageFromRepo() (
 
   set -eu
   printf "${CRED}Downloading${CNO} ${user}/${repo}\n"
-  gh repo clone git@github.com/${user}/${repo} ${destinationPath}
+  gh repo clone git@github.com:${user}/${repo}.git ${destinationPath}/.
   wait
-  if ([ -d ${destinationPath}/$path/.git ]); then
-    rm -rf ${destinationPath}/$path/.git
+  if ([ -d ${destinationPath}/.git ]); then
+    rm -rf ${destinationPath}/.git
   fi
-  if ([ -d ${destinationPath}/$path/.github ]); then
-    rm -rf ${destinationPath}/$path/.github
+  if ([ -d ${destinationPath}/.github ]); then
+    rm -rf ${destinationPath}/.github
   fi
+  if ([ -d ${destinationPath}/.gitignore ]); then
+    rm -rf ${destinationPath}/.gitignore
+  fi  
   printf "${CGREEN}${repo}${CNO} was successful loaded and unzipped into ${destinationPath}\n"
 
 )
@@ -66,7 +69,8 @@ VITE_DEV_SERVER_PORT="'${VITE_DEV_SERVER_PORT}'"
 VITE_ENTRY_POINT="'${VITE_ENTRY_POINT}'"
 VITE_PUBLIC_DIR="'${VITE_PUBLIC_DIR}'"
 VITE_DIST_DIR="'${VITE_DIST_DIR}'"
-REDAXO_HOST_NAME="'${REDAXO_HOST_NAME}'"
+VITE_HOST_PROTOCOL="'${REDAXO_HOST_PROTOCOL}'"
+VITE_HOST_NAME="'${REDAXO_HOST_NAME}'"
 MODE="development"';
 touch .env.local
 echo "$ENV_CONTENT" >> ".env.local"
@@ -175,7 +179,9 @@ done
 # done
 
 printf "\n${CRED}Installing and activating package${CNO} ViteRex\n"
+composer install --working-dir=src/addons/viterex --optimize-autoloader --no-interaction --quiet
 php bin/console package:install "viterex" --no-interaction --quiet
+
 
 # mv src/addons/massif/fragments src
 mkdir -p src/addons/project/fragments
@@ -187,6 +193,7 @@ wait
 mkdir -p var/data/addons/ydeploy
 
 php bin/console cache:clear
+rm -rf public/assets/addon/markitup/cache
 wait
 php bin/console be_style:compile
 wait
@@ -229,9 +236,9 @@ INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES
 INSERT INTO \`rex_config\` (\`namespace\`, \`key\`, \`value\`) VALUES 
 ('massif_settings',	'address_e_mail',	'\"$MASSIF_SETTINGS_EMAIL\"'),
 ('massif_settings',	'address_firma',	'\"$MASSIF_SETTINGS_FIRMA\"'),
-('massif_settings',	'address_geo_lat',	'\"$MASSIF_SETTINGS_GEO_LAT\"'),
-('massif_settings',	'address_geo_long',	'\"$MASSIF_SETTINGS_GEO_LONG\"'),
-('massif_settings',	'address_google_maps_link',	'\"$MASSIF_SETTINGS_GOOGLE_MAPS_LINK\"'),
+('massif_settings',	'google_geo_lat',	'\"$MASSIF_SETTINGS_GEO_LAT\"'),
+('massif_settings',	'google_geo_long',	'\"$MASSIF_SETTINGS_GEO_LONG\"'),
+('massif_settings',	'google_maps_link',	'\"$MASSIF_SETTINGS_GOOGLE_MAPS_LINK\"'),
 ('massif_settings',	'address_kanton_code',	'\"$MASSIF_SETTINGS_KANTON_CODE\"'),
 ('massif_settings',	'address_land',	'\"$MASSIF_SETTINGS_LAND\"'),
 ('massif_settings',	'address_land_code',	'\"$MASSIF_SETTINGS_LAND_CODE\"'),
@@ -246,9 +253,6 @@ INSERT INTO \`rex_yrewrite_domain\` (\`id\`, \`domain\`, \`mount_id\`, \`start_i
 "
 wait
 
-mv setup/templates src/templates
-mv setup/modules src/modules
-
 # remove
 rm -rf public/redaxo/bin
 rm -rf public/redaxo/src
@@ -261,15 +265,14 @@ rm -rf setup
 
 composer install --no-interaction --quiet
 
-# execute yarn
-touch yarn.lock
-yarn
-yarn upgrade-interactive
-
+rm -rf tmp-assets
+mkdir -p tmp-assets
+downloadPackageFromRepo "massif-web" "redaxo-frontend-assets" "tmp-assets/."
+wait
+rsync -a --ignore-existing tmp-assets/ ./
+rm -rf tmp-assets
 
 git init
-mkdir -p src/assets
-downloadPackageFromRepo "massif-web" "redaxo-frontend-assets" "."
 git submodule add git@github.com:ynamite/redaxo_massif.git src/addons/massif/.
 git submodule add git@github.com:ynamite/massif_settings.git src/addons/massif_settings/.
 git submodule add git@github.com:ynamite/massif_dnd_sorter.git src/addons/massif_dnd_sorter/.
@@ -277,19 +280,26 @@ git submodule update --init --recursive
 installPackage "massif"
 installPackage "massif_settings"
 installPackage "massif_dnd_sorter"
+
+# execute yarn
+yarn
+yarn upgrade-interactive
+
 git add .
+
 clear
 git commit -m "initial commit"
-if [ $GIT_PROVIDER && $GIT_NAMESPACE && $GIT_REPO_NAME ]; then
-  if [$GIT_PROVIDER = 'github.com']; then
+
+if [[ -n "${GIT_PROVIDER:-}" && -n "${GIT_NAMESPACE:-}" && -n "${GIT_REPO_NAME:-}" ]]; then
+  if [[ $GIT_PROVIDER == 'github.com' ]]; then
     # Check if authenticated with GitHub CLI
     if gh auth status >/dev/null 2>&1; then
         echo "✅ GitHub authenticated"
     else
-    gh auth login --with-token < ~/.gh_token || {
-        echo "❌ Failed to authenticate with GitHub" >&2
-        exit 1
-    }
+      gh auth login --with-token < ~/.gh_token || {
+          echo "❌ Failed to authenticate with GitHub" >&2
+          exit 1
+      }
     fi
     if gh auth status >/dev/null 2>&1; then
         gh repo create "${GIT_NAMESPACE}"/"${GIT_REPO_NAME}" --private --description "" || {
@@ -299,15 +309,15 @@ if [ $GIT_PROVIDER && $GIT_NAMESPACE && $GIT_REPO_NAME ]; then
         echo "✅ Successfully created GitHub repository: ${GIT_NAMESPACE}/${GIT_REPO_NAME}"
     fi
 
-  else if [$GIT_PROVIDER = 'gitlab.com']; then
+  elif [[ $GIT_PROVIDER == 'gitlab.com' ]]; then
     # Check if authenticated with GitLab CLI
     if glab auth status >/dev/null 2>&1; then
         echo "✅ GitLab authenticated"
     else
-    glab auth login --with-token < ~/.gl_token || {
-        echo "❌ Failed to authenticate with GitLab" >&2
-        exit 1
-    }
+      glab auth login --with-token < ~/.gl_token || {
+          echo "❌ Failed to authenticate with GitLab" >&2
+          exit 1
+      }
     fi
   else
     echo "❌ Unsupported GIT_PROVIDER: ${GIT_PROVIDER}" >&2
