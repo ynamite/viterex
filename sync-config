@@ -21,7 +21,7 @@ ssh -t -p2121 "$REMOTE_SERVER_USER@$REMOTE_SERVER" \
 trap 'echo "❌ Script failed on line $LINENO"' ERR
 
 yq -i "
-  .server = \"http://$REDAXO_HOST_NAME\" | 
+  .server = \"http://$VITE_HOST_NAME\" | 
   .debug = true |
   .db.\"1\".login = \"root\" |
   .db.\"1\".password = \"\" |
