@@ -55,7 +55,7 @@ class LocalValetDriver extends LaravelValetDriver
     $_SERVER['SERVER_ADDR'] = '127.0.0.1';
     $_SERVER['SERVER_NAME'] = $_SERVER['HTTP_HOST'];
 
-    $docRoot = $this->getPublicPath($sitePath);
+    $docRoot = rtrim($this->getPublicPath($sitePath), '/');
     $uri = rtrim($uri, '/');
 
     $candidates = [
