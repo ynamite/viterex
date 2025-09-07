@@ -26,7 +26,10 @@ node_modules
 !.vscode/extensions.json
 .idea
 .yarnrc.yml
-.yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
 .npmrc
 .DS_Store
 *.suo
@@ -34,4 +37,6 @@ node_modules
 *.njsproj
 *.sln
 *.sw?
+*.pem
+*.key
 
