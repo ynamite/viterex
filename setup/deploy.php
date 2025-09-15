@@ -28,6 +28,8 @@ $deploymentRepository = 'git@github.com:user/repo.git';
 
 require __DIR__ . '/src/addons/ydeploy/deploy_yak.php';
 require __DIR__ . '/deployer.task.setup.php';
+// require __DIR__ . '/deployer.task.release.metanet.php';
+
 
 $isGit = is_dir(__DIR__ . '/.git');
 
@@ -54,49 +56,70 @@ add('clear_paths', [
     '.yarn',
     '.prettierrc',
     'jsconfig.json',
-    'browserslistrc',
+    '.browserslistrc',
     'LocalValetDriver.php',
     'composer.json',
+    'composer.lock',
     '.eslintrc.cjs',
+    '.browserlistrc',
+    'localhost+2-key.pem',
+    'localhost+2.pem',
+    'deploy.php',
+    'deployer.task.release.metanet.php',
+    'quickstart',
+    'sync-config',
+    'sync-db',
+    'sync-media',
+    'CriticalCSS.js',
+    'CriticalCSSdebug.js',
 ]);
 
 set('update_code_strategy', 'clone');
 
-desc('Install Git submodules if they exist');
-after('build:start', static function () {
-    on(host('local'), static function () {
-        // install Git submodules if they exist
-        if (test('[ -f {{release_path}}/.gitmodules ]')) {
-            info('Installing Git submodules');
-            run('cd {{release_path}} && git submodule update --init --recursive');
-            info('Git submodules installed');
-            // get submodule paths
-            $submodulePaths = run('cd {{release_path}} && git config --file .gitmodules --get-regexp path | awk \'{ print $2 }\'');
-            $submodulePaths = explode("\n", $submodulePaths);
-            foreach ($submodulePaths as $path) {
-                // run composer install in each submodule
-                if (test("[ -f {{release_path}}/$path/composer.json ]")) {
-                    info("Running composer install in submodule: $path");
-                    run("cd {{release_path}}/$path && composer install --no-dev --optimize-autoloader");
-                }
-                // remove .git directory from submodules
-                if (test("[ -d {{release_path}}/$path/.git ]")) {
-                    info("Removing .git directory from submodule: $path");
-                    run("rm -rf {{release_path}}/$path/.git");
-                }
-                if (test("[ -d {{release_path}}/$path/.github ]")) {
-                    info("Removing .github directory from submodule: $path");
-                    run("rm -rf {{release_path}}/$path/.github");
-                }
-            }
-        } else {
-            info('No Git submodules found in {{release_path}}/.gitmodules');
-        }
-        // Remove git
-        run('rm -rf {{release_path}}/.git && rm -rf {{release_path}}/.gitmodules');
-    });
-});
+desc('Copy files for local build');
+task('build:vendors', static function () {
+    info('Copying files for local build ...');
+    on(
+        host('local'),
+        // copy files for local build
+        static function () {
+            run('cp .env.local {{release_path}}');
+            run('cp .env.local {{release_path}}/.env');
+            run('cp localhost+2-key.pem {{release_path}}');
+            run('cp localhost+2.pem {{release_path}}');
 
+            // install Git submodules if they exist
+            if (test('[ -f {{release_path}}/.gitmodules ]')) {
+                info('Installing Git submodules');
+                run('cd {{release_path}} && git submodule update --init --recursive');
+                info('Git submodules installed');
+                // get submodule paths
+                $submodulePaths = run('cd {{release_path}} && git config --file .gitmodules --get-regexp path | awk \'{ print $2 }\'');
+                $submodulePaths = explode("\n", $submodulePaths);
+                foreach ($submodulePaths as $path) {
+                    // run composer install in each submodule
+                    if (test("[ -f {{release_path}}/$path/composer.json ]")) {
+                        info("Running composer install in submodule: $path");
+                        run("cd {{release_path}}/$path && composer install --no-dev --optimize-autoloader");
+                    }
+                    // remove .git directory from submodules
+                    if (test("[ -d {{release_path}}/$path/.git ]")) {
+                        info("Removing .git directory from submodule: $path");
+                        run("rm -rf {{release_path}}/$path/.git");
+                    }
+                    if (test("[ -d {{release_path}}/$path/.github ]")) {
+                        info("Removing .github directory from submodule: $path");
+                        run("rm -rf {{release_path}}/$path/.github");
+                    }
+                }
+            } else {
+                info('No Git submodules found in {{release_path}}/.gitmodules');
+            }
+            // Remove git
+            run('rm -rf {{release_path}}/.git && rm -rf {{release_path}}/.gitmodules');
+        }
+    );
+});
 
 // delete shared/media directory if it exists
 before('deploy:success', function () {
