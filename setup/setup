@@ -270,8 +270,8 @@ git submodule add git@github.com:ynamite/redaxo_massif.git src/addons/massif/.
 git submodule add git@github.com:ynamite/massif_settings.git src/addons/massif_settings/.
 git submodule add git@github.com:ynamite/massif_dnd_sorter.git src/addons/massif_dnd_sorter/.
 git submodule update --init --recursive
-installPackage "viterex"
 composer install --working-dir=src/addons/viterex --optimize-autoloader --no-interaction --quiet
+installPackage "viterex"
 installPackage "massif"
 installPackage "massif_settings"
 installPackage "massif_dnd_sorter"
