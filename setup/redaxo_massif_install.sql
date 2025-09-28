@@ -74,7 +74,7 @@ INSERT INTO `rex_markitup_profiles` (`id`, `name`, `description`, `urltype`, `mi
 --
 
 INSERT INTO `rex_redactor_profile` (`id`, `name`, `description`, `min_height`, `max_height`, `plugin_counter`, `plugin_limiter`, `plugins`, `settings`) VALUES
-(1,	'default',	'',	400,	800,	1,	'',	'html,|,undo,redo,|,h1,h2,h3,h4,bold,italic,|,image,blockquote,lists[indent],ol,ul,linkExternal,linkInternal,details',	'');
+(1,	'default',	'',	200,	100,	1,	'',	'html,|,undo,redo,|,h1,h2,h3,h4,format[p],bold,italic,ol,ul,indent,outdent,|,blockquote,|,image,linkExternal,linkInternal,linkMedia',	'');
 -- 2025-09-03 12:11:37 UTC
 
 -- --------------------------------------------------------
