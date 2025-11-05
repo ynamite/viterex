@@ -71,6 +71,7 @@ add('clear_paths', [
     'sync-db',
     'sync-media',
     'CriticalCSS.js',
+    'CriticalPrepare.js',
     'CriticalCSSdebug.js',
 ]);
 
@@ -83,6 +84,9 @@ task('build:vendors', static function () {
         host('local'),
         // copy files for local build
         static function () {
+            if (test('[ -d public/dist ]')) {
+                run('cp -r public/dist {{release_path}}/public/');
+            }
             run('cp .env.local {{release_path}}');
             run('cp .env.local {{release_path}}/.env');
             run('cp localhost+2-key.pem {{release_path}}');
@@ -126,6 +130,13 @@ before('deploy:success', function () {
     if (test('[ -d {{deploy_path}}/shared/media ]')) {
         run('rm -rf {{deploy_path}}/shared/media');
     }
+    info('Copying files back from deplyoment build ...');
+    on(
+        host('local'),
+        static function () {
+            run('cp -r {{release_path}}/public/dist public/');
+        }
+    );
 });
 
 
