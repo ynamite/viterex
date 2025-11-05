@@ -99,7 +99,8 @@ INSERT INTO `rex_config` (`namespace`, `key`, `value`) VALUES
 UPDATE `rex_config` SET `value` = 'true' WHERE `namespace` = 'uploader' AND `key` = 'filename-as-title-checked';
 UPDATE `rex_config` SET `value` = '3000' WHERE `namespace` = 'uploader' AND `key` = 'image-max-width';
 UPDATE `rex_config` SET `value` = '3000' WHERE `namespace` = 'uploader' AND `key` = 'image-max-height';
-
+INSERT INTO `rex_config` (`namespace`, `key`, `value`) VALUES
+('block_peek',	'template',	'\"<?php\\r\\n    $clang = rex_clang::getCurrent();\\r\\n    $langCode = $clang ? $clang->getCode() : \'en\';\\r\\n    $assets = \\\\Ynamite\\\\ViteRex\\\\Assets::get();\\r\\n\\r\\n?>\\r\\n<!DOCTYPE html>\\r\\n<html lang=\\\"<?=$langCode?>\\\">\\r\\n<head>\\r\\n    <meta charset=\\\"UTF-8\\\">\\r\\n    <meta name=\\\"viewport\\\" content=\\\"width=device-width, initial-scale=1\\\">\\r\\n    <?=$assets[\'preload\'] . $assets[\'criticalCSS\'] . $assets[\'css\']?>\\r\\n<\\/head>\\r\\n<body class=\\\"bg-body\\\">\\r\\n    {{block_peek_content}}\\r\\n    <?=$assets[\'js\']?>\\r\\n<\\/body>\\r\\n<\\/html>\"');
 
 -- --------------------------------------------------------
 
