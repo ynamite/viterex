@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import fs from "fs-extra";
+import { exec } from "../utils/exec.js";
 import type { ViterexConfig } from "../types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -51,6 +52,7 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
     redaxoAdminEmail,
     redaxoErrorEmail,
     massifSettings,
+    verbose,
     useTailwind,
     useFluidTw,
     setupDeploy,
@@ -238,5 +240,24 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
     if (await fs.pathExists(dest)) {
       await fs.chmod(dest, 0o755);
     }
+  }
+
+  // ─── 7. Download redaxo-frontend-assets from GitHub ────────────────
+  // Clone the repo into a temp dir, then rsync (merge without overwriting)
+  const tmpAssets = path.join(projectDir, "tmp-assets");
+  try {
+    await exec(
+      "gh",
+      ["repo", "clone", "massif-web/redaxo-frontend-assets", tmpAssets],
+      { verbose }
+    );
+    // Remove git metadata from the cloned repo
+    await fs.remove(path.join(tmpAssets, ".git"));
+    await fs.remove(path.join(tmpAssets, ".github"));
+    await fs.remove(path.join(tmpAssets, ".gitignore"));
+    // Merge into project root without overwriting existing files
+    await exec("rsync", ["-a", "--ignore-existing", `${tmpAssets}/`, `${projectDir}/`], { verbose });
+  } finally {
+    await fs.remove(tmpAssets);
   }
 }

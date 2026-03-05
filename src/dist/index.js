@@ -479,6 +479,7 @@ async function scaffoldFrontend(config) {
     redaxoAdminEmail,
     redaxoErrorEmail,
     massifSettings,
+    verbose,
     useTailwind,
     useFluidTw,
     setupDeploy
@@ -616,6 +617,20 @@ async function scaffoldFrontend(config) {
     if (await fs4.pathExists(dest)) {
       await fs4.chmod(dest, 493);
     }
+  }
+  const tmpAssets = path5.join(projectDir, "tmp-assets");
+  try {
+    await exec(
+      "gh",
+      ["repo", "clone", "massif-web/redaxo-frontend-assets", tmpAssets],
+      { verbose }
+    );
+    await fs4.remove(path5.join(tmpAssets, ".git"));
+    await fs4.remove(path5.join(tmpAssets, ".github"));
+    await fs4.remove(path5.join(tmpAssets, ".gitignore"));
+    await exec("rsync", ["-a", "--ignore-existing", `${tmpAssets}/`, `${projectDir}/`], { verbose });
+  } finally {
+    await fs4.remove(tmpAssets);
   }
 }
 
