@@ -200,6 +200,47 @@ export async function collectConfig(
     { onCancel: () => process.exit(0) }
   );
 
+  // ─── Git remote ─────────────────────────────────────────────────
+  let gitProvider = "";
+  let gitNamespace = "";
+  let gitRepoName = "";
+
+  if (!options.skipGit) {
+    const setupRemote = await p.confirm({
+      message: "Create a remote git repository?",
+      initialValue: false,
+    });
+
+    if (p.isCancel(setupRemote)) process.exit(0);
+
+    if (setupRemote) {
+      const gitRemote = await p.group(
+        {
+          provider: () =>
+            p.select({
+              message: "Git provider",
+              initialValue: "github.com",
+              options: [
+                { value: "github.com", label: "GitHub" },
+                { value: "gitlab.com", label: "GitLab" },
+              ],
+            }),
+          namespace: () =>
+            p.text({ message: "Organization / username" }),
+          repoName: ({ results }) =>
+            p.text({
+              message: "Repository name",
+              initialValue: project.projectName as string,
+            }),
+        },
+        { onCancel: () => process.exit(0) }
+      );
+      gitProvider = gitRemote.provider as string;
+      gitNamespace = gitRemote.namespace as string;
+      gitRepoName = gitRemote.repoName as string;
+    }
+  }
+
   p.outro("Config collected — starting installation...");
 
   return {
@@ -225,6 +266,9 @@ export async function collectConfig(
     massifSettings,
     setupDeploy: frontend.setupDeploy as boolean,
     skipGit: !!options.skipGit,
+    gitProvider,
+    gitNamespace,
+    gitRepoName,
     verbose: false,
   };
 }

@@ -79,7 +79,7 @@ for task in "Download Redaxo" "Install Redaxo" "Scaffold frontend" "Install depe
   fi
 done
 # Skipped tasks should say "Would skip"
-for task in "Create database" "Install addons" "Initialize git repo" "Install submodule addons" "Git initial commit"; do
+for task in "Create database" "Install addons" "Initialize git repo" "Install submodule addons" "Git initial commit" "Create remote git repository"; do
   if echo "$OUTPUT" | grep -q "Would skip.*$task"; then
     echo "    Correctly skipped: $task"
   else
@@ -126,6 +126,9 @@ cat > "$CONFIG_ADDONS" <<JSON
   "useFluidTw": true,
   "setupDeploy": true,
   "skipGit": false,
+  "gitProvider": "github.com",
+  "gitNamespace": "test-org",
+  "gitRepoName": "test-addons",
   "verbose": false
 }
 JSON
@@ -133,7 +136,7 @@ JSON
 echo "--- TEST: --config (all enabled) + --dry-run lists all tasks as Would run"
 OUTPUT=$($CLI --config "$CONFIG_ADDONS" --dry-run 2>&1)
 all_run=true
-for task in "Download Redaxo" "Create database" "Install Redaxo" "Install addons" "Scaffold frontend" "Install dependencies" "Initialize git repo" "Install submodule addons" "Git initial commit"; do
+for task in "Download Redaxo" "Create database" "Install Redaxo" "Install addons" "Scaffold frontend" "Install dependencies" "Initialize git repo" "Install submodule addons" "Git initial commit" "Create remote git repository"; do
   if echo "$OUTPUT" | grep -q "Would run.*$task"; then
     echo "    Would run: $task"
   else

@@ -190,6 +190,39 @@ async function collectConfig(projectNameArg, options) {
     },
     { onCancel: () => process.exit(0) }
   );
+  let gitProvider = "";
+  let gitNamespace = "";
+  let gitRepoName = "";
+  if (!options.skipGit) {
+    const setupRemote = await p.confirm({
+      message: "Create a remote git repository?",
+      initialValue: false
+    });
+    if (p.isCancel(setupRemote)) process.exit(0);
+    if (setupRemote) {
+      const gitRemote = await p.group(
+        {
+          provider: () => p.select({
+            message: "Git provider",
+            initialValue: "github.com",
+            options: [
+              { value: "github.com", label: "GitHub" },
+              { value: "gitlab.com", label: "GitLab" }
+            ]
+          }),
+          namespace: () => p.text({ message: "Organization / username" }),
+          repoName: ({ results }) => p.text({
+            message: "Repository name",
+            initialValue: project.projectName
+          })
+        },
+        { onCancel: () => process.exit(0) }
+      );
+      gitProvider = gitRemote.provider;
+      gitNamespace = gitRemote.namespace;
+      gitRepoName = gitRemote.repoName;
+    }
+  }
   p.outro("Config collected \u2014 starting installation...");
   return {
     projectName: project.projectName,
@@ -214,6 +247,9 @@ async function collectConfig(projectNameArg, options) {
     massifSettings,
     setupDeploy: frontend.setupDeploy,
     skipGit: !!options.skipGit,
+    gitProvider,
+    gitNamespace,
+    gitRepoName,
     verbose: false
   };
 }
@@ -706,6 +742,27 @@ async function installSubmoduleAddons(config) {
   }
 }
 
+// tasks/create-git-remote.ts
+async function createGitRemote(config) {
+  const { projectDir, gitProvider, gitNamespace, gitRepoName, verbose } = config;
+  const sshUrl = `git@${gitProvider}:${gitNamespace}/${gitRepoName}.git`;
+  if (gitProvider === "github.com") {
+    await exec(
+      "gh",
+      ["repo", "create", `${gitNamespace}/${gitRepoName}`, "--private", "--description", ""],
+      { cwd: projectDir, verbose }
+    );
+  } else if (gitProvider === "gitlab.com") {
+    await exec(
+      "glab",
+      ["repo", "create", `${gitNamespace}/${gitRepoName}`, "--private"],
+      { cwd: projectDir, verbose }
+    );
+  }
+  await exec("git", ["remote", "add", "origin", sshUrl], { cwd: projectDir, verbose });
+  await exec("git", ["push", "--set-upstream", sshUrl, "main"], { cwd: projectDir, verbose });
+}
+
 // pipeline.ts
 var tasks = [
   {
@@ -748,6 +805,11 @@ var tasks = [
     name: "Git initial commit",
     skip: (c) => c.skipGit,
     run: gitInitialCommit
+  },
+  {
+    name: "Create remote git repository",
+    skip: (c) => c.skipGit || !c.gitProvider,
+    run: createGitRemote
   }
 ];
 async function runPipeline(config, options = {}) {

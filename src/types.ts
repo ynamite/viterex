@@ -35,6 +35,9 @@ export interface ViterexConfig {
 
   // Git
   skipGit: boolean;
+  gitProvider: string;    // e.g. "github.com" or "gitlab.com"
+  gitNamespace: string;   // org or user name
+  gitRepoName: string;    // repository name
 
   // Runtime flags (not persisted to config files)
   verbose: boolean;

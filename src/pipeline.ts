@@ -9,6 +9,7 @@ import { scaffoldFrontend } from "./tasks/scaffold-frontend.js";
 import { installDependencies } from "./tasks/install-deps.js";
 import { initGitRepo, gitInitialCommit } from "./tasks/init-git.js";
 import { installSubmoduleAddons } from "./tasks/install-submodule-addons.js";
+import { createGitRemote } from "./tasks/create-git-remote.js";
 
 export interface Task {
   name: string;
@@ -62,6 +63,11 @@ const tasks: Task[] = [
     name: "Git initial commit",
     skip: (c) => c.skipGit,
     run: gitInitialCommit,
+  },
+  {
+    name: "Create remote git repository",
+    skip: (c) => c.skipGit || !c.gitProvider,
+    run: createGitRemote,
   },
 ];
 
