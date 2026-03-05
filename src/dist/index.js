@@ -773,6 +773,15 @@ async function openBrowser(config) {
   await exec(openCmd, [backendUrl], { verbose });
 }
 
+// tasks/start-dev-server.ts
+async function startDevServer(config) {
+  const { projectDir, packageManager } = config;
+  await exec(packageManager, ["run", "dev"], {
+    cwd: projectDir,
+    verbose: true
+  });
+}
+
 // pipeline.ts
 var tasks = [
   {
@@ -824,6 +833,10 @@ var tasks = [
   {
     name: "Open frontend and backend in browser",
     run: openBrowser
+  },
+  {
+    name: "Start Vite dev server",
+    run: startDevServer
   }
 ];
 async function runPipeline(config, options = {}) {

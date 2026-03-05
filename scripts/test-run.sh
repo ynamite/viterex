@@ -70,7 +70,7 @@ run_test "--config + --dry-run" $CLI --config "$CONFIG_FILE" --dry-run
 echo "--- TEST: dry-run output contains all task names"
 OUTPUT=$($CLI --config "$CONFIG_FILE" --dry-run 2>&1)
 all_found=true
-for task in "Download Redaxo" "Install Redaxo" "Scaffold frontend" "Install dependencies" "Open frontend and backend"; do
+for task in "Download Redaxo" "Install Redaxo" "Scaffold frontend" "Install dependencies" "Open frontend and backend" "Start Vite dev server"; do
   if echo "$OUTPUT" | grep -q "$task"; then
     echo "    Found: $task"
   else
@@ -136,7 +136,7 @@ JSON
 echo "--- TEST: --config (all enabled) + --dry-run lists all tasks as Would run"
 OUTPUT=$($CLI --config "$CONFIG_ADDONS" --dry-run 2>&1)
 all_run=true
-for task in "Download Redaxo" "Create database" "Install Redaxo" "Install addons" "Scaffold frontend" "Install dependencies" "Initialize git repo" "Install submodule addons" "Git initial commit" "Create remote git repository" "Open frontend and backend"; do
+for task in "Download Redaxo" "Create database" "Install Redaxo" "Install addons" "Scaffold frontend" "Install dependencies" "Initialize git repo" "Install submodule addons" "Git initial commit" "Create remote git repository" "Open frontend and backend" "Start Vite dev server"; do
   if echo "$OUTPUT" | grep -q "Would run.*$task"; then
     echo "    Would run: $task"
   else

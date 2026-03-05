@@ -11,6 +11,7 @@ import { initGitRepo, gitInitialCommit } from "./tasks/init-git.js";
 import { installSubmoduleAddons } from "./tasks/install-submodule-addons.js";
 import { createGitRemote } from "./tasks/create-git-remote.js";
 import { openBrowser } from "./tasks/open-browser.js";
+import { startDevServer } from "./tasks/start-dev-server.js";
 
 export interface Task {
   name: string;
@@ -73,6 +74,10 @@ const tasks: Task[] = [
   {
     name: "Open frontend and backend in browser",
     run: openBrowser,
+  },
+  {
+    name: "Start Vite dev server",
+    run: startDevServer,
   },
 ];
 
