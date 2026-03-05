@@ -10,6 +10,7 @@ import { installDependencies } from "./tasks/install-deps.js";
 import { initGitRepo, gitInitialCommit } from "./tasks/init-git.js";
 import { installSubmoduleAddons } from "./tasks/install-submodule-addons.js";
 import { createGitRemote } from "./tasks/create-git-remote.js";
+import { openBrowser } from "./tasks/open-browser.js";
 
 export interface Task {
   name: string;
@@ -68,6 +69,10 @@ const tasks: Task[] = [
     name: "Create remote git repository",
     skip: (c) => c.skipGit || !c.gitProvider,
     run: createGitRemote,
+  },
+  {
+    name: "Open frontend and backend in browser",
+    run: openBrowser,
   },
 ];
 

@@ -763,6 +763,16 @@ async function createGitRemote(config) {
   await exec("git", ["push", "--set-upstream", sshUrl, "main"], { cwd: projectDir, verbose });
 }
 
+// tasks/open-browser.ts
+async function openBrowser(config) {
+  const { redaxoServerName, verbose } = config;
+  const frontendUrl = `http://${redaxoServerName}/`;
+  const backendUrl = `http://${redaxoServerName}/redaxo/`;
+  const openCmd = process.platform === "darwin" ? "open" : "xdg-open";
+  await exec(openCmd, [frontendUrl], { verbose });
+  await exec(openCmd, [backendUrl], { verbose });
+}
+
 // pipeline.ts
 var tasks = [
   {
@@ -810,6 +820,10 @@ var tasks = [
     name: "Create remote git repository",
     skip: (c) => c.skipGit || !c.gitProvider,
     run: createGitRemote
+  },
+  {
+    name: "Open frontend and backend in browser",
+    run: openBrowser
   }
 ];
 async function runPipeline(config, options = {}) {
