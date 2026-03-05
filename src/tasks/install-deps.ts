@@ -15,4 +15,13 @@ export async function installDependencies(config: ViterexConfig): Promise<void> 
     cwd: projectDir,
     verbose,
   });
+
+  // Upgrade dependencies (non-interactive equivalent of yarn upgrade-interactive)
+  if (packageManager === "yarn") {
+    await exec("yarn", ["upgrade", "--latest"], { cwd: projectDir, verbose });
+  } else if (packageManager === "npm") {
+    await exec("npm", ["update"], { cwd: projectDir, verbose });
+  } else if (packageManager === "pnpm") {
+    await exec("pnpm", ["update", "--latest"], { cwd: projectDir, verbose });
+  }
 }

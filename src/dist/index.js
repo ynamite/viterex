@@ -645,6 +645,13 @@ async function installDependencies(config) {
     cwd: projectDir,
     verbose
   });
+  if (packageManager === "yarn") {
+    await exec("yarn", ["upgrade", "--latest"], { cwd: projectDir, verbose });
+  } else if (packageManager === "npm") {
+    await exec("npm", ["update"], { cwd: projectDir, verbose });
+  } else if (packageManager === "pnpm") {
+    await exec("pnpm", ["update", "--latest"], { cwd: projectDir, verbose });
+  }
 }
 
 // tasks/init-git.ts
