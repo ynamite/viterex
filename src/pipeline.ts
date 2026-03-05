@@ -7,7 +7,8 @@ import { installRedaxo } from "./tasks/install-redaxo.js";
 import { installAddons } from "./tasks/install-addons.js";
 import { scaffoldFrontend } from "./tasks/scaffold-frontend.js";
 import { installDependencies } from "./tasks/install-deps.js";
-import { initGit } from "./tasks/init-git.js";
+import { initGitRepo, gitInitialCommit } from "./tasks/init-git.js";
+import { installSubmoduleAddons } from "./tasks/install-submodule-addons.js";
 
 export interface Task {
   name: string;
@@ -48,9 +49,19 @@ const tasks: Task[] = [
     run: installDependencies,
   },
   {
-    name: "Initialize git",
+    name: "Initialize git repo",
     skip: (c) => c.skipGit,
-    run: initGit,
+    run: initGitRepo,
+  },
+  {
+    name: "Install submodule addons (viterex, massif, massif_settings, massif_dnd_sorter)",
+    skip: (c) => c.skipGit,
+    run: installSubmoduleAddons,
+  },
+  {
+    name: "Git initial commit",
+    skip: (c) => c.skipGit,
+    run: gitInitialCommit,
   },
 ];
 

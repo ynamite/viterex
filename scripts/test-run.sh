@@ -70,7 +70,7 @@ run_test "--config + --dry-run" $CLI --config "$CONFIG_FILE" --dry-run
 echo "--- TEST: dry-run output contains all task names"
 OUTPUT=$($CLI --config "$CONFIG_FILE" --dry-run 2>&1)
 all_found=true
-for task in "Download Redaxo" "Install Redaxo" "Scaffold frontend" "Install dependencies" "Initialize git"; do
+for task in "Download Redaxo" "Install Redaxo" "Scaffold frontend" "Install dependencies"; do
   if echo "$OUTPUT" | grep -q "$task"; then
     echo "    Found: $task"
   else
@@ -79,7 +79,7 @@ for task in "Download Redaxo" "Install Redaxo" "Scaffold frontend" "Install depe
   fi
 done
 # Skipped tasks should say "Would skip"
-for task in "Create database" "Install addons"; do
+for task in "Create database" "Install addons" "Initialize git repo" "Install submodule addons" "Git initial commit"; do
   if echo "$OUTPUT" | grep -q "Would skip.*$task"; then
     echo "    Correctly skipped: $task"
   else
@@ -133,7 +133,7 @@ JSON
 echo "--- TEST: --config (all enabled) + --dry-run lists all tasks as Would run"
 OUTPUT=$($CLI --config "$CONFIG_ADDONS" --dry-run 2>&1)
 all_run=true
-for task in "Download Redaxo" "Create database" "Install Redaxo" "Install addons" "Scaffold frontend" "Install dependencies" "Initialize git"; do
+for task in "Download Redaxo" "Create database" "Install Redaxo" "Install addons" "Scaffold frontend" "Install dependencies" "Initialize git repo" "Install submodule addons" "Git initial commit"; do
   if echo "$OUTPUT" | grep -q "Would run.*$task"; then
     echo "    Would run: $task"
   else

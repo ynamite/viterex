@@ -648,11 +648,55 @@ async function installDependencies(config) {
 }
 
 // tasks/init-git.ts
-async function initGit(config) {
+async function initGitRepo(config) {
   const { projectDir, verbose } = config;
   await exec("git", ["init"], { cwd: projectDir, verbose });
+}
+async function gitInitialCommit(config) {
+  const { projectDir, verbose } = config;
   await exec("git", ["add", "."], { cwd: projectDir, verbose });
   await exec("git", ["commit", "-m", "initial commit"], { cwd: projectDir, verbose });
+}
+
+// tasks/install-submodule-addons.ts
+var SUBMODULE_ADDONS = [
+  ["git@github.com:ynamite/viterex-addon.git", "src/addons/viterex"],
+  ["git@github.com:ynamite/redaxo_massif.git", "src/addons/massif"],
+  ["git@github.com:ynamite/massif_settings.git", "src/addons/massif_settings"],
+  ["git@github.com:ynamite/massif_dnd_sorter.git", "src/addons/massif_dnd_sorter"]
+];
+var SUBMODULE_PACKAGES = ["viterex", "massif", "massif_settings", "massif_dnd_sorter"];
+async function installSubmoduleAddons(config) {
+  const { projectDir, verbose } = config;
+  for (const [url, targetPath] of SUBMODULE_ADDONS) {
+    await exec(
+      "git",
+      ["submodule", "add", url, targetPath],
+      { cwd: projectDir, verbose }
+    );
+  }
+  await exec(
+    "git",
+    ["submodule", "update", "--init", "--recursive"],
+    { cwd: projectDir, verbose }
+  );
+  await exec(
+    "composer",
+    ["install", "--working-dir=src/addons/viterex", "--optimize-autoloader", "--no-interaction", "--quiet"],
+    { cwd: projectDir, verbose }
+  );
+  for (const pkg of SUBMODULE_PACKAGES) {
+    await exec(
+      "php",
+      ["bin/console", "package:install", pkg, "--no-interaction", "--quiet"],
+      { cwd: projectDir, verbose }
+    );
+    await exec(
+      "php",
+      ["bin/console", "package:activate", pkg, "--no-interaction", "--quiet"],
+      { cwd: projectDir, verbose }
+    );
+  }
 }
 
 // pipeline.ts
@@ -684,9 +728,19 @@ var tasks = [
     run: installDependencies
   },
   {
-    name: "Initialize git",
+    name: "Initialize git repo",
     skip: (c) => c.skipGit,
-    run: initGit
+    run: initGitRepo
+  },
+  {
+    name: "Install submodule addons (viterex, massif, massif_settings, massif_dnd_sorter)",
+    skip: (c) => c.skipGit,
+    run: installSubmoduleAddons
+  },
+  {
+    name: "Git initial commit",
+    skip: (c) => c.skipGit,
+    run: gitInitialCommit
   }
 ];
 async function runPipeline(config, options = {}) {
