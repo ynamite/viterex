@@ -321,6 +321,7 @@ if [[ -n "${GIT_PROVIDER:-}" && -n "${GIT_NAMESPACE:-}" && -n "${GIT_REPO_NAME:-
   fi
   git push --set-upstream "git@${GIT_PROVIDER}:${GIT_NAMESPACE}/${GIT_REPO_NAME}.git" main
   git remote add origin "git@${GIT_PROVIDER}:${GIT_NAMESPACE}/${GIT_REPO_NAME}.git"
+  gittower .
 fi
 
 # open front and backend
