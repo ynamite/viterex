@@ -565,7 +565,7 @@ async function scaffoldFrontend(config) {
     pkg.devDependencies["tailwindcss"] = "3.4.17";
     pkg.devDependencies["prettier-plugin-tailwindcss"] = "^0.6.11";
     if (useFluidTw) {
-      pkg.devDependencies["fluid-tailwind"] = "^1.0.4";
+      pkg.devDependencies["fluid-tailwindcss"] = "^1";
     }
     await fs4.writeJSON(pkgPath, pkg, { spaces: 2 });
   }
