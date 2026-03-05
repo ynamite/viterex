@@ -60,7 +60,6 @@ echo -e "${CRED}
 Reading config file
 - - - - - - - - - - - -
 REDAXO install version: ${CNO}$REDAXO_VERSION${CRED}
-REDAXO shasum: ${CNO}$REDAXO_SHA${CRED}
 ${CNO}"
 
 # create env.local
@@ -95,7 +94,7 @@ echo -e "${CRED}
 Load REDAXO zip file
 - - - - - - - - - - - -${CNO}"
 curl -Ls -o ${tmpdir}/redaxo_${REDAXO_VERSION}.zip https://github.com/redaxo/redaxo/releases/download/${REDAXO_VERSION}/redaxo_${REDAXO_VERSION}.zip
-echo "${REDAXO_SHA} *${tmpdir}/redaxo_${REDAXO_VERSION}.zip" | shasum -c -a 256
+#echo "${REDAXO_SHA} *${tmpdir}/redaxo_${REDAXO_VERSION}.zip" | shasum -c -a 256
 unzip -oq ${tmpdir}/redaxo_${REDAXO_VERSION}.zip -d ./public
 
 echo -e "${CGREEN}
