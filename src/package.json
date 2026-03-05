@@ -1,0 +1,43 @@
+{
+  "name": "create-viterex",
+  "version": "1.0.0",
+  "description": "CLI to scaffold a ViteRex (Redaxo + Vite) project",
+  "type": "module",
+  "bin": {
+    "create-viterex": "./bin/cli.js"
+  },
+  "scripts": {
+    "dev": "node bin/cli.js",
+    "build": "tsup index.ts --format esm --dts",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.9.1",
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "execa": "^9.5.2",
+    "ora": "^8.2.0",
+    "fs-extra": "^11.3.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0",
+    "typescript": "^5.7.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.0.0"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "redaxo",
+    "vite",
+    "cms",
+    "scaffold"
+  ],
+  "license": "MIT"
+}

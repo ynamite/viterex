@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+clear
+set -euo pipefail
+source $(dirname "$0")/sync.config.local
+# check if .env.local exists otherwise copy .env to .env.local
+if [ -f ".env.local" ]; then
+  echo ".env.local already exists. Skipping creation."
+else
+  echo "Creating .env.local..."
+  cp .env .env.local
+  echo "Please update the .env.local file with your local configuration and run the script again."
+  exit 0
+fi
+source $(dirname "$0")/.env.local
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG_PATH="$SCRIPT_DIR/var/data/core"
+echo "Sync config.yml from remote server..."
+ssh -t -p2121 "$REMOTE_SERVER_USER@$REMOTE_SERVER" \
+  "cat $REMOTE_PATH/shared/var/data/core/config.yml" \
+  > "$SCRIPT_DIR/config.yml"
+trap 'echo "Script failed on line $LINENO"' ERR
+
+yq -i "
+  .server = \"http://$VITE_HOST_NAME\" |
+  .debug = true |
+  .db.\"1\".login = \"root\" |
+  .db.\"1\".password = \"\" |
+  .db.\"1\".name = \"$LOCAL_DATABASE_NAME\"" \
+  "$SCRIPT_DIR/config.yml"
+
+mkdir -p "$CONFIG_PATH"
+mv "$SCRIPT_DIR/config.yml" "$CONFIG_PATH"

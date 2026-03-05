@@ -1,146 +1,233 @@
-# ViteRex 🚀 _Supercharged REDAXO Frontend development with Vite JS_
+# create-viterex
 
-![ViteRex](viterex.jpg)
+CLI tool to scaffold a **ViteRex** project — [Redaxo CMS](https://redaxo.org/) + [Vite](https://vitejs.dev/) + [Tailwind CSS](https://tailwindcss.com/).
 
-- [Beschreibung](#beschreibung)
-- [Vorraussetzungen](#requirements)
-- [Features](#features)
-- [Verwendung/Vorgehen für ein neues Projekt](#anker-neues-projekt)
-- [automatisches Deployment auf einen Webserver](#deployment)
-- [Tipps](#tips)
+## Quick start
 
-<a name="beschreibung"></a>
+```bash
+npx create-viterex my-project
+```
 
-## Beschreibung
+The interactive prompts will walk you through project name, Redaxo version, database credentials, addon selection, Tailwind/Fluid TW toggles, and package manager choice.
 
-Super simple Installation einer Redaxo-Instanz, samt Addons und Plugins, sowie
-einer leistungsstarken lokalen Entwicklungsumgebung mit Tailwind CSS, PostCSS und
-Autoprefixer und Vite JS als Bundler.
-Mit Support für Live-Reloading und HMR für Redaxo, PHP, CSS und JS Dateien.
+## Usage
 
-Deployment via [ydeploy](https://github.com/yakamara/ydeploy) von [yakamara](https://github.com/yakamara/) (basierend auf [deployer](https://deployer.org/))
+```
+create-viterex [project-name] [options]
+```
 
-Basierend auf [yak](https://github.com/yakamara/yak) von Thomas Blum ([tbaddade](https://github.com/tbaddade))
+### Options
 
-<a name="features"></a>
+| Flag | Description | Default |
+|---|---|---|
+| `--skip-db` | Skip database creation | `false` |
+| `--skip-addons` | Skip addon installation | `false` |
+| `--skip-git` | Don't initialize a git repo | `false` |
+| `--pm <manager>` | Package manager: `yarn`, `npm`, or `pnpm` | `yarn` |
+| `--config <path>` | Load config from a JSON file (skip all prompts) | — |
+| `--resume` | Resume a previously failed run, skipping completed tasks | `false` |
+| `--dry-run` | Log each task without executing anything | `false` |
+| `--verbose` | Pipe task stdout/stderr to the terminal | `false` |
+| `-V, --version` | Print version | — |
+| `-h, --help` | Show help | — |
 
-## Features
+## Examples
 
-- automatische Redaxo Installation per Terminal, inkl. gewünschter Addons und Plugins
-- modular – konfigurierbar über eine Konfigurationsdatei unter /setup/setup.cfg
-- lokale Entwicklungsumgebung mit Node und [Vite JS](https://vitejs.dev/)
-- native JS module imports (und CSS imports per JS, oder Assets imports wie CSS, SVG, Bilder, JSON, etc., inklusive Transformationen und so)
-- alles was NPM bzw. Yarn zu bieten haben
-- [Tailwind CSS](https://tailwindcss.com/)
-- Vite JS bzw. [rollup.js](https://rollupjs.org/) als Bundler/Minifier (inkl. PostCSS mit CSS Nesting und Autoprefixer)
-- Live-Reload bzw. HMR für Templates, Struktur, URL (beliebig erweiterbar)
-  - /src/templates/\*_/._
-  - /src/modules/\*_/._
-  - /var/cache/addons/(structure|url)\*_/._
-  - /assets/\*_/._
-  - einfach erweiterbar, zum Beispiel für Fragmente  
-- Deployment via ydeploy bzw. deployment via [deployer](https://deployer.org/), Konfiguration unter setup/deploy.php
+### Interactive mode
 
-<a name="requirements"></a>
+```bash
+npx create-viterex
+```
 
-## Vorraussetzungen
+You'll be prompted for everything. Pass a project name to skip the first question:
 
-- grundlegendes Terminal-Know-how von Vorteil!
-- eine `bash` wird vorrausgesetzt
-- [`yarn` muss installiert sein](https://yarnpkg.com)
-- [`composer` muss für deployer bzw. deployment via ydeploy installiert sein](https://getcomposer.org/)
-- eine lokale PHP-Entwicklungsumgebung für Redaxo, wie [Laravel Herd](https://herd.laravel.com/); oder [MAMP](https://www.mamp.info)
-- ein lokaler Datenbank-Server für Redaxo, wie [DBngin](https://dbngin.com/); oder [MAMP](https://www.mamp.info)
-- optional: [Phpmyadmin](http://phpmyadmin.net/) o.Ä. für DBngin
+```bash
+npx create-viterex my-site
+```
 
-<a name="anker-neues-projekt"></a>
+### Skip specific steps
 
-## Verwendung/Vorgehen für ein neues Projekt
+```bash
+npx create-viterex my-site --skip-db --skip-git --pm pnpm
+```
 
-1. lokaler Webserver mit PHP- und MySQL-Unterstützung installieren (Empfehlung für Mac OS: [Laravel Herd](https://herd.laravel.com/) und [DBngin](https://dbngin.com/) oder [MAMP](https://www.mamp.info)
-2. dieses Repo klonen – ggf. geklontes Directory umbenennen, das ist nun der Projekt-Ordner
-3. Projekt-Ordner als vhost mounten (über installierten Webserver)
-4. im Terminal in den Projekt-Ordner wechseln
-5. `setup/setup.cfg` in einem Editor anpassen. __Wichtig:__ unbedingt REDAXO_ERROR_EMAIL ausfüllen!
-   _die Einträge beginnend mit `VITE_` am besten unverändert lassen, ausser man weiss, was man tut\_ 😌
-6. Skript `setup/setup` im Projekt-Verzeichnis im Terminal ausführen. __Achtung:__ falls eine DB mit dem angegebenen Namen bereits besteht, wird im setup Ordner ein Backup angelegt und die bestehende DB neu angelegt!
-   _nun wird Redaxo heruntergeladen und installiert. Danach folgen die gewählten Addons und Plugins. Am Ende werden die PHP-Dependencies per Composer und per Yarn die Node-Dependencies installiert._
-7. der Vite JS Dev-Server sollte nun automatisch gestartet und im Default-Browser das Front- und Backend geöffnet werden
-8. im Backend mit den Zugangsdaten aus setup.cfg anmelden
-9. Frontend einaml mit F5 reloaden und los gehts! Happy coding! 🙌🏼
+### Non-interactive mode with a config file
 
-**Ab sofort sollten jegliche Änderungen an Dateien (Templates, Module und Fragmente unter /src/ und CSS, JS Dateien unter /assets/) und sogar Anpassungen im Redaxo Backend sofort im Frontend automatisch gespiegelt werden (dank Live-Reload und HMR) – ohne nerviges, manuelles refreshen mit F5** 🍔
+```bash
+npx create-viterex --config viterex.json
+```
 
-- mit `CTRL + C` kann der Vite JS Dev-Server im Terminal gestoppt werden
-- mit `yarn dev` Vite JS Dev-Server starten
+### Preview what would happen
 
-<a name="deployment"></a>
+```bash
+npx create-viterex --config viterex.json --dry-run
+```
 
-## automatisches Deployment auf einen Webserver
+### Resume after a failure
 
-1. die Deployment-Host-Konfiguration in /deploy.php anpassen
-2. im Terminal im Projekt-Ordner `vendor/bin/dep deploy` ausführen um das Deployment zu starten _fingers crossed_
+If a task fails mid-run, fix the issue and resume where you left off:
 
-- wer sich mit deployer auskennt, kann die Deployer-Konfig in /deploy.php beliebig erweitern
+```bash
+npx create-viterex my-site --resume
+```
 
-**... wer deployer nicht nutzen möchte:**
-einfach im Projekt-Ordner `yarn build` ausführen und folgende Dateien und Ordner auf einem Webserver bereitstellen:
+Progress is tracked in `.viterex-state.json` inside the project directory. The state file is automatically deleted on successful completion.
 
-- `bin`
-- `public`
-- `src`
-- `var`
-- `.env.local`
-- `inc.vite.php`
-- `LICENSE.md`
+### Debug with verbose output
 
-_**Wichtig für Deployment ohne Deployer**: Webhosting so konfigurieren, dass der Dokumentstamm (bzw. www-Root) auf den Ordner /public zeigt_
+```bash
+npx create-viterex my-site --verbose
+```
 
-<a name="tips"></a>
+All subprocess output (composer, php, mysql, git, etc.) is piped to the terminal instead of being suppressed.
 
-## Tipps
+## Config JSON schema
 
-- bei Verwendung unter Laravel Herd (bzw. mit Nginx) müssen folgende Regeln in die herd.conf bei Laravel Herd oder in die nginx.conf, für Nginx:
-  ```
-    # YREWRITE START
-    rewrite ^/sitemap\.xml$                           /index.php?rex_yrewrite_func=sitemap last;
-    rewrite ^/robots\.txt$                            /index.php?rex_yrewrite_func=robots last;
-    rewrite ^/media[0-9]*/imagetypes/([^/]*)/([^/]*)  /index.php?rex_media_type=$1&rex_media_file=$2&$args;
-    rewrite ^/media/([^/]*)/([^/]*)                   /index.php?rex_media_type=$1&rex_media_file=$2&$args;
-    rewrite ^/media/(.*)                              /index.php?rex_media_type=yrewrite_default&rex_media_file=$1&$query_string;
-    rewrite ^/images/([^/]*)/([^/]*)                  /index.php?rex_media_type=$1&rex_media_file=$2&$args;
-    rewrite ^/imagetypes/([^/]*)/([^/]*)              /index.php?rex_media_type=$1&rex_media_file=$2;
-    rewrite ^/image/([^/]*)/([^/]*)/([^/]*)           /index.php?rex_media_auto_size=1&rex_media_type=$1&rex_media_file=$3__w$2;
+When using `--config`, provide a JSON file matching this shape:
 
-    # !!! WICHTIG !!! Falls Let's Encrypt fehlschlägt, diese Zeile auskommentieren (sollte jedoch funktionieren)
-    location ~ /\. { deny  all; }
+```jsonc
+{
+  // Project
+  "projectName": "my-site",              // Directory name (alphanumeric, hyphens, underscores)
+  "projectDir": "/absolute/path/to/my-site",
 
-    # Zugriff auf diese Verzeichnisse verbieten
-    location ^~ /src { deny  all; }
-    location ^~ /var { deny  all; }
-    location ^~ /bin { deny  all; }
-    # YREWRITE END
-  ```
-  Pfad zur herd.conf für Laravel Herd: `~/Library/Application Support/Herd/config/nginx`
-- falls eine andere Redaxo Version installiert werden soll, einfach Eintrag anpassen und SHA-Vergleichssumme im Terminal anzeigen lassen, in setup/setup.cfg eintragen und setup/setup starten:<br/>
-  `$ curl -Ls https://github.com/redaxo/redaxo/releases/download/5.19.0/redaxo_5.19.0.zip | shasum`
-- Eine Variante, um die "Ordner ist unsicher"-Fehlermeldungen in Redaxo loszuwerden, ist in `/public/assets/core/standard.js` bei “redaxo-security-self-test” die Zeile wie folgt anpassen:<br/>
-  `if (i % 2 == 0 && data != '' && data.substring(0, 6) != '<br />') {`
-- falls auf eurem System mysql im Shell nicht verfügbar sein sollte (wie mit Laravel Herd und DBngin der Fall), dann wie folgt vorgehen:
-  - Für Mac OS und MySQL 8.0.33:
-    ins Terminal gehen und folgendes eingeben und mit Enter bestätigen<br/>
-    `sudo nano /etc/zshrc`
-    System-Passwort eingeben und dann folgende Zeile ganz am Ende auf einer neuen Zeile eintragen<br/>
-    `export PATH=/Users/Shared/DBngin/mysql/8.0.33/bin:$PATH`
-    nun mit CTRL + O die Datei speichern und mit CTRL + X den Nano Editor verlassen
-- bei deployment via ydeploy, sollte folgendes sichergestellt werden:
-  - es sollte ein Unterverzeichnis als `deploymentPath` angegeben; direkt ins Webserver root zu deployen kann gefährlich sein, da ev. wichtige Dateien überschrieben werden
-  - falls auf dem Webserver in der secure shell (SSH) PHP in einer älteren Version als 8.1 ausgeführt wird, funktioniert ydeploy nicht. Vor deployment sicherstellen, dass PHP >=8.1 in der Shell läuft.
-- Metanet Hosting auf SSH PHP 8.2 umstellen:
-  ```
-  alias php='/opt/php82/bin/php' 
-  echo "alias php='/opt/php82/bin/php'" >> ~/.bash_profile
+  // Redaxo
+  "redaxoVersion": "5.17.1",
+  "redaxoAdminUser": "admin",
+  "redaxoAdminPassword": "secret",
+  "redaxoAdminEmail": "admin@example.com",
+  "redaxoErrorEmail": "errors@example.com",
+  "redaxoServerName": "my-site.test",     // Local vhost hostname
 
-  export PATH=/opt/php82/bin:$PATH
-  echo "export PATH=/opt/php82/bin:\$PATH" >> ~/.bash_profile 
-  ```
+  // Database
+  "skipDb": false,                        // true to skip DB creation entirely
+  "dbHost": "127.0.0.1",
+  "dbPort": 3306,
+  "dbName": "my_site",
+  "dbUser": "root",
+  "dbPassword": "",
+
+  // Addons
+  "skipAddons": false,                    // true to skip addon installation
+  "addons": [
+    { "key": "yrewrite", "install": true, "activate": true },
+    { "key": "developer", "install": true, "activate": true },
+    {
+      "key": "ui_tools",
+      "install": true,
+      "activate": true,
+      "plugins": ["jquery-minicolors", "selectize"]
+    }
+  ],
+
+  // Frontend
+  "packageManager": "yarn",              // "yarn" | "npm" | "pnpm"
+  "useTailwind": true,
+  "useFluidTw": true,
+
+  // Deployment
+  "setupDeploy": false,                  // true to scaffold ydeploy config
+
+  // Git
+  "skipGit": false,                      // true to skip git init + initial commit
+
+  // Runtime (optional in config file — overridden by CLI flags)
+  "verbose": false
+}
+```
+
+### Addon selection format
+
+Each entry in the `addons` array:
+
+| Field | Type | Description |
+|---|---|---|
+| `key` | `string` | Redaxo addon key (e.g. `"yrewrite"`) |
+| `install` | `boolean` | Whether to download and install the addon |
+| `activate` | `boolean` | Whether to activate the addon after install |
+| `plugins` | `string[]` | Optional list of plugin keys to install and activate (e.g. `["history"]`) |
+
+Plugins use slash notation internally: addon `structure` with plugin `history` becomes `structure/history`.
+
+## Pipeline
+
+The CLI runs these tasks sequentially:
+
+| # | Task | Skipped when |
+|---|---|---|
+| 1 | Download Redaxo | — |
+| 2 | Create database | `--skip-db` |
+| 3 | Install Redaxo | — |
+| 4 | Install addons | `--skip-addons` or no addons selected |
+| 5 | Scaffold frontend (Vite, Tailwind, configs) | — |
+| 6 | Install dependencies (composer + packages) | — |
+| 7 | Initialize git | `--skip-git` |
+
+Each task is idempotent. If one fails, fix the issue and re-run with `--resume`.
+
+## Available addons
+
+All addons below are selected by default in interactive mode:
+
+| Addon | Description |
+|---|---|
+| `yform` | Form builder |
+| `yrewrite` | URL rewriting |
+| `be_tools` | Backend enhancements |
+| `sprog` | i18n / variables |
+| `url` | Custom URL profiles |
+| `adminer` | DB management |
+| `bloecks` | Block editor |
+| `developer` | File-based templates/modules |
+| `focuspoint` | Image focal point |
+| `mblock` | Repeatable fields |
+| `mform` | Module form builder |
+| `quick_navigation` | Quick navigation |
+| `cropper` | Image cropping |
+| `hyphenator` | Auto-hyphenation |
+| `emailobfuscator` | Email obfuscation |
+| `plyr` | Media player |
+| `structure_tweaks` | Structure tweaks |
+| `markitup` | Markdown editor |
+| `redactor` | WYSIWYG editor |
+| `ui_tools` | UI tools (plugins: jquery-minicolors, selectize) |
+| `uploader` | Media upload |
+| `useragent` | Device detection |
+| `yform_adminer` | YForm adminer |
+| `yform_quick_edit` | YForm quick edit |
+| `yform_spam_protection` | YForm spam protection |
+| `yform_usability` | YForm usability |
+| `media_negotiator` | WebP/AVIF negotiation |
+| `statistics` | Statistics |
+| `ydeploy` | Deployment |
+| `structure` | Structure (plugin: history) |
+| `phpmailer` | PHPMailer |
+| `be_password` | Password policy |
+| `block_peek` | Slice preview |
+
+## Prerequisites
+
+- Node.js >= 18
+- PHP (for Redaxo CLI commands)
+- MySQL / MariaDB (unless `--skip-db`)
+- Composer
+- Git (unless `--skip-git`)
+
+## Development
+
+```bash
+cd src
+pnpm install
+pnpm run build          # tsup -> dist/
+node dist/index.js      # run locally
+```
+
+Run the test script to verify the CLI boots and parses all flags correctly:
+
+```bash
+bash scripts/test-run.sh
+```
+
+## License
+
+MIT
