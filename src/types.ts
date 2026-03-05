@@ -27,6 +27,9 @@ export interface ViterexConfig {
   useTailwind: boolean;
   useFluidTw: boolean;
 
+  // Massif Settings (business contact info inserted into rex_config)
+  massifSettings: MassifSettings;
+
   // Deployment
   setupDeploy: boolean;
 
@@ -81,6 +84,21 @@ export const ADDON_CATALOG: AddonEntry[] = [
   { key: "be_password", label: "BE Password (password policy)", recommended: true },
   { key: "block_peek", label: "Block Peek (slice preview)", recommended: true },
 ];
+
+export interface MassifSettings {
+  firma: string;
+  strasse: string;
+  plz: string;
+  ort: string;
+  kantonCode: string;
+  land: string;
+  landCode: string;
+  phone: string;
+  email: string;
+  googleMapsLink: string;
+  geoLat: string;
+  geoLong: string;
+}
 
 export interface AddonEntry {
   key: string;

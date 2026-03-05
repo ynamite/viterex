@@ -146,6 +146,42 @@ async function collectConfig(projectNameArg, options) {
       };
     });
   }
+  const massif = await p.group(
+    {
+      firma: () => p.text({ message: "Company name", placeholder: "My Company" }),
+      strasse: () => p.text({ message: "Street address", placeholder: "Strasse 1" }),
+      plz: () => p.text({ message: "Postal code (PLZ)", placeholder: "5400" }),
+      ort: () => p.text({ message: "City", placeholder: "Baden" }),
+      kantonCode: () => p.text({ message: "Canton/State code", placeholder: "AG" }),
+      land: () => p.text({ message: "Country", initialValue: "Schweiz" }),
+      landCode: () => p.text({ message: "Country code", initialValue: "CH" }),
+      phone: () => p.text({ message: "Phone number", placeholder: "+41 00 000 00 00" }),
+      email: () => p.text({
+        message: "Contact email",
+        validate: (v) => {
+          if (!v.includes("@")) return "Enter a valid email";
+        }
+      }),
+      googleMapsLink: () => p.text({ message: "Google Maps link (optional)", defaultValue: "" }),
+      geoLat: () => p.text({ message: "Latitude (optional)", defaultValue: "" }),
+      geoLong: () => p.text({ message: "Longitude (optional)", defaultValue: "" })
+    },
+    { onCancel: () => process.exit(0) }
+  );
+  const massifSettings = {
+    firma: massif.firma ?? "",
+    strasse: massif.strasse ?? "",
+    plz: massif.plz ?? "",
+    ort: massif.ort ?? "",
+    kantonCode: massif.kantonCode ?? "",
+    land: massif.land ?? "",
+    landCode: massif.landCode ?? "",
+    phone: massif.phone ?? "",
+    email: massif.email ?? "",
+    googleMapsLink: massif.googleMapsLink ?? "",
+    geoLat: massif.geoLat ?? "",
+    geoLong: massif.geoLong ?? ""
+  };
   const frontend = await p.group(
     {
       useTailwind: () => p.confirm({ message: "Include Tailwind CSS?", initialValue: true }),
@@ -175,6 +211,7 @@ async function collectConfig(projectNameArg, options) {
     packageManager: project.packageManager,
     useTailwind: frontend.useTailwind,
     useFluidTw: frontend.useFluidTw,
+    massifSettings,
     setupDeploy: frontend.setupDeploy,
     skipGit: !!options.skipGit,
     verbose: false
@@ -441,6 +478,7 @@ async function scaffoldFrontend(config) {
     redaxoAdminUser,
     redaxoAdminEmail,
     redaxoErrorEmail,
+    massifSettings,
     useTailwind,
     useFluidTw,
     setupDeploy
@@ -451,7 +489,19 @@ async function scaffoldFrontend(config) {
     ADMIN_USER: redaxoAdminUser,
     ADMIN_EMAIL: redaxoAdminEmail,
     ERROR_EMAIL: redaxoErrorEmail,
-    HOST_PROTOCOL: "http"
+    HOST_PROTOCOL: "http",
+    MASSIF_FIRMA: massifSettings.firma,
+    MASSIF_STRASSE: massifSettings.strasse,
+    MASSIF_PLZ: massifSettings.plz,
+    MASSIF_ORT: massifSettings.ort,
+    MASSIF_KANTON_CODE: massifSettings.kantonCode,
+    MASSIF_LAND: massifSettings.land,
+    MASSIF_LAND_CODE: massifSettings.landCode,
+    MASSIF_PHONE: massifSettings.phone,
+    MASSIF_EMAIL: massifSettings.email,
+    MASSIF_GOOGLE_MAPS_LINK: massifSettings.googleMapsLink,
+    MASSIF_GEO_LAT: massifSettings.geoLat,
+    MASSIF_GEO_LONG: massifSettings.geoLong
   };
   const baseDir = path5.join(templatesDir, "base");
   if (await fs4.pathExists(baseDir)) {

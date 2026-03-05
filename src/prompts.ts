@@ -1,6 +1,6 @@
 import * as p from "@clack/prompts";
 import path from "node:path";
-import { ADDON_CATALOG, type ViterexConfig } from "./types.js";
+import { ADDON_CATALOG, type ViterexConfig, type MassifSettings } from "./types.js";
 
 export async function collectConfig(
   projectNameArg: string | undefined,
@@ -134,6 +134,57 @@ export async function collectConfig(
     });
   }
 
+  // ─── Massif Settings (business contact info) ─────────────────────
+  const massif = await p.group(
+    {
+      firma: () =>
+        p.text({ message: "Company name", placeholder: "My Company" }),
+      strasse: () =>
+        p.text({ message: "Street address", placeholder: "Strasse 1" }),
+      plz: () =>
+        p.text({ message: "Postal code (PLZ)", placeholder: "5400" }),
+      ort: () =>
+        p.text({ message: "City", placeholder: "Baden" }),
+      kantonCode: () =>
+        p.text({ message: "Canton/State code", placeholder: "AG" }),
+      land: () =>
+        p.text({ message: "Country", initialValue: "Schweiz" }),
+      landCode: () =>
+        p.text({ message: "Country code", initialValue: "CH" }),
+      phone: () =>
+        p.text({ message: "Phone number", placeholder: "+41 00 000 00 00" }),
+      email: () =>
+        p.text({
+          message: "Contact email",
+          validate: (v) => {
+            if (!v.includes("@")) return "Enter a valid email";
+          },
+        }),
+      googleMapsLink: () =>
+        p.text({ message: "Google Maps link (optional)", defaultValue: "" }),
+      geoLat: () =>
+        p.text({ message: "Latitude (optional)", defaultValue: "" }),
+      geoLong: () =>
+        p.text({ message: "Longitude (optional)", defaultValue: "" }),
+    },
+    { onCancel: () => process.exit(0) }
+  );
+
+  const massifSettings: MassifSettings = {
+    firma: (massif.firma as string) ?? "",
+    strasse: (massif.strasse as string) ?? "",
+    plz: (massif.plz as string) ?? "",
+    ort: (massif.ort as string) ?? "",
+    kantonCode: (massif.kantonCode as string) ?? "",
+    land: (massif.land as string) ?? "",
+    landCode: (massif.landCode as string) ?? "",
+    phone: (massif.phone as string) ?? "",
+    email: (massif.email as string) ?? "",
+    googleMapsLink: (massif.googleMapsLink as string) ?? "",
+    geoLat: (massif.geoLat as string) ?? "",
+    geoLong: (massif.geoLong as string) ?? "",
+  };
+
   // ─── Frontend options ─────────────────────────────────────────────
   const frontend = await p.group(
     {
@@ -171,6 +222,7 @@ export async function collectConfig(
     packageManager: project.packageManager as ViterexConfig["packageManager"],
     useTailwind: frontend.useTailwind as boolean,
     useFluidTw: frontend.useFluidTw as boolean,
+    massifSettings,
     setupDeploy: frontend.setupDeploy as boolean,
     skipGit: !!options.skipGit,
     verbose: false,

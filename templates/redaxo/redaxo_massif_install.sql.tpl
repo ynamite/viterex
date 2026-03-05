@@ -146,3 +146,23 @@ INSERT INTO `rex_config` (`namespace`, `key`, `value`) VALUES
 ('phpmailer', 'wordwrap', '120');
 INSERT INTO `rex_yrewrite_domain` (`id`, `domain`, `mount_id`, `start_id`, `notfound_id`, `clangs`, `clang_start`, `clang_start_auto`, `clang_start_hidden`, `robots`, `title_scheme`, `description`, `auto_redirect`, `auto_redirect_days`) VALUES
 (1,	'{{HOST_PROTOCOL}}://{{SERVER_NAME}}/',	0,	1,	2,	'',	1,	0,	0,	'User-agent: *\r\nDisallow:',	'%T / %SN',	'',	1,	0);
+
+-- --------------------------------------------------------
+
+--
+-- Massif Settings (business contact info)
+--
+
+INSERT INTO `rex_config` (`namespace`, `key`, `value`) VALUES
+('massif_settings',	'address_e_mail',	'"{{MASSIF_EMAIL}}"'),
+('massif_settings',	'address_firma',	'"{{MASSIF_FIRMA}}"'),
+('massif_settings',	'google_geo_lat',	'"{{MASSIF_GEO_LAT}}"'),
+('massif_settings',	'google_geo_long',	'"{{MASSIF_GEO_LONG}}"'),
+('massif_settings',	'google_maps_link',	'"{{MASSIF_GOOGLE_MAPS_LINK}}"'),
+('massif_settings',	'address_kanton_code',	'"{{MASSIF_KANTON_CODE}}"'),
+('massif_settings',	'address_land',	'"{{MASSIF_LAND}}"'),
+('massif_settings',	'address_land_code',	'"{{MASSIF_LAND_CODE}}"'),
+('massif_settings',	'address_ort',	'"{{MASSIF_ORT}}"'),
+('massif_settings',	'address_phone',	'"{{MASSIF_PHONE}}"'),
+('massif_settings',	'address_plz',	'"{{MASSIF_PLZ}}"'),
+('massif_settings',	'address_strasse',	'"{{MASSIF_STRASSE}}"');

@@ -50,6 +50,7 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
     redaxoAdminUser,
     redaxoAdminEmail,
     redaxoErrorEmail,
+    massifSettings,
     useTailwind,
     useFluidTw,
     setupDeploy,
@@ -63,6 +64,18 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
     ADMIN_EMAIL: redaxoAdminEmail,
     ERROR_EMAIL: redaxoErrorEmail,
     HOST_PROTOCOL: "http",
+    MASSIF_FIRMA: massifSettings.firma,
+    MASSIF_STRASSE: massifSettings.strasse,
+    MASSIF_PLZ: massifSettings.plz,
+    MASSIF_ORT: massifSettings.ort,
+    MASSIF_KANTON_CODE: massifSettings.kantonCode,
+    MASSIF_LAND: massifSettings.land,
+    MASSIF_LAND_CODE: massifSettings.landCode,
+    MASSIF_PHONE: massifSettings.phone,
+    MASSIF_EMAIL: massifSettings.email,
+    MASSIF_GOOGLE_MAPS_LINK: massifSettings.googleMapsLink,
+    MASSIF_GEO_LAT: massifSettings.geoLat,
+    MASSIF_GEO_LONG: massifSettings.geoLong,
   };
 
   // ─── 1. Base static files ──────────────────────────────────────────
