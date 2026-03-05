@@ -56,8 +56,9 @@ export async function installAddons(config: ViterexConfig): Promise<void> {
     }
   }
 
-  // Post-addon setup: clear cache and compile backend styles
+  // Post-addon setup: clear cache, remove markitup cache, compile backend styles
   await exec("php", ["bin/console", "cache:clear", "--quiet"], { cwd: projectDir, verbose });
+  await fs.remove(path.join(projectDir, "public", "assets", "addon", "markitup", "cache"));
   await exec("php", ["bin/console", "be_style:compile", "--quiet"], { cwd: projectDir, verbose });
 
   // Import the massif install SQL (base articles, config presets, admin user email, yrewrite domain)

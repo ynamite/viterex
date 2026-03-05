@@ -393,6 +393,7 @@ async function installAddons(config) {
     }
   }
   await exec("php", ["bin/console", "cache:clear", "--quiet"], { cwd: projectDir, verbose });
+  await fs3.remove(path4.join(projectDir, "public", "assets", "addon", "markitup", "cache"));
   await exec("php", ["bin/console", "be_style:compile", "--quiet"], { cwd: projectDir, verbose });
   const sqlFile = path4.join(projectDir, "var", "data", "redaxo_massif_install.sql");
   if (await fs3.pathExists(sqlFile)) {
