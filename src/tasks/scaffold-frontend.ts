@@ -155,38 +155,11 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
   }
 
   // ─── 4. Redaxo PHP files ──────────────────────────────────────────
+  // NOTE: bin/console, path_provider.php, index.frontend.php,
+  // index.backend.php, and .htaccess are copied in download-redaxo.ts
+  // because they must be in place before `setup:run` executes.
+
   const redaxoDir = path.join(templatesDir, "redaxo");
-
-  // bin/console
-  await copyTemplate(
-    path.join(redaxoDir, "console"),
-    path.join(projectDir, "bin", "console")
-  );
-
-  // public/index.php (frontend)
-  await copyTemplate(
-    path.join(redaxoDir, "index.frontend.php"),
-    path.join(projectDir, "public", "index.php")
-  );
-
-  // public/redaxo/index.php (backend)
-  await fs.ensureDir(path.join(projectDir, "public", "redaxo"));
-  await copyTemplate(
-    path.join(redaxoDir, "index.backend.php"),
-    path.join(projectDir, "public", "redaxo", "index.php")
-  );
-
-  // src/path_provider.php
-  await copyTemplate(
-    path.join(redaxoDir, "path_provider.php"),
-    path.join(projectDir, "src", "path_provider.php")
-  );
-
-  // public/.htaccess
-  await copyTemplate(
-    path.join(redaxoDir, "htaccess"),
-    path.join(projectDir, "public", ".htaccess")
-  );
 
   // var/data/addons/install/config.json
   await fs.ensureDir(path.join(projectDir, "var", "data", "addons", "install"));

@@ -1,7 +1,11 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import fs from "fs-extra";
 import { exec } from "../utils/exec.js";
 import type { ViterexConfig } from "../types.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const templatesDir = path.resolve(__dirname, "../../templates");
 
 export async function downloadRedaxo(config: ViterexConfig): Promise<void> {
   const { projectDir, redaxoVersion, verbose } = config;
@@ -45,4 +49,24 @@ export async function downloadRedaxo(config: ViterexConfig): Promise<void> {
 
   // Clean up tmp
   await fs.remove(tmpDir);
+
+  // Copy custom Redaxo PHP files required for the Yakamara-massif directory layout.
+  // These must be in place BEFORE `setup:run` is called.
+  const redaxoTemplates = path.join(templatesDir, "redaxo");
+
+  // bin/console — custom console that uses the app_path_provider
+  await fs.copy(path.join(redaxoTemplates, "console"), path.join(binDir, "console"), { overwrite: true });
+
+  // src/path_provider.php — tells Redaxo where everything lives
+  await fs.copy(path.join(redaxoTemplates, "path_provider.php"), path.join(srcDir, "path_provider.php"), { overwrite: true });
+
+  // public/index.php (frontend entry)
+  await fs.copy(path.join(redaxoTemplates, "index.frontend.php"), path.join(publicDir, "index.php"), { overwrite: true });
+
+  // public/redaxo/index.php (backend entry)
+  await fs.ensureDir(path.join(publicDir, "redaxo"));
+  await fs.copy(path.join(redaxoTemplates, "index.backend.php"), path.join(publicDir, "redaxo", "index.php"), { overwrite: true });
+
+  // public/.htaccess
+  await fs.copy(path.join(redaxoTemplates, "htaccess"), path.join(publicDir, ".htaccess"), { overwrite: true });
 }
