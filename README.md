@@ -5,7 +5,7 @@ CLI tool to scaffold a **ViteRex** project — [Redaxo CMS](https://redaxo.org/)
 ## Quick start
 
 ```bash
-npx create-viterex my-project
+pnpx create-viterex my-project
 ```
 
 The interactive prompts will walk you through project name, Redaxo version, database credentials, addon selection, Tailwind/Fluid TW toggles, and package manager choice.
@@ -125,11 +125,30 @@ When using `--config`, provide a JSON file matching this shape:
   "useTailwind": true,
   "useFluidTw": true,
 
+  // Massif Settings (business contact info inserted into rex_config)
+  "massifSettings": {
+    "firma": "My Company",
+    "strasse": "Strasse 1",
+    "plz": "5400",
+    "ort": "Baden",
+    "kantonCode": "AG",
+    "land": "Schweiz",
+    "landCode": "CH",
+    "phone": "+41 00 000 00 00",
+    "email": "info@example.com",
+    "googleMapsLink": "",                 // optional
+    "geoLat": "",                         // optional
+    "geoLong": ""                         // optional
+  },
+
   // Deployment
   "setupDeploy": false,                  // true to scaffold ydeploy config
 
   // Git
   "skipGit": false,                      // true to skip git init + initial commit
+  "gitProvider": "github.com",           // "github.com" | "gitlab.com" (empty string to skip remote)
+  "gitNamespace": "my-org",              // GitHub org or GitLab group/user
+  "gitRepoName": "my-site",             // remote repository name
 
   // Runtime (optional in config file — overridden by CLI flags)
   "verbose": false
@@ -149,6 +168,33 @@ Each entry in the `addons` array:
 
 Plugins use slash notation internally: addon `structure` with plugin `history` becomes `structure/history`.
 
+### Massif Settings format
+
+Business contact information inserted into the Redaxo `rex_config` table:
+
+| Field | Type | Description |
+|---|---|---|
+| `firma` | `string` | Company name |
+| `strasse` | `string` | Street address |
+| `plz` | `string` | Postal code |
+| `ort` | `string` | City |
+| `kantonCode` | `string` | Canton/State code (e.g. `"AG"`) |
+| `land` | `string` | Country name (e.g. `"Schweiz"`) |
+| `landCode` | `string` | Country code (e.g. `"CH"`) |
+| `phone` | `string` | Phone number |
+| `email` | `string` | Contact email |
+| `googleMapsLink` | `string` | Google Maps link (optional) |
+| `geoLat` | `string` | Latitude (optional) |
+| `geoLong` | `string` | Longitude (optional) |
+
+### Git remote format
+
+| Field | Type | Description |
+|---|---|---|
+| `gitProvider` | `string` | `"github.com"` or `"gitlab.com"` (empty string to skip) |
+| `gitNamespace` | `string` | Organization or username |
+| `gitRepoName` | `string` | Repository name |
+
 ## Pipeline
 
 The CLI runs these tasks sequentially:
@@ -162,6 +208,11 @@ The CLI runs these tasks sequentially:
 | 5 | Scaffold frontend (Vite, Tailwind, configs) | — |
 | 6 | Install dependencies (composer + packages) | — |
 | 7 | Initialize git | `--skip-git` |
+| 8 | Install submodule addons (viterex, massif, massif_settings, massif_dnd_sorter) | `--skip-git` |
+| 9 | Git initial commit | `--skip-git` |
+| 10 | Create remote git repository | `--skip-git` or no git provider |
+| 11 | Open frontend and backend in browser | — |
+| 12 | Start Vite dev server | — |
 
 Each task is idempotent. If one fails, fix the issue and re-run with `--resume`.
 
@@ -216,16 +267,9 @@ All addons below are selected by default in interactive mode:
 ## Development
 
 ```bash
-cd src
 pnpm install
 pnpm run build          # tsup -> dist/
-node dist/index.js      # run locally
-```
-
-Run the test script to verify the CLI boots and parses all flags correctly:
-
-```bash
-bash scripts/test-run.sh
+node bin/cli.js         # run locally
 ```
 
 ## License
