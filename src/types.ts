@@ -24,8 +24,6 @@ export interface ViterexConfig {
 
   // Vite / Frontend
   packageManager: "yarn" | "npm" | "pnpm";
-  useTailwind: boolean;
-  useFluidTw: boolean;
 
   // Massif Settings (business contact info inserted into rex_config)
   massifSettings: MassifSettings;

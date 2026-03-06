@@ -16,7 +16,7 @@ Three-layer design:
    - `setup-database.ts` — DROP IF EXISTS + CREATE via mysql CLI
    - `install-redaxo.ts` — `php redaxo/bin/console setup:run` with flags
    - `install-addons.ts` — Loop: download → install → activate per addon via Redaxo CLI
-   - `scaffold-frontend.ts` — Copy template files, generate .env and package.json, conditionally add Tailwind
+   - `scaffold-frontend.ts` — Copy template files and generate .env
    - `install-deps.ts` — composer install + yarn/npm/pnpm install
    - `init-git.ts` — git init + initial commit
 
@@ -60,9 +60,7 @@ Published usage: `pnpx create-viterex [project-name] [--flags]`
 
 The `templates/` directory contains `.tpl` files that get copied/transformed into the project. Uses `{{PLACEHOLDER}}` token replacement. Needs to be populated with:
 
-- `base/` — static files copied as-is (.browserslistrc, .prettierrc, .eslintrc, postcss.config, stylelint, etc.)
-- `vite.config.js.tpl` — Vite config with `{{SERVER_NAME}}` placeholder
-- `tailwind.config.js.tpl` — Tailwind config (only copied if Tailwind selected)
+- `base/` — static files copied as-is (LocalValetDriver.php, etc.)
 
 ## Redaxo-specific notes
 

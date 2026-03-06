@@ -5,7 +5,7 @@ import { exec } from "../utils/exec.js";
 import type { ViterexConfig } from "../types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const templatesDir = path.resolve(__dirname, "../../templates");
+const templatesDir = path.resolve(__dirname, "../templates");
 
 export async function downloadRedaxo(config: ViterexConfig): Promise<void> {
   const { projectDir, redaxoVersion, verbose } = config;

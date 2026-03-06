@@ -54,8 +54,6 @@ cat > "$CONFIG_FILE" <<JSON
   "skipAddons": true,
   "addons": [],
   "packageManager": "npm",
-  "useTailwind": false,
-  "useFluidTw": false,
   "setupDeploy": false,
   "skipGit": true,
   "verbose": false
@@ -122,8 +120,6 @@ cat > "$CONFIG_ADDONS" <<JSON
     { "key": "developer", "install": true, "activate": true }
   ],
   "packageManager": "yarn",
-  "useTailwind": true,
-  "useFluidTw": true,
   "setupDeploy": true,
   "skipGit": false,
   "gitProvider": "github.com",

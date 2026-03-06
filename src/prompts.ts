@@ -188,12 +188,6 @@ export async function collectConfig(
   // ─── Frontend options ─────────────────────────────────────────────
   const frontend = await p.group(
     {
-      useTailwind: () =>
-        p.confirm({ message: "Include Tailwind CSS?", initialValue: true }),
-      useFluidTw: ({ results }) =>
-        results.useTailwind
-          ? p.confirm({ message: "Include Fluid TW?", initialValue: true })
-          : Promise.resolve(false),
       setupDeploy: () =>
         p.confirm({ message: "Set up ydeploy?", initialValue: false }),
     },
@@ -261,8 +255,6 @@ export async function collectConfig(
     skipAddons: !!options.skipAddons,
     addons,
     packageManager: project.packageManager as ViterexConfig["packageManager"],
-    useTailwind: frontend.useTailwind as boolean,
-    useFluidTw: frontend.useFluidTw as boolean,
     massifSettings,
     setupDeploy: frontend.setupDeploy as boolean,
     skipGit: !!options.skipGit,

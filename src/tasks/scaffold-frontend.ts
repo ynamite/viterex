@@ -5,7 +5,7 @@ import { exec } from "../utils/exec.js";
 import type { ViterexConfig } from "../types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const templatesDir = path.resolve(__dirname, "../../templates");
+const templatesDir = path.resolve(__dirname, "../templates");
 
 /**
  * Replace all {{PLACEHOLDER}} tokens in a string with values from the replacements map.
@@ -53,8 +53,6 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
     redaxoErrorEmail,
     massifSettings,
     verbose,
-    useTailwind,
-    useFluidTw,
     setupDeploy,
   } = config;
 
@@ -101,58 +99,12 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
     replacements
   );
 
-  // package.json
-  await processTemplate(
-    path.join(templatesDir, "package.json.tpl"),
-    path.join(projectDir, "package.json"),
-    replacements
-  );
-
-  // If tailwind selected, add tailwind + fluid-tailwind deps to package.json
-  if (useTailwind) {
-    const pkgPath = path.join(projectDir, "package.json");
-    const pkg = await fs.readJSON(pkgPath);
-    pkg.devDependencies["tailwindcss"] = "3.4.17";
-    pkg.devDependencies["prettier-plugin-tailwindcss"] = "^0.6.11";
-    if (useFluidTw) {
-      pkg.devDependencies["fluid-tailwind"] = "^1.0.4";
-    }
-    await fs.writeJSON(pkgPath, pkg, { spaces: 2 });
-  }
-
-  // vite.config.js (no dynamic placeholders, but kept as .tpl for consistency)
-  await processTemplate(
-    path.join(templatesDir, "vite.config.js.tpl"),
-    path.join(projectDir, "vite.config.js"),
-    replacements
-  );
-
   // composer.json
   await processTemplate(
     path.join(templatesDir, "composer.json.tpl"),
     path.join(projectDir, "composer.json"),
     replacements
   );
-
-  // ─── 3. Tailwind / PostCSS ────────────────────────────────────────
-  if (useTailwind) {
-    await processTemplate(
-      path.join(templatesDir, "tailwind.config.js.tpl"),
-      path.join(projectDir, "tailwind.config.js"),
-      replacements
-    );
-    // PostCSS config with tailwind plugins
-    await copyTemplate(
-      path.join(templatesDir, "base", "postcss.config.js"),
-      path.join(projectDir, "postcss.config.js")
-    );
-  } else {
-    // PostCSS config without tailwind
-    await copyTemplate(
-      path.join(templatesDir, "postcss.config.no-tailwind.js"),
-      path.join(projectDir, "postcss.config.js")
-    );
-  }
 
   // ─── 4. Redaxo PHP files ──────────────────────────────────────────
   // NOTE: bin/console, path_provider.php, index.frontend.php,
