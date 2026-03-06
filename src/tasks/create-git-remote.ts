@@ -39,8 +39,8 @@ export async function createGitRemote(config: ViterexConfig): Promise<void> {
   try {
     await exec("git", ["push", "--set-upstream", sshUrl, "main"], { cwd: projectDir, verbose });
   } catch {
-    // Remote has existing commits — pull with rebase then push
-    await exec("git", ["pull", "--rebase", sshUrl, "main"], { cwd: projectDir, verbose });
-    await exec("git", ["push", "--set-upstream", sshUrl, "main"], { cwd: projectDir, verbose });
+    // Remote has existing commits (e.g. README from repo creation) —
+    // force push since the local scaffold is the source of truth
+    await exec("git", ["push", "--force", "--set-upstream", sshUrl, "main"], { cwd: projectDir, verbose });
   }
 }
