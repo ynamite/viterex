@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "node bin/cli.js",
-    "build": "tsup index.ts --format esm --dts",
+    "build": "tsup src/index.ts --format esm --dts",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
