@@ -180,7 +180,6 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
     // because git objects can have restrictive permissions)
     await exec("rm", ["-rf", path.join(tmpAssets, ".git")], { verbose });
     await fs.remove(path.join(tmpAssets, ".github"));
-    await fs.remove(path.join(tmpAssets, ".gitignore"));
     // Merge into project root without overwriting existing files
     await exec("rsync", ["-a", "--ignore-existing", `${tmpAssets}/`, `${projectDir}/`], { verbose });
   } finally {
