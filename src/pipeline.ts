@@ -2,7 +2,6 @@ import * as p from "@clack/prompts";
 import type { ViterexConfig } from "./types.js";
 import { saveState } from "./state.js";
 import { downloadRedaxo } from "./tasks/download-redaxo.js";
-import { setupDatabase } from "./tasks/setup-database.js";
 import { installRedaxo } from "./tasks/install-redaxo.js";
 import { installAddons } from "./tasks/install-addons.js";
 import { scaffoldFrontend } from "./tasks/scaffold-frontend.js";
@@ -16,6 +15,8 @@ import { startDevServer } from "./tasks/start-dev-server.js";
 export interface Task {
   name: string;
   skip?: (config: ViterexConfig) => boolean;
+  /** When true, the spinner is stopped before running so the task gets full TTY control. */
+  interactive?: boolean;
   run: (config: ViterexConfig) => Promise<void>;
 }
 
@@ -29,12 +30,7 @@ const tasks: Task[] = [
     name: "Download Redaxo",
     run: downloadRedaxo,
   },
-  {
-    name: "Create database",
-    skip: (c) => c.skipDb,
-    run: setupDatabase,
-  },
-  {
+{
     name: "Install Redaxo",
     run: installRedaxo,
   },
@@ -49,6 +45,7 @@ const tasks: Task[] = [
   },
   {
     name: "Install dependencies (composer + packages)",
+    interactive: true,
     run: installDependencies,
   },
   {
@@ -117,19 +114,34 @@ export async function runPipeline(
       continue;
     }
 
-    const s = p.spinner();
-    s.start(label);
-
-    try {
-      await task.run(config);
-      s.stop(`${label} ✓`);
-
-      // Persist progress after each successful task
-      done.add(task.name);
-      await saveState(config, [...done]);
-    } catch (err) {
-      s.stop(`${label} ✗`);
-      throw new Error(`Task "${task.name}" failed: ${(err as Error).message}`);
+    if (task.interactive) {
+      p.log.step(label);
+      try {
+        await task.run(config);
+        p.log.step(`${label} ✓`);
+        done.add(task.name);
+        await saveState(config, [...done]);
+      } catch (err) {
+        const e = err as Record<string, unknown>;
+        const stderr = e.stderr ? `\n${e.stderr}` : "";
+        const stdout = e.stdout ? `\n${e.stdout}` : "";
+        throw new Error(`Task "${task.name}" failed: ${(err as Error).message}${stderr}${stdout}`);
+      }
+    } else {
+      const s = p.spinner();
+      s.start(label);
+      try {
+        await task.run(config);
+        s.stop(`${label} ✓`);
+        done.add(task.name);
+        await saveState(config, [...done]);
+      } catch (err) {
+        s.stop(`${label} ✗`);
+        const e = err as Record<string, unknown>;
+        const stderr = e.stderr ? `\n${e.stderr}` : "";
+        const stdout = e.stdout ? `\n${e.stdout}` : "";
+        throw new Error(`Task "${task.name}" failed: ${(err as Error).message}${stderr}${stdout}`);
+      }
     }
   }
 }

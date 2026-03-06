@@ -14,7 +14,7 @@ export function exec(
 ): ResultPromise {
   const { verbose, ...execaOptions } = options;
   return execa(file, args, {
-    ...execaOptions,
     stdio: verbose ? "inherit" : "pipe",
+    ...execaOptions,
   } as Options);
 }

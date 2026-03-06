@@ -16,12 +16,18 @@ export async function installDependencies(config: ViterexConfig): Promise<void> 
     verbose,
   });
 
-  // Upgrade dependencies (non-interactive equivalent of yarn upgrade-interactive)
-  if (packageManager === "yarn") {
-    await exec("yarn", ["upgrade", "--latest"], { cwd: projectDir, verbose });
-  } else if (packageManager === "npm") {
-    await exec("npm", ["update"], { cwd: projectDir, verbose });
-  } else if (packageManager === "pnpm") {
-    await exec("pnpm", ["update", "--latest"], { cwd: projectDir, verbose });
+  // Upgrade dependencies — these commands are interactive and need a TTY
+  const upgradeCmd: Record<string, string[]> = {
+    yarn: ["upgrade-interactive"],
+    npm: ["outdated"], // npm has no built-in interactive upgrade
+    pnpm: ["update", "--interactive", "--latest"],
+  };
+
+  const args = upgradeCmd[packageManager];
+  if (args) {
+    await exec(packageManager, args, {
+      cwd: projectDir,
+      stdio: "inherit",
+    });
   }
 }
