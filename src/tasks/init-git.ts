@@ -31,5 +31,9 @@ export async function gitInitialCommit(config: ViterexConfig): Promise<void> {
   const { projectDir, verbose } = config;
 
   await exec("git", ["add", "."], { cwd: projectDir, verbose });
+
+  // Ensure executable scripts are tracked with +x in git
+  await exec("git", ["update-index", "--chmod=+x", "bin/console"], { cwd: projectDir, verbose });
+
   await exec("git", ["commit", "-m", "initial commit"], { cwd: projectDir, verbose });
 }

@@ -5,6 +5,7 @@ import { downloadRedaxo } from "./tasks/download-redaxo.js";
 import { installRedaxo } from "./tasks/install-redaxo.js";
 import { installAddons } from "./tasks/install-addons.js";
 import { scaffoldFrontend } from "./tasks/scaffold-frontend.js";
+import { importSql } from "./tasks/import-sql.js";
 import { installDependencies } from "./tasks/install-deps.js";
 import { initGitRepo, gitInitialCommit } from "./tasks/init-git.js";
 import { installSubmoduleAddons } from "./tasks/install-submodule-addons.js";
@@ -40,8 +41,13 @@ const tasks: Task[] = [
     run: installAddons,
   },
   {
-    name: "Scaffold frontend (Vite, Tailwind, configs)",
+    name: "Scaffold frontend (Vite, configs)",
     run: scaffoldFrontend,
+  },
+  {
+    name: "Import SQL data (articles, config presets, massif settings)",
+    skip: (c) => c.skipDb,
+    run: importSql,
   },
   {
     name: "Install dependencies (composer + packages)",

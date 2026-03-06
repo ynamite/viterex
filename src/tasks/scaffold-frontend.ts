@@ -63,7 +63,7 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
     ADMIN_USER: redaxoAdminUser,
     ADMIN_EMAIL: redaxoAdminEmail,
     ERROR_EMAIL: redaxoErrorEmail,
-    HOST_PROTOCOL: "http",
+    HOST_PROTOCOL: "https",
     MASSIF_FIRMA: massifSettings.firma,
     MASSIF_STRASSE: massifSettings.strasse,
     MASSIF_PLZ: massifSettings.plz,

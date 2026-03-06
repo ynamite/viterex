@@ -4,7 +4,7 @@ import { exec } from "../utils/exec.js";
 import type { ViterexConfig } from "../types.js";
 
 export async function installAddons(config: ViterexConfig): Promise<void> {
-  const { projectDir, addons, dbHost, dbUser, dbPassword, dbName, verbose } = config;
+  const { projectDir, addons, verbose } = config;
 
   for (const addon of addons) {
     const isPlugin = addon.key.includes("/");
@@ -56,25 +56,8 @@ export async function installAddons(config: ViterexConfig): Promise<void> {
     }
   }
 
-  // Post-addon setup: clear cache, remove markitup cache, compile backend styles
+  // Post-addon setup: clear cache, compile backend styles
   await exec("php", ["bin/console", "cache:clear", "--quiet"], { cwd: projectDir, verbose });
-  await fs.remove(path.join(projectDir, "public", "assets", "addon", "markitup", "cache"));
   await exec("php", ["bin/console", "be_style:compile", "--quiet"], { cwd: projectDir, verbose });
 
-  // Import the massif install SQL (base articles, config presets, admin user email, yrewrite domain)
-  const sqlFile = path.join(projectDir, "var", "data", "redaxo_massif_install.sql");
-  if (await fs.pathExists(sqlFile)) {
-    const authArgs = [
-      "-h", dbHost,
-      "-u", dbUser,
-      ...(dbPassword ? [`--password=${dbPassword}`] : []),
-      `--database=${dbName}`,
-    ];
-
-    await exec("mysql", [...authArgs], {
-      cwd: projectDir,
-      inputFile: sqlFile,
-      verbose,
-    });
-  }
 }

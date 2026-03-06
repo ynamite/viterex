@@ -56,6 +56,7 @@ export async function downloadRedaxo(config: ViterexConfig): Promise<void> {
 
   // bin/console — custom console that uses the app_path_provider
   await fs.copy(path.join(redaxoTemplates, "console"), path.join(binDir, "console"), { overwrite: true });
+  await fs.chmod(path.join(binDir, "console"), 0o755);
 
   // src/path_provider.php — tells Redaxo where everything lives
   await fs.copy(path.join(redaxoTemplates, "path_provider.php"), path.join(srcDir, "path_provider.php"), { overwrite: true });

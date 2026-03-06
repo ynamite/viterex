@@ -203,7 +203,7 @@ The CLI runs these tasks sequentially:
 | 2   | Create database                                                                | `--skip-db`                           |
 | 3   | Install Redaxo                                                                 | —                                     |
 | 4   | Install addons                                                                 | `--skip-addons` or no addons selected |
-| 5   | Scaffold frontend (Vite, Tailwind, configs)                                    | —                                     |
+| 5   | Scaffold frontend (Vite, configs)                                              | —                                     |
 | 6   | Install dependencies (composer + packages)                                     | —                                     |
 | 7   | Initialize git                                                                 | `--skip-git`                          |
 | 8   | Install submodule addons (viterex, massif, massif_settings, massif_dnd_sorter) | `--skip-git`                          |
@@ -237,8 +237,7 @@ All addons below are selected by default in interactive mode:
 | `emailobfuscator`       | Email obfuscation                                |
 | `plyr`                  | Media player                                     |
 | `structure_tweaks`      | Structure tweaks                                 |
-| `markitup`              | Markdown editor                                  |
-| `redactor`              | WYSIWYG editor                                   |
+| `cke5`                  | CKEditor 5                                       |
 | `ui_tools`              | UI tools (plugins: jquery-minicolors, selectize) |
 | `uploader`              | Media upload                                     |
 | `useragent`             | Device detection                                 |

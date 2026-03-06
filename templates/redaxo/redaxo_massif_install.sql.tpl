@@ -1,6 +1,7 @@
 
 SET NAMES utf8mb4;
 
+DELETE FROM `rex_article` where id IN (1, 2, 3);
 INSERT INTO `rex_article` (`pid`, `id`, `parent_id`, `name`, `catname`, `catpriority`, `startarticle`, `priority`, `path`, `status`, `template_id`, `clang_id`, `createdate`, `createuser`, `updatedate`, `updateuser`, `revision`, `yrewrite_url_type`, `yrewrite_url`, `yrewrite_redirection`, `yrewrite_title`, `yrewrite_description`, `yrewrite_image`, `yrewrite_changefreq`, `yrewrite_priority`, `yrewrite_index`, `yrewrite_canonical_url`) VALUES
 (1,	1,	0,	'Home',	'Home',	1,	1,	1,	'|',	1,	1,	1,	'2024-01-11 15:21:10',	'admin',	'2024-01-11 15:21:08',	'admin',	0,	'AUTO',	'',	'',	'',	'',	'',	NULL,	NULL,	NULL,	''),
 (2,	2,	0,	'404',	'',	0,	0,	1,	'|',	0,	1,	1,	'2024-01-11 15:23:39',	'admin',	'2024-01-11 15:23:39',	'admin',	0,	'AUTO',	'',	'',	'',	'',	'',	NULL,	NULL,	NULL,	''),
@@ -10,12 +11,10 @@ INSERT INTO `rex_article` (`pid`, `id`, `parent_id`, `name`, `catname`, `catprio
 -- Daten fuer Tabelle `rex_clang`
 --
 
-DELETE FROM `rex_clang`
-WHERE ((`id` = '1'));
-
 ALTER TABLE `rex_clang`
 ADD `clang_locale` text NULL;
 
+DELETE FROM `rex_clang` WHERE ((`id` = '1'));
 INSERT INTO `rex_clang` (`id`, `code`, `name`, `priority`, `status`, `revision`, `clang_locale`) VALUES
 (1, 'de', 'Deutsch', 1, 1, 0, 'de_CH');
 
@@ -25,6 +24,7 @@ INSERT INTO `rex_clang` (`id`, `code`, `name`, `priority`, `status`, `revision`,
 -- Daten fuer Tabelle `rex_media_manager_type`
 --
 
+DELETE FROM `rex_media_manager_type` WHERE ((`id` = '100'));
 INSERT INTO `rex_media_manager_type` (`id`, `status`, `name`, `description`, `createdate`, `createuser`, `updatedate`, `updateuser`) VALUES
 (100,	0,	'auto',	'',	'2024-01-31 16:01:40',	'admin',	'2024-02-09 15:03:49',	'admin');
 
@@ -47,20 +47,14 @@ DELETE FROM `rex_template`;
 -- --------------------------------------------------------
 
 --
--- Daten fuer Tabelle `rex_markitup_profiles`
+-- Daten fuer Tabelle `rex_cke5_profiles`
 --
 
-INSERT INTO `rex_markitup_profiles` (`id`, `name`, `description`, `urltype`, `minheight`, `maxheight`, `type`, `markitup_buttons`) VALUES
-(3,	'markdown_massif',	'Markdown MASSIF configuration',	'relative',	300,	800,	'markdown',	'groupheading[1|2|3|4|5|6],italic,bold,deleted,sub,sup,unorderedlist,orderedlist,grouplink[file|internal|external|mailto],media,quote,code,table');
+DELETE FROM `rex_cke5_profiles` WHERE `id` IN (4, 5);
+INSERT INTO `rex_cke5_profiles` (`id`, `name`, `description`, `toolbar`, `expert_definition`, `expert_suboption`, `expert`, `extra_definition`, `extra`, `code_block`, `special_characters`, `group_when_full`, `table_color_default`, `table_color`, `ytable`, `transformation`, `transformation_extra`, `transformation_remove`, `transformation_include`, `html_support_allow`, `html_support_disallow`, `blank_to_external`, `link_internalcategory`, `link_mediatypes`, `link_mediacategory`, `link_downloadable`, `link_decorators`, `link_decorators_definition`, `auto_link`, `text_part_language`, `heading`, `alignment`, `image_toolbar`, `image_resize_unit`, `image_resize_handles`, `image_resize_options`, `image_resize_group_options`, `image_resize_options_definition`, `fontsize`, `highlight`, `emoji`, `table_toolbar`, `rexlink`, `list_style`, `list_start_index`, `list_reversed`, `html_preview`, `height_default`, `min_height`, `max_height`, `lang`, `lang_content`, `font_color`, `font_color_default`, `font_background_color`, `font_background_color_default`, `font_families`, `font_family_default`, `mediaembed`, `mentions`, `mentions_definition`, `styles`, `group_styles`, `templates`, `group_templates`, `sprog_mention`, `sprog_mention_definition`, `mediatype`, `mediatypes`, `mediapath`, `mediacategory`, `upload_mediacategory`, `upload_default`, `createdate`, `updatedate`, `createuser`, `updateuser`, `placeholder_sv_se`, `placeholder_es_es`, `placeholder_it_it`, `placeholder_en_gb`, `placeholder_nl_nl`, `placeholder_ru_ru`, `placeholder_pt_br`, `placeholder_de_de`) VALUES
+(4,	'massif',	'MASSIF Default',	'heading,|,bold,italic,underline,strikethrough,blockQuote,|,subscript,superscript,|,bulletedList,numberedList,outdent,indent,|,link,rexImage,|,redo,undo,|,findAndReplace,removeFormat,selectAll,|,specialCharacters,|,sourceEditing',	'',	'',	NULL,	'',	NULL,	'css,html,javascript,php,plaintext,c,cs,cpp,diff,java,python,ruby,typescript,xml',	NULL,	'|group_when_full|',	'|default_table_color|',	'[{\"color\":\"\",\"label\":\"\",\"hasBorder\":\"true\"}]',	'[{\"table\":\"\",\"label\":\"\",\"title\":\"\"}]',	NULL,	'[{\"from\":\"\",\"to\":\"\"}]',	NULL,	NULL,	'[{\r\n    \"name\": \"regex(/^(div|section|article)$/)\",\r\n    \"attributes\": true,\r\n    \"classes\": true,\r\n    \"styles\": true\r\n}]',	'',	'|blank_to_external|',	0,	'',	0,	NULL,	NULL,	'[{\r\n    \"openInNewTab\": {\r\n        \"mode\": \"manual\",\r\n        \"label\": \"Open in a new tab\",\r\n        \"defaultValue\": true,\r\n        \"attributes\": {\r\n            \"target\": \"_blank\",\r\n            \"rel\": \"noopener noreferrer\"\r\n        }\r\n    }\r\n},\r\n{\r\n    \"isGallery\": {\r\n        \"mode\": \"manual\",\r\n        \"label\": \"Gallery link\",\r\n        \"classes\": \"gallery\"\r\n    }\r\n}]',	NULL,	'|en|fr|de|sl|tk|',	'h1,h2,h3,h4,h5,h6,paragraph',	'left,right,center,justify',	'imageTextAlternative,toggleImageCaption,linkImage',	'%',	NULL,	NULL,	'|default_resize_group_options|',	'[{\"name\":\"original\",\"value\":\"null\",\"icon\":\"original\"},{\"name\":\"25\",\"value\":\"25\",\"icon\":\"small\"},{\"name\":\"50\",\"value\":\"50\",\"icon\":\"medium\"},{\"name\":\"75\",\"value\":\"75\",\"icon\":\"large\"},{\"name\":\"10\",\"value\":\"10\",\"icon\":\"mini\"}]',	'default,tiny,small,big,huge',	'yellowMarker,greenMarker,redPen,greenPen,pinkMarker,blueMarker',	'EmojiPeople,EmojiNature,EmojiFood,EmojiSymbols',	'tableColumn,tableRow,mergeTableCells,|,tableProperties,tableCellProperties,toggleTableCaption',	'internal,media,email,phone',	'|liststyle|',	'|liststartindex|',	'|listreversed|',	'|html_preview|',	'|default_height|',	60,	800,	'',	'',	'',	'|default_font_color|',	'',	'|default_font_background_color|',	'',	'|default_font_family|',	'youtube,vimeo,dailymotion,spotify,instagram,twitter,googleMaps,flickr,facebook',	NULL,	'[{\r\n    \"marker\": \"@\",\r\n    \"feed\": [\r\n        \"@test\",\r\n        \"@test2\"\r\n    ],\r\n    \"minimumCharacters\": \"0\"\r\n}]',	NULL,	NULL,	NULL,	NULL,	NULL,	'[{\"sprog_key\":\"\",\"sprog_description\":\"\"}]',	'',	'',	'media',	0,	NULL,	NULL,	NULL,	'2025-10-01 16:58:10',	NULL,	'admin',	'',	'',	'',	'',	'',	'',	'',	''),
+(5,	'massif_minimal',	'MASSIF Minimal',	'heading,|,bold,italic,underline,strikethrough,blockQuote,|,subscript,superscript,|,bulletedList,numberedList,outdent,indent,|,link,|,undo,|,findAndReplace,removeFormat,selectAll,|,specialCharacters,|,sourceEditing',	'',	'',	NULL,	'',	NULL,	'css,html,javascript,php,plaintext,c,cs,cpp,diff,java,python,ruby,typescript,xml',	NULL,	'|group_when_full|',	'|default_table_color|',	'[{\"color\":\"\",\"label\":\"\",\"hasBorder\":\"true\"}]',	'[{\"table\":\"\",\"label\":\"\",\"title\":\"\"}]',	NULL,	'[{\"from\":\"\",\"to\":\"\"}]',	NULL,	NULL,	'[{\r\n    \"name\": \"regex(/^(div|section|article)$/)\",\r\n    \"attributes\": true,\r\n    \"classes\": true,\r\n    \"styles\": true\r\n}]',	'',	'|blank_to_external|',	0,	'',	0,	NULL,	NULL,	'[{\r\n    \"openInNewTab\": {\r\n        \"mode\": \"manual\",\r\n        \"label\": \"Open in a new tab\",\r\n        \"defaultValue\": true,\r\n        \"attributes\": {\r\n            \"target\": \"_blank\",\r\n            \"rel\": \"noopener noreferrer\"\r\n        }\r\n    }\r\n},\r\n{\r\n    \"isGallery\": {\r\n        \"mode\": \"manual\",\r\n        \"label\": \"Gallery link\",\r\n        \"classes\": \"gallery\"\r\n    }\r\n}]',	NULL,	'|en|fr|de|sl|tk|',	'h3,paragraph',	'left,right,center,justify',	'imageTextAlternative,toggleImageCaption,linkImage',	'%',	NULL,	NULL,	'|default_resize_group_options|',	'[{\"name\":\"original\",\"value\":\"null\",\"icon\":\"original\"},{\"name\":\"25\",\"value\":\"25\",\"icon\":\"small\"},{\"name\":\"50\",\"value\":\"50\",\"icon\":\"medium\"},{\"name\":\"75\",\"value\":\"75\",\"icon\":\"large\"},{\"name\":\"10\",\"value\":\"10\",\"icon\":\"mini\"}]',	'default,tiny,small,big,huge',	'yellowMarker,greenMarker,redPen,greenPen,pinkMarker,blueMarker',	'EmojiPeople,EmojiNature,EmojiFood,EmojiSymbols',	'tableColumn,tableRow,mergeTableCells,|,tableProperties,tableCellProperties,toggleTableCaption',	'internal,media,email,phone',	NULL,	NULL,	NULL,	'|html_preview|',	NULL,	300,	1000,	'',	'',	'',	'|default_font_color|',	'',	'|default_font_background_color|',	'',	'|default_font_family|',	'youtube,vimeo,dailymotion,spotify,instagram,twitter,googleMaps,flickr,facebook',	NULL,	'[{\r\n    \"marker\": \"@\",\r\n    \"feed\": [\r\n        \"@test\",\r\n        \"@test2\"\r\n    ],\r\n    \"minimumCharacters\": \"0\"\r\n}]',	NULL,	NULL,	NULL,	NULL,	NULL,	'[{\"sprog_key\":\"\",\"sprog_description\":\"\"}]',	'',	'',	'media',	0,	NULL,	NULL,	NULL,	'2025-10-06 09:54:02',	NULL,	'admin',	'',	'',	'',	'',	'',	'',	'',	'');
 
--- --------------------------------------------------------
-
---
--- Daten fuer Tabelle `rex_redactor_profile`
---
-
-INSERT INTO `rex_redactor_profile` (`id`, `name`, `description`, `min_height`, `max_height`, `plugin_counter`, `plugin_limiter`, `plugins`, `settings`) VALUES
-(1,	'default',	'',	200,	100,	1,	'',	'html,|,undo,redo,|,h1,h2,h3,h4,format[p],bold,italic,ol,ul,indent,outdent,|,blockquote,|,image,linkExternal,linkInternal,linkMedia',	'');
 
 -- --------------------------------------------------------
 
@@ -68,7 +62,7 @@ INSERT INTO `rex_redactor_profile` (`id`, `name`, `description`, `min_height`, `
 -- Daten fuer Tabelle `rex_config`
 --
 
-DELETE FROM `rex_config` WHERE `namespace` = 'sprog';
+DELETE FROM `rex_config` WHERE `namespace` = 'sprog' OR `namespace` = 'block_peek';
 INSERT INTO `rex_config` (`namespace`, `key`, `value`) VALUES
 ('sprog',	'chunkSizeArticles',	'4'),
 ('sprog',	'clang_base',	'[]'),
@@ -153,6 +147,7 @@ INSERT INTO `rex_yrewrite_domain` (`id`, `domain`, `mount_id`, `start_id`, `notf
 -- Massif Settings (business contact info)
 --
 
+DELETE FROM rex_config WHERE `namespace` = 'massif_settings';
 INSERT INTO `rex_config` (`namespace`, `key`, `value`) VALUES
 ('massif_settings',	'address_e_mail',	'"{{MASSIF_EMAIL}}"'),
 ('massif_settings',	'address_firma',	'"{{MASSIF_FIRMA}}"'),
