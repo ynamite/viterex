@@ -71,12 +71,20 @@ The `templates/` directory contains `.tpl` files that get copied/transformed int
 
 ## TODO
 
-- [ ] Populate `templates/` directory with actual config files (port from current viterex repo, which is the current root directory)
-- [ ] Verify Redaxo CLI `setup:run` flags against target version
-- [ ] Expand `ADDON_CATALOG` with full addon list and plugin sub-selections
-- [ ] Add `--resume` flag with `.viterex-state.json` to track completed steps
-- [ ] Add SHA checksum verification for Redaxo download
-- [ ] Error recovery: let user retry individual failed tasks
-- [ ] Add `--verbose` flag to pipe task stdout/stderr to terminal
-- [ ] Add `--dry-run` flag that prints what would happen without executing
+- [x] Populate `templates/` directory with actual config files (port from current viterex repo, which is the current root directory)
+- [x] Verify Redaxo CLI `setup:run` flags against target version
+- [x] Expand `ADDON_CATALOG` with full addon list and plugin sub-selections
+- [x] Add `--resume` flag with `.viterex-state.json` to track completed steps
+- [x] Error recovery: let user retry individual failed tasks
+- [x] Add `--verbose` flag to pipe task stdout/stderr to terminal
+- [x] Add `--dry-run` flag that prints what would happen without executing
+- [ ] add `--generate-config` flag to output a config JSON file based on CLI prompts and exit, for easier CI usage
+- [ ] publish `viterex` addon package (viterex addon repo, not this one) to redaxo installer for one-click install from Redaxo backend
+- [ ] install `viterex` addon package from redaxo installer in `install-addons.ts` instead of cloning from GitHub (currently the addon is not published, so we clone the repo directly). `viterex` is a required addon as it contains shared assets and logic for the frontend, so it should be installed by default.
+- [ ] Allow custom addons via separate `addons.json` config file that extends `ADDON_CATALOG`
+- [ ] in `addons.json` allow installing addons by cloning them from a repository instead of from installing from redaxo installer by providing the repository url in `install-addons.ts`
+- [ ] Optionally also allow installing an addon as a submodule by marking them as `submodule: true` in `addons.json` file. This way we can also have addons that are not published in the redaxo installer, like `viterex`, as part of the configuration and installation process. Submodules will be added to the project and can be used in the same way as addons installed from the redaxo installer, but they will be managed as git submodules, which means they can be versioned and updated independently from the main project. Submodules MUST be installed in the `install-submodule-addons.ts` step. When installing submodules, we also need to run `composer install --working-dir=src/addons/${addonName} --optimize-autoloader --no-interaction --quiet` in their directories if a `composer.json` file is present to install their dependencies (just as is currently the case with `viterex` addon).
+- [ ] remove hard coded submodules `viterex` (required anyway), `massif`, `massif_settings`, `massif_dnd_sorter` submodules and instead allow installing them via the `addons.json` file as described in the previous point. This way we can also have versioning for them and decouple their release cycles from the main `create-viterex` package.
+- [ ] redaxo installer config file (`templates/redaxo/redaxo_install_config.json`) should be provided by the user or be generated based on user input during setup and then can be used for installing redaxo and addons from the redaxo installer in `install-redaxo.ts` and `install-addons.ts` instead of passing all the parameters via CLI flags.
+- [ ] redaxo custom sql seed file (`templates/redaxo/redaxo_massif_install.sql.tpl`) is entirely optional and should be provided by the user instead of hard coded, like it is now. It can be used to seed custom data during redaxo installation, like we currently do for the massif demo content. If provided, it should be executed at the same moment it is now in `scaffold-frontend.ts` and also allow usage of replacements like `{{DB_NAME}}`, `{{DB_USER}}`, etc. for dynamic values based on user input.
 - [ ] Publish to npm as `create-viterex`
