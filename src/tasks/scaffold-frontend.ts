@@ -176,13 +176,14 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
       ["repo", "clone", "massif-web/redaxo-frontend-assets", tmpAssets],
       { verbose }
     );
-    // Remove git metadata from the cloned repo
-    await fs.remove(path.join(tmpAssets, ".git"));
+    // Remove git metadata from the cloned repo (use rm -rf for .git
+    // because git objects can have restrictive permissions)
+    await exec("rm", ["-rf", path.join(tmpAssets, ".git")], { verbose });
     await fs.remove(path.join(tmpAssets, ".github"));
     await fs.remove(path.join(tmpAssets, ".gitignore"));
     // Merge into project root without overwriting existing files
     await exec("rsync", ["-a", "--ignore-existing", `${tmpAssets}/`, `${projectDir}/`], { verbose });
   } finally {
-    await fs.remove(tmpAssets);
+    await exec("rm", ["-rf", tmpAssets], { verbose });
   }
 }
