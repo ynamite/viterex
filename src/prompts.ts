@@ -39,12 +39,13 @@ export async function collectConfig(
   );
 
   // ─── Redaxo config ────────────────────────────────────────────────
+  let adminEmail: string | symbol = "";
   const redaxo = await p.group(
     {
       version: () =>
         p.text({
           message: "Redaxo version",
-          initialValue: "5.17.1",
+          initialValue: "5.20.2",
         }),
       adminUser: () =>
         p.text({
@@ -55,8 +56,8 @@ export async function collectConfig(
         p.password({
           message: "Admin password",
         }),
-      adminEmail: () =>
-        p.text({
+      adminEmail: async () =>
+        adminEmail = await p.text({
           message: "Admin email",
           validate: (v) => {
             if (!v.includes("@")) return "Enter a valid email";
@@ -65,6 +66,7 @@ export async function collectConfig(
       errorEmail: () =>
         p.text({
           message: "Error notification email",
+          initialValue: adminEmail === "" ? "admin" : (adminEmail as string),
           validate: (v) => {
             if (!v.includes("@")) return "Enter a valid email";
           },
