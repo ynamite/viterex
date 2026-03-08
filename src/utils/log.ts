@@ -2,7 +2,7 @@ import chalk from "chalk";
 
 export function printBanner(): void {
   console.log(
-    chalk.red(`
+    chalk.bgMagenta.black.bold(`
 - - - - - - - - - - - -
   ViteRex Setup
 - - - - - - - - - - - -
