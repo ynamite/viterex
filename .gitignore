@@ -1,6 +1,7 @@
 /.build
 node_modules
 dist
+presets/massif/
 /vendor
 /.tools
 *.local

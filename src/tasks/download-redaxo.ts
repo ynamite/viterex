@@ -19,7 +19,7 @@ export async function downloadRedaxo(config: ViterexConfig): Promise<void> {
   await exec("curl", ["-Ls", "-o", zipFile, url], { verbose });
   await exec("unzip", ["-oq", zipFile, "-d", publicDir], { verbose });
 
-  // Reorganize into Yakamara-massif file structure
+  // Reorganize into ViteRex file structure
   const binDir = path.join(projectDir, "bin");
   const srcDir = path.join(projectDir, "src");
   const varDir = path.join(projectDir, "var");
@@ -50,7 +50,7 @@ export async function downloadRedaxo(config: ViterexConfig): Promise<void> {
   // Clean up tmp
   await fs.remove(tmpDir);
 
-  // Copy custom Redaxo PHP files required for the Yakamara-massif directory layout.
+  // Copy custom Redaxo PHP files required for the ViteRex directory layout.
   // These must be in place BEFORE `setup:run` is called.
   const redaxoTemplates = path.join(templatesDir, "redaxo");
 

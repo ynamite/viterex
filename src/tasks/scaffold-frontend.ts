@@ -51,7 +51,6 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
     redaxoAdminUser,
     redaxoAdminEmail,
     redaxoErrorEmail,
-    massifSettings,
     verbose,
     setupDeploy,
   } = config;
@@ -64,18 +63,7 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
     ADMIN_EMAIL: redaxoAdminEmail,
     ERROR_EMAIL: redaxoErrorEmail,
     HOST_PROTOCOL: "https",
-    MASSIF_FIRMA: massifSettings.firma,
-    MASSIF_STRASSE: massifSettings.strasse,
-    MASSIF_PLZ: massifSettings.plz,
-    MASSIF_ORT: massifSettings.ort,
-    MASSIF_KANTON_CODE: massifSettings.kantonCode,
-    MASSIF_LAND: massifSettings.land,
-    MASSIF_LAND_CODE: massifSettings.landCode,
-    MASSIF_PHONE: massifSettings.phone,
-    MASSIF_EMAIL: massifSettings.email,
-    MASSIF_GOOGLE_MAPS_LINK: massifSettings.googleMapsLink,
-    MASSIF_GEO_LAT: massifSettings.geoLat,
-    MASSIF_GEO_LONG: massifSettings.geoLong,
+    ...config.templateReplacements,
   };
 
   // ─── 1. Base static files ──────────────────────────────────────────
@@ -123,12 +111,14 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
   // var/data/addons/ydeploy (empty dir needed)
   await fs.ensureDir(path.join(projectDir, "var", "data", "addons", "ydeploy"));
 
-  // Massif install SQL (templated with placeholders)
-  await processTemplate(
-    path.join(redaxoDir, "redaxo_massif_install.sql.tpl"),
-    path.join(projectDir, "var", "data", "redaxo_massif_install.sql"),
-    replacements
-  );
+  // Seed SQL (from preset or custom path)
+  if (config.seedFile) {
+    await processTemplate(
+      config.seedFile,
+      path.join(projectDir, "var", "data", "seed.sql"),
+      replacements
+    );
+  }
 
   // src/addons/project/fragments (empty dir for project fragments)
   await fs.ensureDir(path.join(projectDir, "src", "addons", "project", "fragments"));
@@ -167,22 +157,23 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
     }
   }
 
-  // ─── 7. Download massif redaxo-frontend-assets from GitHub ────────────────
-  // Clone the repo into a temp dir, then rsync (merge without overwriting)
-  const tmpAssets = path.join(projectDir, "tmp-assets");
-  try {
-    await exec(
-      "gh",
-      ["repo", "clone", "massif-web/redaxo-frontend-assets", tmpAssets],
-      { verbose }
-    );
-    // Remove git metadata from the cloned repo (use rm -rf for .git
-    // because git objects can have restrictive permissions)
-    await exec("rm", ["-rf", path.join(tmpAssets, ".git")], { verbose });
-    await fs.remove(path.join(tmpAssets, ".github"));
-    // Merge into project root without overwriting existing files
-    await exec("rsync", ["-a", "--ignore-existing", `${tmpAssets}/`, `${projectDir}/`], { verbose });
-  } finally {
-    await exec("rm", ["-rf", tmpAssets], { verbose });
+  // ─── 7. Download frontend assets from preset repo (if configured) ─
+  if (config.frontendAssetsRepo) {
+    const tmpAssets = path.join(projectDir, "tmp-assets");
+    try {
+      await exec(
+        "gh",
+        ["repo", "clone", config.frontendAssetsRepo, tmpAssets],
+        { verbose }
+      );
+      // Remove git metadata from the cloned repo (use rm -rf for .git
+      // because git objects can have restrictive permissions)
+      await exec("rm", ["-rf", path.join(tmpAssets, ".git")], { verbose });
+      await fs.remove(path.join(tmpAssets, ".github"));
+      // Merge into project root without overwriting existing files
+      await exec("rsync", ["-a", "--ignore-existing", `${tmpAssets}/`, `${projectDir}/`], { verbose });
+    } finally {
+      await exec("rm", ["-rf", tmpAssets], { verbose });
+    }
   }
 }

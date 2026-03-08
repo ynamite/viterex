@@ -54,6 +54,8 @@ cat > "$CONFIG_FILE" <<JSON
   "skipAddons": true,
   "addons": [],
   "packageManager": "npm",
+  "preset": "custom",
+  "templateReplacements": {},
   "setupDeploy": false,
   "skipGit": true,
   "verbose": false
@@ -77,7 +79,7 @@ for task in "Download Redaxo" "Install Redaxo" "Scaffold frontend" "Install depe
   fi
 done
 # Skipped tasks should say "Would skip"
-for task in "Create database" "Install addons" "Initialize git repo" "Install submodule addons" "Git initial commit" "Create remote git repository"; do
+for task in "Install addons" "Seed database" "Initialize git repo" "Install addons as submodules" "Git initial commit" "Create remote git repository"; do
   if echo "$OUTPUT" | grep -q "Would skip.*$task"; then
     echo "    Correctly skipped: $task"
   else
@@ -120,6 +122,12 @@ cat > "$CONFIG_ADDONS" <<JSON
     { "key": "developer", "install": true, "activate": true }
   ],
   "packageManager": "yarn",
+  "preset": "default",
+  "templateReplacements": {},
+  "seedFile": "$REPO_ROOT/presets/default/seed.sql.tpl",
+  "submoduleAddons": [
+    { "url": "git@github.com:ynamite/viterex-addon.git", "path": "src/addons/viterex", "packageKey": "viterex", "hasComposerDeps": true }
+  ],
   "setupDeploy": true,
   "skipGit": false,
   "gitProvider": "github.com",
@@ -132,7 +140,7 @@ JSON
 echo "--- TEST: --config (all enabled) + --dry-run lists all tasks as Would run"
 OUTPUT=$($CLI --config "$CONFIG_ADDONS" --dry-run 2>&1)
 all_run=true
-for task in "Download Redaxo" "Create database" "Install Redaxo" "Install addons" "Scaffold frontend" "Install dependencies" "Initialize git repo" "Install submodule addons" "Git initial commit" "Create remote git repository" "Open frontend and backend" "Start Vite dev server"; do
+for task in "Download Redaxo" "Install Redaxo" "Install addons" "Scaffold frontend" "Seed database" "Install dependencies" "Initialize git repo" "Install addons as submodules" "Git initial commit" "Create remote git repository" "Open frontend and backend" "Start Vite dev server"; do
   if echo "$OUTPUT" | grep -q "Would run.*$task"; then
     echo "    Would run: $task"
   else
@@ -145,6 +153,90 @@ if $all_run; then
   pass=$((pass + 1))
 else
   echo "    FAIL"
+  fail=$((fail + 1))
+fi
+
+# ─── 8. --preset default --dry-run ────────────────────────────────────
+CONFIG_PRESET_DEFAULT="$TMPDIR_BASE/test-preset-default.json"
+cat > "$CONFIG_PRESET_DEFAULT" <<JSON
+{
+  "projectName": "test-preset-default",
+  "projectDir": "$TMPDIR_BASE/test-preset-default",
+  "redaxoVersion": "5.20.2",
+  "redaxoAdminUser": "admin",
+  "redaxoAdminPassword": "admin123",
+  "redaxoAdminEmail": "admin@example.com",
+  "redaxoErrorEmail": "error@example.com",
+  "redaxoServerName": "test-preset.test",
+  "skipDb": false,
+  "dbHost": "127.0.0.1",
+  "dbPort": 3306,
+  "dbName": "test_preset",
+  "dbUser": "root",
+  "dbPassword": "",
+  "skipAddons": false,
+  "addons": [
+    { "key": "yform", "install": true, "activate": true }
+  ],
+  "packageManager": "yarn",
+  "preset": "default",
+  "templateReplacements": {},
+  "seedFile": "$REPO_ROOT/presets/default/seed.sql.tpl",
+  "submoduleAddons": [
+    { "url": "git@github.com:ynamite/viterex-addon.git", "path": "src/addons/viterex", "packageKey": "viterex", "hasComposerDeps": true }
+  ],
+  "setupDeploy": false,
+  "skipGit": true,
+  "verbose": false
+}
+JSON
+
+echo "--- TEST: preset default --dry-run shows Seed database task"
+OUTPUT=$($CLI --config "$CONFIG_PRESET_DEFAULT" --dry-run 2>&1)
+if echo "$OUTPUT" | grep -q "Would run.*Seed database"; then
+  echo "    PASS"
+  pass=$((pass + 1))
+else
+  echo "    FAIL - Seed database not found in output"
+  fail=$((fail + 1))
+fi
+
+# ─── 9. --preset custom --dry-run (no seed file) ──────────────────────
+CONFIG_PRESET_CUSTOM="$TMPDIR_BASE/test-preset-custom.json"
+cat > "$CONFIG_PRESET_CUSTOM" <<JSON
+{
+  "projectName": "test-preset-custom",
+  "projectDir": "$TMPDIR_BASE/test-preset-custom",
+  "redaxoVersion": "5.20.2",
+  "redaxoAdminUser": "admin",
+  "redaxoAdminPassword": "admin123",
+  "redaxoAdminEmail": "admin@example.com",
+  "redaxoErrorEmail": "error@example.com",
+  "redaxoServerName": "test-custom.test",
+  "skipDb": false,
+  "dbHost": "127.0.0.1",
+  "dbPort": 3306,
+  "dbName": "test_custom",
+  "dbUser": "root",
+  "dbPassword": "",
+  "skipAddons": true,
+  "addons": [],
+  "packageManager": "npm",
+  "preset": "custom",
+  "templateReplacements": {},
+  "setupDeploy": false,
+  "skipGit": true,
+  "verbose": false
+}
+JSON
+
+echo "--- TEST: preset custom --dry-run skips Seed database"
+OUTPUT=$($CLI --config "$CONFIG_PRESET_CUSTOM" --dry-run 2>&1)
+if echo "$OUTPUT" | grep -q "Would skip.*Seed database"; then
+  echo "    PASS"
+  pass=$((pass + 1))
+else
+  echo "    FAIL - Seed database should be skipped"
   fail=$((fail + 1))
 fi
 

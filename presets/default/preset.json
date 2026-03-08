@@ -1,0 +1,26 @@
+{
+  "name": "default",
+  "description": "Minimal Redaxo + Vite setup with essential addons",
+  "addons": [
+    { "key": "yform", "install": true, "activate": true },
+    { "key": "yrewrite", "install": true, "activate": true },
+    { "key": "adminer", "install": true, "activate": true },
+    { "key": "developer", "install": true, "activate": true },
+    { "key": "ydeploy", "install": true, "activate": true },
+    { "key": "structure", "install": true, "activate": true, "plugins": ["history"] },
+    { "key": "phpmailer", "install": true, "activate": true },
+    { "key": "sprog", "install": true, "activate": true },
+    { "key": "be_tools", "install": true, "activate": true },
+    { "key": "cke5", "install": true, "activate": true },
+    { "key": "mform", "install": true, "activate": true }
+  ],
+  "submoduleAddons": [
+    {
+      "url": "git@github.com:ynamite/viterex-addon.git",
+      "path": "src/addons/viterex",
+      "packageKey": "viterex",
+      "hasComposerDeps": true
+    }
+  ],
+  "seedFile": "seed.sql.tpl"
+}

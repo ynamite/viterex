@@ -1,6 +1,7 @@
 import * as p from "@clack/prompts";
 import path from "node:path";
-import { ADDON_CATALOG, type ViterexConfig, type MassifSettings } from "./types.js";
+import { ADDON_CATALOG, type ViterexConfig } from "./types.js";
+import { discoverPresets, loadPreset, resolveSeedFile } from "./preset.js";
 
 export async function collectConfig(
   projectNameArg: string | undefined,
@@ -37,6 +38,42 @@ export async function collectConfig(
     },
     { onCancel: () => process.exit(0) }
   );
+
+  // ─── Preset selection ──────────────────────────────────────────────
+  let presetId = (options.preset as string) ?? "";
+  let presetDir: string | undefined;
+  let seedFile: string | undefined;
+  let submoduleAddons: ViterexConfig["submoduleAddons"];
+  let frontendAssetsRepo: string | undefined;
+  let templateReplacements: Record<string, string> = {};
+  let presetAddons: ViterexConfig["addons"] | undefined;
+
+  if (!presetId) {
+    const presetNames = await discoverPresets();
+    const selected = await p.select({
+      message: "Select a preset",
+      options: presetNames.map((name) => ({
+        value: name,
+        label: name === "custom" ? "Custom (manual configuration)" : name,
+      })),
+    });
+    if (p.isCancel(selected)) process.exit(0);
+    presetId = selected as string;
+  }
+
+  const loaded = await loadPreset(presetId);
+  if (loaded) {
+    presetDir = loaded.dir;
+    if (loaded.config.seedFile) {
+      seedFile = resolveSeedFile(loaded.config.seedFile, loaded.dir);
+    }
+    submoduleAddons = loaded.config.submoduleAddons;
+    frontendAssetsRepo = loaded.config.frontendAssetsRepo;
+    templateReplacements = loaded.config.templateReplacements ?? {};
+    if (loaded.config.addons) {
+      presetAddons = loaded.config.addons;
+    }
+  }
 
   // ─── Redaxo config ────────────────────────────────────────────────
   let adminEmail: string | symbol = "";
@@ -112,7 +149,10 @@ export async function collectConfig(
   // ─── Addon selection ──────────────────────────────────────────────
   let addons: ViterexConfig["addons"] = [];
 
-  if (!options.skipAddons) {
+  if (presetAddons) {
+    // Preset provides addons — use them directly
+    addons = presetAddons;
+  } else if (!options.skipAddons) {
     const selected = await p.multiselect({
       message: "Select addons to install",
       options: ADDON_CATALOG.map((a) => ({
@@ -134,58 +174,52 @@ export async function collectConfig(
         plugins: catalogEntry?.plugins,
       };
     });
+
+    // Allow extra addon keys not in catalog
+    const extraAddons = await p.text({
+      message: "Extra addon keys (comma-separated, or leave empty)",
+      placeholder: "addon1, addon2",
+      defaultValue: "",
+    });
+
+    if (!p.isCancel(extraAddons) && extraAddons) {
+      const extras = (extraAddons as string)
+        .split(",")
+        .map((k) => k.trim())
+        .filter(Boolean);
+      for (const key of extras) {
+        addons.push({ key, install: true, activate: true });
+      }
+    }
   }
 
-  // ─── Massif Settings (business contact info) ─────────────────────
-  const massif = await p.group(
-    {
-      firma: () =>
-        p.text({ message: "Company name", placeholder: "My Company" }),
-      strasse: () =>
-        p.text({ message: "Street address", placeholder: "Strasse 1" }),
-      plz: () =>
-        p.text({ message: "Postal code (PLZ)", placeholder: "5400" }),
-      ort: () =>
-        p.text({ message: "City", placeholder: "Baden" }),
-      kantonCode: () =>
-        p.text({ message: "Canton/State code", placeholder: "AG" }),
-      land: () =>
-        p.text({ message: "Country", initialValue: "Schweiz" }),
-      landCode: () =>
-        p.text({ message: "Country code", initialValue: "CH" }),
-      phone: () =>
-        p.text({ message: "Phone number", placeholder: "+41 00 000 00 00" }),
-      email: () =>
-        p.text({
-          message: "Contact email",
-          validate: (v) => {
-            if (!v.includes("@")) return "Enter a valid email";
-          },
-        }),
-      googleMapsLink: () =>
-        p.text({ message: "Google Maps link (optional)", defaultValue: "" }),
-      geoLat: () =>
-        p.text({ message: "Latitude (optional)", defaultValue: "" }),
-      geoLong: () =>
-        p.text({ message: "Longitude (optional)", defaultValue: "" }),
-    },
-    { onCancel: () => process.exit(0) }
-  );
+  // ─── Custom prompts (from preset) ─────────────────────────────────
+  if (loaded?.config.customPrompts?.length) {
+    for (const prompt of loaded.config.customPrompts) {
+      const value = await p.text({
+        message: prompt.message,
+        placeholder: prompt.placeholder,
+        initialValue: prompt.initialValue,
+        validate: prompt.required
+          ? (v) => { if (!v) return "This field is required"; }
+          : undefined,
+      });
+      if (p.isCancel(value)) process.exit(0);
+      templateReplacements[prompt.key] = (value as string) ?? "";
+    }
+  }
 
-  const massifSettings: MassifSettings = {
-    firma: (massif.firma as string) ?? "",
-    strasse: (massif.strasse as string) ?? "",
-    plz: (massif.plz as string) ?? "",
-    ort: (massif.ort as string) ?? "",
-    kantonCode: (massif.kantonCode as string) ?? "",
-    land: (massif.land as string) ?? "",
-    landCode: (massif.landCode as string) ?? "",
-    phone: (massif.phone as string) ?? "",
-    email: (massif.email as string) ?? "",
-    googleMapsLink: (massif.googleMapsLink as string) ?? "",
-    geoLat: (massif.geoLat as string) ?? "",
-    geoLong: (massif.geoLong as string) ?? "",
-  };
+  // ─── Seed file (custom preset only) ───────────────────────────────
+  if (presetId === "custom") {
+    const seedPath = await p.text({
+      message: "Path to SQL seed file (optional, leave empty to skip)",
+      placeholder: "/path/to/seed.sql.tpl",
+      defaultValue: "",
+    });
+    if (!p.isCancel(seedPath) && seedPath) {
+      seedFile = path.resolve(seedPath as string);
+    }
+  }
 
   // ─── Frontend options ─────────────────────────────────────────────
   const frontend = await p.group(
@@ -257,7 +291,12 @@ export async function collectConfig(
     skipAddons: !!options.skipAddons,
     addons,
     packageManager: project.packageManager as ViterexConfig["packageManager"],
-    massifSettings,
+    preset: presetId,
+    presetDir,
+    seedFile,
+    submoduleAddons,
+    templateReplacements,
+    frontendAssetsRepo,
     setupDeploy: frontend.setupDeploy as boolean,
     skipGit: !!options.skipGit,
     gitProvider,

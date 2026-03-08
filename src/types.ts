@@ -25,8 +25,13 @@ export interface ViterexConfig {
   // Vite / Frontend
   packageManager: "yarn" | "npm" | "pnpm";
 
-  // Massif Settings (business contact info inserted into rex_config)
-  massifSettings: MassifSettings;
+  // Preset
+  preset: string;
+  presetDir?: string;
+  seedFile?: string;
+  submoduleAddons?: SubmoduleAddon[];
+  templateReplacements: Record<string, string>;
+  frontendAssetsRepo?: string;
 
   // Deployment
   setupDeploy: boolean;
@@ -46,6 +51,33 @@ export interface AddonSelection {
   install: boolean;
   activate: boolean;
   plugins?: string[]; // optional plugin keys to activate
+}
+
+export interface PresetConfig {
+  name: string;
+  description: string;
+  addons?: AddonSelection[];
+  submoduleAddons?: SubmoduleAddon[];
+  seedFile?: string;                    // relative to preset dir
+  templateReplacements?: Record<string, string>;
+  customPrompts?: CustomPromptDef[];
+  frontendAssetsRepo?: string;
+  installerConfig?: string;             // relative to preset dir
+}
+
+export interface SubmoduleAddon {
+  url: string;
+  path: string;
+  packageKey: string;
+  hasComposerDeps?: boolean;
+}
+
+export interface CustomPromptDef {
+  key: string;
+  message: string;
+  placeholder?: string;
+  initialValue?: string;
+  required?: boolean;
 }
 
 // Full addon catalog ported from setup/setup.cfg ADDON_PACKAGES.
@@ -82,21 +114,6 @@ export const ADDON_CATALOG: AddonEntry[] = [
   { key: "be_password", label: "BE Password (password policy)", recommended: true },
   { key: "block_peek", label: "Block Peek (slice preview)", recommended: true },
 ];
-
-export interface MassifSettings {
-  firma: string;
-  strasse: string;
-  plz: string;
-  ort: string;
-  kantonCode: string;
-  land: string;
-  landCode: string;
-  phone: string;
-  email: string;
-  googleMapsLink: string;
-  geoLat: string;
-  geoLong: string;
-}
 
 export interface AddonEntry {
   key: string;

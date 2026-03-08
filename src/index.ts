@@ -15,6 +15,7 @@ program
   .option("--skip-addons", "Skip addon installation")
   .option("--skip-git", "Don't initialize a git repo")
   .option("--pm <manager>", "Package manager: yarn | npm | pnpm", "yarn")
+  .option("--preset <name>", "Use a preset (default, massif, custom, or path to preset.json)")
   .option("--config <path>", "Path to a viterex config file (skip prompts)")
   .option("--resume", "Resume a previously failed run, skipping completed tasks")
   .option("--dry-run", "Log each task without executing")
@@ -58,5 +59,9 @@ program.parse();
 
 async function loadConfigFile(configPath: string) {
   const fsExtra = await import("fs-extra");
-  return fsExtra.default.readJSON(configPath);
+  const config = await fsExtra.default.readJSON(configPath);
+  // Ensure new fields have defaults for backwards compatibility
+  if (!config.templateReplacements) config.templateReplacements = {};
+  if (!config.preset) config.preset = "custom";
+  return config;
 }

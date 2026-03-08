@@ -44,7 +44,28 @@ export async function loadState(
     );
   }
 
-  const data: StateData = await fs.readJSON(statePath);
+  // Read as untyped first to handle migration from old format
+  const raw: Record<string, unknown> = await fs.readJSON(statePath);
+  const rawConfig = raw.config as Record<string, unknown>;
+
+  // Migrate old state format: convert massifSettings to templateReplacements
+  if (rawConfig.massifSettings && !rawConfig.templateReplacements) {
+    const ms = rawConfig.massifSettings as Record<string, string>;
+    // Convert camelCase keys to SCREAMING_SNAKE_CASE with MASSIF_ prefix
+    // e.g. "googleMapsLink" → "MASSIF_GOOGLE_MAPS_LINK", "firma" → "MASSIF_FIRMA"
+    rawConfig.templateReplacements = Object.fromEntries(
+      Object.entries(ms).map(([k, v]) => {
+        const snake = k.replace(/([A-Z])/g, '_$1').toUpperCase();
+        return [`MASSIF_${snake}`, v];
+      })
+    );
+    delete rawConfig.massifSettings;
+  }
+  // Ensure new fields have defaults
+  if (!rawConfig.templateReplacements) rawConfig.templateReplacements = {};
+  if (!rawConfig.preset) rawConfig.preset = "custom";
+
+  const data = raw as unknown as StateData;
 
   // Apply any CLI overrides on top of saved config
   if (options.skipDb) data.config.skipDb = true;

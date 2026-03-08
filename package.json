@@ -28,7 +28,8 @@
   "files": [
     "dist",
     "bin",
-    "templates"
+    "templates",
+    "presets"
   ],
   "engines": {
     "node": ">=18"

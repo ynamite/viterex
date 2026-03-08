@@ -45,8 +45,8 @@ const tasks: Task[] = [
     run: scaffoldFrontend,
   },
   {
-    name: "Import SQL data (articles, config presets, massif settings)",
-    skip: (c) => c.skipDb,
+    name: "Seed database",
+    skip: (c) => c.skipDb || !c.seedFile,
     run: importSql,
   },
   {
@@ -61,7 +61,7 @@ const tasks: Task[] = [
   },
   {
     name: "Install addons as submodules",
-    skip: (c) => c.skipGit,
+    skip: (c) => c.skipGit || !c.submoduleAddons?.length,
     run: installSubmoduleAddons,
   },
   {
