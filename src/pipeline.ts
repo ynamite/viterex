@@ -60,7 +60,7 @@ const tasks: Task[] = [
     run: initGitRepo,
   },
   {
-    name: "Install submodule addons (viterex, massif, massif_settings, massif_dnd_sorter)",
+    name: "Install addons as submodules",
     skip: (c) => c.skipGit,
     run: installSubmoduleAddons,
   },
