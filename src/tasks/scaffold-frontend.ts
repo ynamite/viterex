@@ -167,7 +167,7 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
     }
   }
 
-  // ─── 7. Download redaxo-frontend-assets from GitHub ────────────────
+  // ─── 7. Download massif redaxo-frontend-assets from GitHub ────────────────
   // Clone the repo into a temp dir, then rsync (merge without overwriting)
   const tmpAssets = path.join(projectDir, "tmp-assets");
   try {
