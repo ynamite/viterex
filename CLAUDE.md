@@ -7,7 +7,7 @@ Analyse the current state of the codebase for an up-to-date overview of the curr
 
 Three-layer design:
 
-1. **Config collection** (`src/prompts.ts`) — Interactive terminal prompts via `@clack/prompts`. Collects project name, Redaxo version, DB credentials, addon selection, Tailwind/Fluid TW toggles, package manager choice. Bypassable with `--config path/to/config.json` for CI/automated use.
+1. **Config collection** (`src/prompts.ts`) — Interactive terminal prompts via `@clack/prompts`. Collects project name, Redaxo version, DB credentials, addon selection, package manager choice. Bypassable with `--config path/to/config.json` for CI/automated use.
 
 2. **Task pipeline** (`src/pipeline.ts`) — Ordered array of `Task` objects, each with `name`, optional `skip` predicate, and async `run` function. Tasks execute sequentially with spinner feedback. Each task is idempotent — safe to re-run on failure.
 

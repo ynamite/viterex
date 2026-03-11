@@ -27,7 +27,6 @@ Dies ist eine REDAXO CMS Installation (Version 5.x). REDAXO ist ein deutsches Co
   - Beispiel: `php bin/console massif:exec-php "var_dump(rex_addon::get('massif_settings')->getConfig());"` gibt die Konfiguration des `massif_settings` Addons aus
   - es können auch Konsolen-Befehle erstellt werden, die dann über `php bin/console *Befehl*` ausgeführt werden können
 
-
 ### 2. REDAXO API-Klassen recherchieren z.B:
 
 Wichtige Core-Klassen, die analysiert werden sollten:
@@ -58,7 +57,6 @@ Wichtige benutzerdefinierte Klassen:
 - `massif_img` - Bildverarbeitung und -optimierung
 - `massif_utils` - Hilfsfunktionen des Massif-Addons. Vor allem die statische Methode `parse`
 
-
 ### 3. Addon-spezifische APIs erforschen
 
 Verfügbare Addons (in `src/addons/` und Assets in `public/assets/addons/`):
@@ -86,10 +84,10 @@ Ziel ist es, die Anzahl der Abhängigkeiten zu minimieren und die Performance zu
 
 ### CSS-Framework-Hierarchie
 
-1. **Tailwind CSS v3** - Utility-First CSS Framework
-2. **Fluid.tw** - Fluid Responsive Design
+1. **Tailwind CSS v4** - Utility-First CSS Framework
 
 ### JS-Framework
+
 1. **Vanilla Javascript**
 2. **LazySizes** - Lazy Loading für Bilder und iframes
 3. **GSAP** - Animationen und Transitionen
@@ -97,7 +95,6 @@ Ziel ist es, die Anzahl der Abhängigkeiten zu minimieren und die Performance zu
 5. **Swiper JS** - Touch-freundliche Slider und Karussells
 6. **Three.js** - 3D-Grafiken und Animationen
 7. **Store** - Zustandverwaltung für komplexe Anwendungen (Eigenentwicklung als Test, allenfalls verwerfen)
-
 
 ## Backend-Entwicklung
 

@@ -8,7 +8,7 @@ CLI tool to scaffold a **ViteRex** project — [Redaxo CMS](https://redaxo.org/)
 pnpx create-viterex my-project
 ```
 
-The interactive prompts will walk you through project name, Redaxo version, database credentials, addon selection, Tailwind/Fluid TW toggles, and package manager choice.
+The interactive prompts will walk you through project name, Redaxo version, database credentials, addon selection and package manager choice.
 
 ## Usage
 
