@@ -71,32 +71,40 @@ The `templates/` directory contains `.tpl` files that get copied/transformed int
 
 ## TODO
 
-- [x] Populate `templates/` directory with actual config files (port from current viterex repo, which is the current root directory)
-- [x] Verify Redaxo CLI `setup:run` flags against target version
-- [x] Expand `ADDON_CATALOG` with full addon list and plugin sub-selections
-- [x] Add `--resume` flag with `.viterex-state.json` to track completed steps
-- [x] Error recovery: let user retry individual failed tasks
-- [x] Add `--verbose` flag to pipe task stdout/stderr to terminal
-- [x] Add `--dry-run` flag that prints what would happen without executing
+Shipped work has moved to `CHANGELOG.md`. Remaining open items are grouped by theme.
 
-- [ ] add default `templates/base/package.json.tpl` with basic dependencies and scripts for Vite. This will be copied to the project during `scaffold-frontend.ts` with token replacement for project name and other dynamic values. This way we can provide a ready-to-go `package.json` file that users can further customize after installation, and also ensure that all necessary dependencies are included by default.
-
-- [ ] currently there's a lot of MASSIF specific stuff going on in the codebase, which is not ideal as it couples the `create-viterex` package to a specific use case. We should aim to make the installation process more generic and flexible, so that it can be used for different projects and use cases without being tied to MASSIF. This can be achieved by allowing users to choose which addons they want to install during the prompts phase, and then installing only those addons during the installation phase. We can also provide a default configuration that includes the most commonly used addons, but allow users to customize it based on their needs. This way we can make `create-viterex` a more versatile and widely applicable tool for scaffolding ViteRex projects. Still, we can keep the MASSIF demo content as an optional addon that users can choose to install if they want to have a ready-to-go demo environment, but it shouldn't be the default or only option.
-
-- [ ] publish `viterex-addon` package (viterex addon repo, not this one) to redaxo installer for one-click install from Redaxo backend
-
-- [ ] install `viterex-addon` addon package from redaxo installer in `install-addons.ts` instead of cloning from GitHub (currently the addon is not published, so we clone the repo directly). `viterex-addon` is a required addon as it contains shared assets and logic for the frontend, so it should be installed by default.
-
-- [ ] Allow custom addons via separate `addons.json` config file that extends `ADDON_CATALOG`. Custom addons should allow replacement key/value pairs to replace values in the custom sql seed file (`redaxo_custom_sql_seed.sql.tpl`) during installation, like `massif_settings` currently does. This way we can have a more flexible and customizable installation process that can adapt to different use cases and requirements. For example, we could have a custom addon that seeds specific demo content during installation by providing a custom sql seed file with the necessary replacements for dynamic values like database credentials. This would allow us to easily set up different demo environments with different content based on the same base configuration.
-
-- [ ] Remove `massif_settings`, `massif_dnd_sorter` and `massif` addons from main config, setup process and `ADDON_CATALOG` and instead allow installing them via the `addons.json` file as described in the previous point. This way we can also have versioning for them and decouple their release cycles from the main `create-viterex` package.
-
-- [ ] in `addons.json` allow installing addons by cloning them from a repository instead of from installing from redaxo installer by optionally providing the repository url in `install-addons.ts`
-
-- [ ] Only install `viterex-addon`, `massif_settings`, `massif_dnd_sorter` and `massif` addons as a submodules under the `massif` preset.
-
-- [ ] redaxo installer config file (`templates/redaxo/redaxo_install_config.json`) shouldn't be hard coded and instead be prompted by the setup routine. If presented, it should be used in `scaffold-frontend.ts` to generate the file `redaxo_install_config.json` in the data dir (as is the case now). If none is provided, this step should be skipped.
-
-- [ ] add `--generate-config` flag to output a config JSON file based on CLI prompts and exit, for easier CI usage
+### Product / roadmap
 
 - [ ] Publish to npm as `create-viterex`
+- [ ] Publish `viterex-addon` to the Redaxo installer (separate repo)
+- [ ] Swap `install-submodule-addons.ts` for a Redaxo-installer install once `viterex-addon` is published — it's the shared frontend logic and should be installed by default
+- [ ] Ship default `templates/base/package.json.tpl` with Vite + Tailwind deps and scripts (token replacement for project name)
+- [ ] Ship default `templates/base/vite.config.js.tpl`, `tailwind.config.js.tpl`, `index.js`, `.gitignore.tpl`
+- [ ] `--generate-config` flag: run prompts, write JSON, exit (for CI)
+- [ ] Prompt for `redaxo_install_config.json` contents instead of copying the hard-coded `templates/redaxo/redaxo_install_config.json`; skip the step entirely when the user provides nothing
+
+### Decouple from MASSIF
+
+- [ ] Move `massif`, `massif_settings`, `massif_dnd_sorter` submodules out of the default flow into an opt-in `massif` preset; keep them installable but not the default
+- [ ] Support a user-level `addons.json` that extends `ADDON_CATALOG` with repo-clone installs and custom `templateReplacements` for per-project seed SQL (replaces the old hard-coded `massif_settings` block)
+- [ ] Remove `gittower` call from `open-browser.ts` (or gate behind a preset/flag) — currently hard-wired for the MASSIF workflow
+
+### Bugs / cleanup (found during the current review)
+
+- [ ] Delete unused `src/tasks/setup-database.ts` — never imported; DB is created inline by `setup:run --db-createdb=yes`
+- [ ] Fix `scripts/test-run.sh`: `CLI` points to `src/dist/index.js`, should be `dist/index.js`
+- [ ] Update `README.md` addon table to match `ADDON_CATALOG` (drop `plyr`, `markitup`, `redactor`, `yform_quick_edit`); replace `massifSettings` docs with `templateReplacements`
+- [ ] Fix `--preset` help text in `src/index.ts` — mentions a non-existent `massif` preset
+- [ ] Allow `--resume` with `--config` (derive project dir from the config file, not only from the positional arg) in `src/state.ts#loadState`
+- [ ] Stop silent `git push --force` fallback in `create-git-remote.ts` — prompt or require an explicit `--force` flag
+- [ ] Honour `skipDb` in `install-redaxo.ts` (currently still passes DB creds and `--db-createdb=yes`)
+- [ ] Make `install-redaxo.ts` locale/timezone configurable (prompt defaults: `de_de` / `Europe/Berlin`)
+- [ ] Surface dev-server failures: `start-dev-server.ts` uses `stdio: "ignore"` — write to a log file or inherit when `--verbose`
+- [ ] Handle Windows in `open-browser.ts` (`start` command) or gracefully skip
+
+### Tooling
+
+- [ ] Add `tsup.config.ts` so the build is declarative
+- [ ] Rename `pnpm run dev` → `pnpm run start`, and have a real `dev` script run `tsup --watch` — today `dev` requires a prior `build`
+- [ ] Add a minimal Vitest unit test for `replacePlaceholders` (in `scaffold-frontend.ts`) and the `loadState` migration logic
+- [ ] Add CI (GitHub Actions) running `pnpm build` + `scripts/test-run.sh`
