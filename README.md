@@ -5,7 +5,7 @@ CLI tool to scaffold a **ViteRex** project — [Redaxo CMS](https://redaxo.org/)
 ## Quick start
 
 ```bash
-pnpx create-viterex my-project
+npx create-viterex my-project
 ```
 
 The interactive prompts will walk you through project name, Redaxo version, database credentials, addon selection and package manager choice.

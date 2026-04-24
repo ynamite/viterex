@@ -1,6 +1,6 @@
 # create-viterex
 
-Create CLI tool to scaffold a ViteRex project (Redaxo CMS + Vite JS + Tailwind CSS). Published as `pnpx create-viterex`.
+Create CLI tool to scaffold a ViteRex project (Redaxo CMS + Vite JS + Tailwind CSS). Published as `npx create-viterex`.
 Analyse the current state of the codebase for an up-to-date overview of the current architecture (root directory, setup/). The new implementation will be in `src/`, which already contains some typescript files outlining the intended structure. Pay close attention to the current shell script in `setup/` for the actual commands being run, as these will need to be translated into the new TypeScript implementation.
 
 ## Architecture
@@ -46,7 +46,7 @@ node bin/cli.js      # dev run
 pnpm run dev          # same thing
 ```
 
-Published usage: `pnpx create-viterex [project-name] [--flags]`
+Published usage: `npx create-viterex [project-name] [--flags]`
 
 ## CLI flags
 
@@ -90,6 +90,9 @@ Shipped work has moved to `CHANGELOG.md`. Remaining open items are grouped by th
 
 ### Bugs / cleanup (found during the current review)
 
+- [ ] Task "Install dependencies (composer + packages)" failed: Command failed with exit code 1: pnpm install
+      \u2009ERR_PNPM_NO_PKG_MANIFEST\u2009 No package.json found in /Users/yvestorres/Herd/viterex-setup-test/my-viterex-project
+       ERR_PNPM_NO_PKG_MANIFEST  No package.json found in /Users/yvestorres/Herd/viterex-setup-test/my-viterex-project
 - [ ] Delete unused `src/tasks/setup-database.ts` — never imported; DB is created inline by `setup:run --db-createdb=yes`
 - [ ] Fix `scripts/test-run.sh`: `CLI` points to `src/dist/index.js`, should be `dist/index.js`
 - [ ] Update `README.md` addon table to match `ADDON_CATALOG` (drop `plyr`, `markitup`, `redactor`, `yform_quick_edit`); replace `massifSettings` docs with `templateReplacements`
