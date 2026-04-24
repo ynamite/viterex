@@ -11,9 +11,13 @@ release. Nothing has been published to npm yet — everything lives under
 ### Added
 
 - Preset system: `src/preset.ts` discovers `presets/*/preset.json`; external
-  preset paths also accepted via `--preset <path>`. Built-in `default` preset
-  ships with the essential addon set and a viterex-addon submodule
-  (`presets/default/preset.json`, `presets/default/seed.sql.tpl`). (5fb8a37)
+  preset paths also accepted via `--preset <path>`. Ships two built-in
+  presets: `default` (essential addon set + `viterex-addon` submodule) and
+  `massif` (full MASSIF setup — 30 addons, four submodules including
+  `redaxo_massif`, `massif_settings`, `massif_dnd_sorter`, twelve `MASSIF_*`
+  custom prompts, and the `frontendAssetsRepo`). MASSIF-specific behaviour
+  that used to live in the default flow is now isolated to the `massif`
+  preset. (5fb8a37, 921cd90)
 - `--resume` flag with `.viterex-state.json` — per-task recovery; state file
   is written after each task and removed on success. (`src/state.ts`)
 - `--dry-run` flag — logs each task without executing it. (`src/pipeline.ts`)
@@ -110,8 +114,6 @@ See the `## TODO` section in `CLAUDE.md` for the full list. Highlights:
 - `README.md` addon table still lists `plyr`, `markitup`, `redactor`,
   `yform_quick_edit` (all removed) and documents the obsolete
   `massifSettings` config block.
-- `src/index.ts` help text mentions a `massif` preset that doesn't exist in
-  `presets/`.
 - `--resume` requires the positional project-name argument; it can't infer
   the project dir from `--config`.
 - `create-git-remote.ts` silently falls back to `git push --force` on any

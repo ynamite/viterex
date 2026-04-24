@@ -85,8 +85,7 @@ Shipped work has moved to `CHANGELOG.md`. Remaining open items are grouped by th
 
 ### Decouple from MASSIF
 
-- [ ] Move `massif`, `massif_settings`, `massif_dnd_sorter` submodules out of the default flow into an opt-in `massif` preset; keep them installable but not the default
-- [ ] Support a user-level `addons.json` that extends `ADDON_CATALOG` with repo-clone installs and custom `templateReplacements` for per-project seed SQL (replaces the old hard-coded `massif_settings` block)
+- [ ] Support a user-level `~/.viterex/addons.json` that adds extra entries to `ADDON_CATALOG` for interactive selection across projects — presets already cover per-project submodule-addons and template replacements
 - [ ] Remove `gittower` call from `open-browser.ts` (or gate behind a preset/flag) — currently hard-wired for the MASSIF workflow
 
 ### Bugs / cleanup (found during the current review)
@@ -94,7 +93,6 @@ Shipped work has moved to `CHANGELOG.md`. Remaining open items are grouped by th
 - [ ] Delete unused `src/tasks/setup-database.ts` — never imported; DB is created inline by `setup:run --db-createdb=yes`
 - [ ] Fix `scripts/test-run.sh`: `CLI` points to `src/dist/index.js`, should be `dist/index.js`
 - [ ] Update `README.md` addon table to match `ADDON_CATALOG` (drop `plyr`, `markitup`, `redactor`, `yform_quick_edit`); replace `massifSettings` docs with `templateReplacements`
-- [ ] Fix `--preset` help text in `src/index.ts` — mentions a non-existent `massif` preset
 - [ ] Allow `--resume` with `--config` (derive project dir from the config file, not only from the positional arg) in `src/state.ts#loadState`
 - [ ] Stop silent `git push --force` fallback in `create-git-remote.ts` — prompt or require an explicit `--force` flag
 - [ ] Honour `skipDb` in `install-redaxo.ts` (currently still passes DB creds and `--db-createdb=yes`)
