@@ -1,13 +1,15 @@
 import chalk from "chalk";
 
 export function printBanner(): void {
-  console.log(
-    chalk.bgMagenta.black.bold(`
-- - - - - - - - - - - -
-  ViteRex Setup
-- - - - - - - - - - - -
-`)
-  );
+  const top = "┌────────────────────┐";
+  const bottom = "└────────────────────┘";
+  const label = chalk.magentaBright.bold("ViteRex Setup");
+  const side = chalk.magenta("│");
+  console.log("");
+  console.log(chalk.magenta(top));
+  console.log(`${side}   ${label}    ${side}`);
+  console.log(chalk.magenta(bottom));
+  console.log("");
 }
 
 export function printSuccess(projectName: string): void {

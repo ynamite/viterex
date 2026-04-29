@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import fs from "fs-extra";
+import * as p from "@clack/prompts";
 import type { PresetConfig } from "./types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -34,6 +35,10 @@ export async function discoverPresets(): Promise<string[]> {
  * - "custom" returns null (user configures everything manually)
  * - If presetId contains "/" or ends with ".json", treat as external file path
  * - Otherwise look up in built-in presets/ directory
+ *
+ * Filters out legacy `viterex` submodule entries with a warning — viterex is
+ * now installed via `install:download` from redaxo.org and should not be
+ * declared as a submodule.
  */
 export async function loadPreset(
   presetId: string
@@ -44,11 +49,9 @@ export async function loadPreset(
   let dir: string;
 
   if (presetId.includes("/") || presetId.endsWith(".json")) {
-    // External preset path
     configPath = path.resolve(presetId);
     dir = path.dirname(configPath);
   } else {
-    // Built-in preset
     dir = path.join(presetsDir, presetId);
     configPath = path.join(dir, "preset.json");
   }
@@ -58,6 +61,20 @@ export async function loadPreset(
   }
 
   const config: PresetConfig = await fs.readJSON(configPath);
+
+  if (config.submoduleAddons?.length) {
+    const before = config.submoduleAddons.length;
+    config.submoduleAddons = config.submoduleAddons.filter(
+      (s) => s.packageKey !== "viterex" && s.packageKey !== "viterex_addon",
+    );
+    if (config.submoduleAddons.length < before) {
+      p.log.warn(
+        `Preset "${presetId}" lists viterex_addon as a submodule. ` +
+          `viterex_addon is now installed from redaxo.org via install:download — entry filtered.`,
+      );
+    }
+  }
+
   return { config, dir };
 }
 

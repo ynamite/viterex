@@ -1,16 +1,21 @@
+import path from "node:path";
+import fs from "fs-extra";
+import chalk from "chalk";
 import { Command } from "commander";
 import { collectConfig } from "./prompts.js";
 import { runPipeline } from "./pipeline.js";
 import { loadState, clearState } from "./state.js";
+import { detectInstallation } from "./utils/detect.js";
 import { printBanner, printSuccess, printError } from "./utils/log.js";
+import type { Layout, ViterexConfig } from "./types.js";
 
 const program = new Command();
 
 program
   .name("create-viterex")
-  .description("Scaffold a ViteRex (Redaxo + Vite) project")
+  .description("Scaffold a ViteRex (Redaxo + Vite) project, or augment an existing Redaxo install")
   .version("1.0.0")
-  .argument("[project-name]", "Name of the project directory")
+  .argument("[project-name]", "Name of the project directory (or '.' to augment current dir)")
   .option("--skip-db", "Skip database creation")
   .option("--skip-addons", "Skip addon installation")
   .option("--skip-git", "Don't initialize a git repo")
@@ -20,32 +25,81 @@ program
   .option("--resume", "Resume a previously failed run, skipping completed tasks")
   .option("--dry-run", "Log each task without executing")
   .option("--verbose", "Pipe task stdout/stderr to the terminal")
+  .option("--layout <m|c|ct>", "Directory layout: modern | classic | classic+theme")
+  .option("--fresh", "Force fresh-install pipeline even when an existing Redaxo install is detected")
+  .option("--force-push", "Allow force-push when the git remote already has commits")
+  .option("--with-tower", "Open Tower (macOS) after a successful run")
+  .option("--lang <locale>", "Redaxo language (e.g. de_de)")
+  .option("--timezone <tz>", "Redaxo timezone (e.g. Europe/Berlin)")
+  .option("--generate-config [path]", "Run prompts and write config JSON to <path> (default: viterex.json), then exit")
+  .option("--force", "Allow --generate-config to overwrite an existing file")
   .action(async (projectName, options) => {
     printBanner();
 
     try {
-      let config;
+      // --generate-config: run prompts, write JSON, exit. Never enters the pipeline.
+      if (options.generateConfig) {
+        if (options.config) {
+          console.warn(chalk.yellow("--config is ignored when --generate-config is set"));
+        }
+        const targetPath = path.resolve(
+          typeof options.generateConfig === "string"
+            ? options.generateConfig
+            : "viterex.json",
+        );
+        if ((await fs.pathExists(targetPath)) && !options.force) {
+          throw new Error(
+            `${targetPath} already exists. Re-run with --force to overwrite.`,
+          );
+        }
+
+        // Force fresh mode regardless of cwd contents — generating a config
+        // for an augment install is non-sensical (augment derives values from
+        // the existing Redaxo install, not from a config file).
+        const detection = await detectInstallation(process.cwd());
+        detection.mode = "fresh";
+
+        const generated = await collectConfig(projectName, options, detection);
+        // Strip runtime-only fields the user shouldn't pin in a config file.
+        const { verbose: _v, forcePush: _fp, withTower: _wt, ...persisted } = generated;
+        await fs.writeJSON(targetPath, persisted, { spaces: 2 });
+
+        console.log(
+          chalk.green(
+            `\n✓ Wrote ${targetPath} — re-run with --config ${JSON.stringify(targetPath)} to install.\n`,
+          ),
+        );
+        return;
+      }
+
+      const targetDir = resolveTargetDir(projectName, options.config);
+      const detection = await detectInstallation(targetDir);
+
+      if (options.fresh) {
+        detection.mode = "fresh";
+      }
+
+      let config: ViterexConfig;
       let completedTasks: string[] = [];
 
       if (options.resume) {
-        // Resume: load config and completed tasks from state file
         const state = await loadState(projectName, options);
         config = state.config;
         completedTasks = state.completedTasks;
       } else {
-        // Fresh run: collect config, delete any stale state file
         config = options.config
-          ? await loadConfigFile(options.config)
-          : await collectConfig(projectName, options);
+          ? await loadConfigFile(options.config, detection.layout)
+          : await collectConfig(projectName, options, detection);
 
         await clearState(config.projectDir);
       }
 
       config.verbose = !!options.verbose;
+      config.forcePush = config.forcePush || !!options.forcePush;
+      config.withTower = config.withTower || !!options.withTower;
 
       await runPipeline(config, { completedTasks, dryRun: !!options.dryRun });
 
-      // Clean up state file on successful completion
       await clearState(config.projectDir);
 
       printSuccess(config.projectName);
@@ -57,11 +111,32 @@ program
 
 program.parse();
 
-async function loadConfigFile(configPath: string) {
-  const fsExtra = await import("fs-extra");
-  const config = await fsExtra.default.readJSON(configPath);
-  // Ensure new fields have defaults for backwards compatibility
+function resolveTargetDir(projectName: string | undefined, configPath: string | undefined): string {
+  if (projectName) {
+    return path.resolve(process.cwd(), projectName);
+  }
+  if (configPath) {
+    try {
+      const cfg = fs.readJSONSync(configPath) as { projectDir?: string };
+      if (cfg.projectDir) return path.resolve(cfg.projectDir);
+    } catch {
+      // fall through to cwd
+    }
+  }
+  return process.cwd();
+}
+
+async function loadConfigFile(configPath: string, defaultLayout: Layout): Promise<ViterexConfig> {
+  const config = (await fs.readJSON(configPath)) as Partial<ViterexConfig> & Record<string, unknown>;
+
+  // Backfill defaults for fields added in newer installer versions
   if (!config.templateReplacements) config.templateReplacements = {};
   if (!config.preset) config.preset = "custom";
-  return config;
+  if (!config.layout) config.layout = defaultLayout;
+  if (!config.installMode) config.installMode = "fresh";
+  if (!config.redaxoLang) config.redaxoLang = "de_de";
+  if (!config.redaxoTimezone) config.redaxoTimezone = "Europe/Berlin";
+  if (!config.addons) config.addons = [];
+
+  return config as ViterexConfig;
 }

@@ -1,63 +1,106 @@
 import path from "node:path";
 import fs from "fs-extra";
 import { exec } from "../utils/exec.js";
+import { consolePathFor, srcAddonsDirFor } from "../utils/detect.js";
 import type { ViterexConfig } from "../types.js";
 
 export async function installAddons(config: ViterexConfig): Promise<void> {
-  const { projectDir, addons, verbose } = config;
+  const { projectDir, layout, addons, verbose } = config;
+  const consolePath = consolePathFor(layout);
+  const addonsDir = srcAddonsDirFor(layout);
+
+  // We deliberately do NOT pass --quiet to package:install / package:activate
+  // / install:download. Symfony Console's --quiet suppresses error output too,
+  // so a failing addon install would surface as an empty stderr — useless for
+  // debugging. The pipeline captures stdout/stderr and appends them to the
+  // thrown error message when a task fails, which gives the user something to
+  // act on.
 
   for (const addon of addons) {
     const isPlugin = addon.key.includes("/");
 
-    // Download top-level addons only if not already present on disk
-    // (plugins are part of their parent addon, no separate download needed)
     if (!isPlugin && addon.install) {
-      const addonDir = path.join(projectDir, "src", "addons", addon.key);
+      const addonDir = path.join(projectDir, addonsDir, addon.key);
       if (!(await fs.pathExists(addonDir))) {
-        await exec(
-          "php",
-          ["bin/console", "install:download", addon.key, "--no-interaction", "--quiet"],
-          { cwd: projectDir, verbose }
-        );
+        const downloadArgs = [
+          consolePath,
+          "install:download",
+          addon.key,
+          ...(addon.version ? [addon.version] : []),
+          "--no-interaction",
+        ];
+        await runWithContext("install:download", addon.key, "php", downloadArgs, projectDir, verbose);
       }
     }
 
     if (addon.install) {
-      await exec(
+      await runWithContext(
+        "package:install",
+        addon.key,
         "php",
-        ["bin/console", "package:install", addon.key, "--no-interaction", "--quiet"],
-        { cwd: projectDir, verbose }
+        [consolePath, "package:install", addon.key, "--no-interaction"],
+        projectDir,
+        verbose,
       );
     }
 
     if (addon.activate) {
-      await exec(
+      await runWithContext(
+        "package:activate",
+        addon.key,
         "php",
-        ["bin/console", "package:activate", addon.key, "--no-interaction", "--quiet"],
-        { cwd: projectDir, verbose }
+        [consolePath, "package:activate", addon.key, "--no-interaction"],
+        projectDir,
+        verbose,
       );
     }
 
-    // Install and activate plugins if specified
     if (addon.plugins) {
       for (const plugin of addon.plugins) {
         const pluginKey = `${addon.key}/${plugin}`;
-        await exec(
+        await runWithContext(
+          "package:install",
+          pluginKey,
           "php",
-          ["bin/console", "package:install", pluginKey, "--no-interaction", "--quiet"],
-          { cwd: projectDir, verbose }
+          [consolePath, "package:install", pluginKey, "--no-interaction"],
+          projectDir,
+          verbose,
         );
-        await exec(
+        await runWithContext(
+          "package:activate",
+          pluginKey,
           "php",
-          ["bin/console", "package:activate", pluginKey, "--no-interaction", "--quiet"],
-          { cwd: projectDir, verbose }
+          [consolePath, "package:activate", pluginKey, "--no-interaction"],
+          projectDir,
+          verbose,
         );
       }
     }
   }
 
-  // Post-addon setup: clear cache, compile backend styles
-  await exec("php", ["bin/console", "cache:clear", "--quiet"], { cwd: projectDir, verbose });
-  await exec("php", ["bin/console", "be_style:compile", "--quiet"], { cwd: projectDir, verbose });
+  await exec("php", [consolePath, "cache:clear"], { cwd: projectDir, verbose });
+  await exec("php", [consolePath, "be_style:compile"], { cwd: projectDir, verbose });
+}
 
+/**
+ * Wrap an exec call so a failure carries the addon key in its message.
+ * Without this, all you see is "Command failed: php bin/console package:install yrewrite",
+ * with no detail on which step or addon broke when there are 30+ addons in the loop.
+ */
+async function runWithContext(
+  step: string,
+  addonKey: string,
+  file: string,
+  args: string[],
+  cwd: string,
+  verbose: boolean,
+): Promise<void> {
+  try {
+    await exec(file, args, { cwd, verbose });
+  } catch (err) {
+    const e = err as Error & { stderr?: string; stdout?: string };
+    const detail = [e.stderr, e.stdout].filter(Boolean).join("\n").trim();
+    const suffix = detail ? `\n${detail}` : "";
+    throw new Error(`${step} ${addonKey} failed${suffix}`);
+  }
 }

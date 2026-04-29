@@ -1,6 +1,13 @@
+export type Layout = "modern" | "classic" | "classic+theme";
+export type InstallMode = "fresh" | "augment";
+
 export interface ViterexConfig {
   projectName: string;
   projectDir: string;
+
+  // Detection
+  layout: Layout;
+  installMode: InstallMode;
 
   // Redaxo
   redaxoVersion: string;
@@ -9,6 +16,8 @@ export interface ViterexConfig {
   redaxoAdminEmail: string;
   redaxoErrorEmail: string;
   redaxoServerName: string;
+  redaxoLang: string;
+  redaxoTimezone: string;
 
   // Database
   skipDb: boolean;
@@ -31,26 +40,36 @@ export interface ViterexConfig {
   seedFile?: string;
   submoduleAddons?: SubmoduleAddon[];
   templateReplacements: Record<string, string>;
-  frontendAssetsRepo?: string;
 
   // Deployment
   setupDeploy: boolean;
 
   // Git
   skipGit: boolean;
-  gitProvider: string;    // e.g. "github.com" or "gitlab.com"
-  gitNamespace: string;   // org or user name
-  gitRepoName: string;    // repository name
+  gitProvider: string;
+  gitNamespace: string;
+  gitRepoName: string;
 
   // Runtime flags (not persisted to config files)
   verbose: boolean;
+  forcePush?: boolean;
+  withTower?: boolean;
+
+  // Preset-derived (resolved to absolute paths in prompts.ts)
+  installerConfig?: string;     // absolute path to a redaxo_installer_config.json
+  deployerExtras?: string[];    // absolute paths to .php files included in deploy.php
+
+  // Prompt-derived (set only when no preset.installerConfig)
+  installerApiLogin?: string;
+  installerApiKey?: string;
 }
 
 export interface AddonSelection {
-  key: string;       // e.g. "yrewrite"
+  key: string; // e.g. "yrewrite"
   install: boolean;
   activate: boolean;
   plugins?: string[]; // optional plugin keys to activate
+  version?: string; // optional version pin for install:download
 }
 
 export interface PresetConfig {
@@ -58,11 +77,13 @@ export interface PresetConfig {
   description: string;
   addons?: AddonSelection[];
   submoduleAddons?: SubmoduleAddon[];
-  seedFile?: string;                    // relative to preset dir
+  seedFile?: string; // relative to preset dir
   templateReplacements?: Record<string, string>;
   customPrompts?: CustomPromptDef[];
-  frontendAssetsRepo?: string;
-  installerConfig?: string;             // relative to preset dir
+  installerConfig?: string; // relative to preset dir
+  deployerExtras?: string[]; // .php paths relative to preset dir; required'd at deploy.php line 31 + added to clear_paths
+  redaxoLang?: string; // override prompt default; e.g. "de_de"
+  redaxoTimezone?: string; // override prompt default; e.g. "Europe/Berlin"
 }
 
 export interface SubmoduleAddon {
@@ -80,17 +101,39 @@ export interface CustomPromptDef {
   required?: boolean;
 }
 
-// Full addon catalog ported from setup/setup.cfg ADDON_PACKAGES.
-// All entries from the original list are recommended:true (installed by default).
+/**
+ * Baseline addons installed regardless of preset choice.
+ *
+ * Order matters — addons earlier in the list must be activated before later
+ * ones so dependencies resolve:
+ *   - structure: no addon deps (core only)
+ *   - phpmailer: no addon deps
+ *   - developer: no addon deps
+ *   - yform:     no addon deps; required by yrewrite
+ *   - yrewrite:  requires structure + yform (both above)
+ *   - ydeploy:   no hard deps on the others; placed before viterex
+ *   - viterex_addon: LAST so consumer addons that activate later (e.g. redaxo-massif)
+ *                    see it as available when their install.php fires. Installed
+ *                    via `install:download viterex_addon` from redaxo.org.
+ */
+export const ALWAYS_INCLUDED: AddonSelection[] = [
+  { key: "structure", install: true, activate: true, plugins: ["history"] },
+  { key: "phpmailer", install: true, activate: true },
+  { key: "developer", install: true, activate: true },
+  { key: "yform", install: true, activate: true },
+  { key: "yrewrite", install: true, activate: true },
+  { key: "ydeploy", install: true, activate: true },
+  { key: "viterex_addon", install: true, activate: true },
+];
+
+// Addons NOT in ALWAYS_INCLUDED but offered as recommended extras.
+// Baseline keys are intentionally excluded so the multiselect doesn't double-list them.
 export const ADDON_CATALOG: AddonEntry[] = [
-  { key: "yform", label: "YForm (form builder)", recommended: true },
-  { key: "yrewrite", label: "YRewrite (URL rewriting)", recommended: true },
   { key: "be_tools", label: "BE Tools (backend enhancements)", recommended: true },
   { key: "sprog", label: "Sprog (i18n / variables)", recommended: true },
   { key: "url", label: "URL (custom URL profiles)", recommended: true },
   { key: "adminer", label: "Adminer (DB management)", recommended: true },
   { key: "bloecks", label: "Bloecks (block editor)", recommended: true },
-  { key: "developer", label: "Developer (file-based templates/modules)", recommended: true },
   { key: "focuspoint", label: "Focuspoint (image focal point)", recommended: true },
   { key: "mblock", label: "MBlock (repeatable fields)", recommended: true },
   { key: "mform", label: "MForm (module form builder)", recommended: true },
@@ -108,9 +151,6 @@ export const ADDON_CATALOG: AddonEntry[] = [
   { key: "yform_usability", label: "YForm Usability", recommended: true },
   { key: "media_negotiator", label: "Media Negotiator (WebP/AVIF)", recommended: true },
   { key: "statistics", label: "Statistics", recommended: true },
-  { key: "ydeploy", label: "YDeploy (deployment)", recommended: true },
-  { key: "structure", label: "Structure (history plugin)", recommended: true, plugins: ["history"] },
-  { key: "phpmailer", label: "PHPMailer", recommended: true },
   { key: "be_password", label: "BE Password (password policy)", recommended: true },
   { key: "block_peek", label: "Block Peek (slice preview)", recommended: true },
 ];

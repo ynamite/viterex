@@ -1,44 +1,24 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import fs from "fs-extra";
-import { exec } from "../utils/exec.js";
+import { dataDirFor, srcAddonsDirFor } from "../utils/detect.js";
+import { replacePlaceholders } from "../utils/replace-placeholders.js";
 import type { ViterexConfig } from "../types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const templatesDir = path.resolve(__dirname, "../templates");
 
-/**
- * Replace all {{PLACEHOLDER}} tokens in a string with values from the replacements map.
- */
-function replacePlaceholders(
-  content: string,
-  replacements: Record<string, string>
-): string {
-  return content.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-    return key in replacements ? replacements[key] : match;
-  });
-}
-
-/**
- * Read a .tpl file, replace placeholders, and write to destination.
- */
 async function processTemplate(
   tplPath: string,
   destPath: string,
-  replacements: Record<string, string>
+  replacements: Record<string, string>,
 ): Promise<void> {
   if (!(await fs.pathExists(tplPath))) return;
   const content = await fs.readFile(tplPath, "utf-8");
   await fs.writeFile(destPath, replacePlaceholders(content, replacements));
 }
 
-/**
- * Copy a static file from templates to the project directory.
- */
-async function copyTemplate(
-  srcPath: string,
-  destPath: string
-): Promise<void> {
+async function copyTemplate(srcPath: string, destPath: string): Promise<void> {
   if (!(await fs.pathExists(srcPath))) return;
   await fs.copy(srcPath, destPath, { overwrite: false });
 }
@@ -47,15 +27,14 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
   const {
     projectDir,
     projectName,
+    layout,
     redaxoServerName,
     redaxoAdminUser,
     redaxoAdminEmail,
     redaxoErrorEmail,
-    verbose,
     setupDeploy,
   } = config;
 
-  // Common placeholder replacements used across all templates
   const replacements: Record<string, string> = {
     PROJECT_NAME: projectName,
     SERVER_NAME: redaxoServerName,
@@ -67,113 +46,106 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
   };
 
   // ─── 1. Base static files ──────────────────────────────────────────
-  // .browserslistrc, .eslintrc.cjs, .prettierrc, stylelint.config.js,
-  // jsconfig.json, index.js, LocalValetDriver.php, .gitignore
   const baseDir = path.join(templatesDir, "base");
   if (await fs.pathExists(baseDir)) {
     await fs.copy(baseDir, projectDir, { overwrite: false });
   }
 
   // ─── 2. Templated root configs ─────────────────────────────────────
-  // .env and .env.local (both from same template)
-  await processTemplate(
-    path.join(templatesDir, "env.tpl"),
-    path.join(projectDir, ".env"),
-    replacements
-  );
+  await processTemplate(path.join(templatesDir, "env.tpl"), path.join(projectDir, ".env"), replacements);
   await processTemplate(
     path.join(templatesDir, "env.tpl"),
     path.join(projectDir, ".env.local"),
-    replacements
+    replacements,
   );
 
-  // composer.json
   await processTemplate(
     path.join(templatesDir, "composer.json.tpl"),
     path.join(projectDir, "composer.json"),
-    replacements
+    replacements,
   );
 
-  // ─── 4. Redaxo PHP files ──────────────────────────────────────────
-  // NOTE: bin/console, path_provider.php, index.frontend.php,
-  // index.backend.php, and .htaccess are copied in download-redaxo.ts
-  // because they must be in place before `setup:run` executes.
+  // ─── 3. Layout-aware Redaxo data files ────────────────────────────
+  const dataDir = path.join(projectDir, dataDirFor(layout));
+  const addonsDir = path.join(projectDir, srcAddonsDirFor(layout));
 
-  const redaxoDir = path.join(templatesDir, "redaxo");
+  await fs.ensureDir(path.join(dataDir, "addons", "install"));
 
-  // var/data/addons/install/config.json
-  await fs.ensureDir(path.join(projectDir, "var", "data", "addons", "install"));
-  await copyTemplate(
-    path.join(redaxoDir, "redaxo_install_config.json"),
-    path.join(projectDir, "var", "data", "addons", "install", "config.json")
-  );
-
-  // var/data/addons/ydeploy (empty dir needed)
-  await fs.ensureDir(path.join(projectDir, "var", "data", "addons", "ydeploy"));
-
-  // Seed SQL (from preset or custom path)
-  if (config.seedFile) {
-    await processTemplate(
-      config.seedFile,
-      path.join(projectDir, "var", "data", "seed.sql"),
-      replacements
+  // REDAXO Installer API credentials:
+  //   1. preset supplies a config file → copy it
+  //   2. user answered the prompt → write a fresh config from their values
+  //   3. neither → no installer config installed (Redaxo handles its absence)
+  const installerConfigPath = path.join(dataDir, "addons", "install", "config.json");
+  if (config.installerConfig) {
+    await fs.copy(config.installerConfig, installerConfigPath, { overwrite: false });
+  } else if (config.installerApiLogin && config.installerApiKey) {
+    await fs.writeJSON(
+      installerConfigPath,
+      {
+        backups: true,
+        api_login: config.installerApiLogin,
+        api_key: config.installerApiKey,
+      },
+      { spaces: 2 },
     );
   }
 
-  // src/addons/project/fragments (empty dir for project fragments)
-  await fs.ensureDir(path.join(projectDir, "src", "addons", "project", "fragments"));
+  await fs.ensureDir(path.join(dataDir, "addons", "ydeploy"));
 
-  // ─── 5. Deploy files (conditional) ────────────────────────────────
+  if (config.seedFile) {
+    await processTemplate(
+      config.seedFile,
+      path.join(dataDir, "seed.sql"),
+      replacements,
+    );
+  }
+
+  await fs.ensureDir(path.join(addonsDir, "project", "fragments"));
+
+  // ─── 4. Deploy files (conditional) ────────────────────────────────
   if (setupDeploy) {
     const deployDir = path.join(templatesDir, "deploy");
+    const extras = config.deployerExtras ?? [];
+
+    // Copy preset-supplied extras to project root.
+    for (const absPath of extras) {
+      await fs.copy(
+        absPath,
+        path.join(projectDir, path.basename(absPath)),
+        { overwrite: false },
+      );
+    }
+
+    // Build placeholder content for deploy.php.
+    const requiresBlock = extras
+      .map((f) => `require __DIR__ . '/${path.basename(f)}';`)
+      .join("\n");
+    const clearPathsBlock = extras
+      .map((f) => `    '${path.basename(f)}',`)
+      .join("\n");
 
     await processTemplate(
       path.join(deployDir, "deploy.php.tpl"),
       path.join(projectDir, "deploy.php"),
-      replacements
+      {
+        ...replacements,
+        DEPLOYER_EXTRAS: requiresBlock,
+        DEPLOYER_EXTRAS_CLEAR_PATHS: clearPathsBlock,
+      },
     );
+
+    // Collapse extra blank lines left behind when placeholders are empty.
+    const deployPhp = path.join(projectDir, "deploy.php");
+    const rendered = (await fs.readFile(deployPhp, "utf-8")).replace(
+      /\n{3,}/g,
+      "\n\n",
+    );
+    await fs.writeFile(deployPhp, rendered);
 
     await copyTemplate(
       path.join(deployDir, "deployer.task.setup.php"),
-      path.join(projectDir, "deployer.task.setup.php")
-    );
-
-    await copyTemplate(
-      path.join(deployDir, "deployer.task.release.metanet.php"),
-      path.join(projectDir, "deployer.task.release.metanet.php")
+      path.join(projectDir, "deployer.task.setup.php"),
     );
   }
 
-  // ─── 6. Utility scripts ───────────────────────────────────────────
-  const scriptsDir = path.join(templatesDir, "scripts");
-
-  const scripts = ["quickstart", "sync-config", "sync-db", "sync-media"];
-  for (const script of scripts) {
-    const dest = path.join(projectDir, script);
-    await copyTemplate(path.join(scriptsDir, script), dest);
-    // Make scripts executable
-    if (await fs.pathExists(dest)) {
-      await fs.chmod(dest, 0o755);
-    }
-  }
-
-  // ─── 7. Download frontend assets from preset repo (if configured) ─
-  if (config.frontendAssetsRepo) {
-    const tmpAssets = path.join(projectDir, "tmp-assets");
-    try {
-      await exec(
-        "gh",
-        ["repo", "clone", config.frontendAssetsRepo, tmpAssets],
-        { verbose }
-      );
-      // Remove git metadata from the cloned repo (use rm -rf for .git
-      // because git objects can have restrictive permissions)
-      await exec("rm", ["-rf", path.join(tmpAssets, ".git")], { verbose });
-      await fs.remove(path.join(tmpAssets, ".github"));
-      // Merge into project root without overwriting existing files
-      await exec("rsync", ["-a", "--ignore-existing", `${tmpAssets}/`, `${projectDir}/`], { verbose });
-    } finally {
-      await exec("rm", ["-rf", tmpAssets], { verbose });
-    }
-  }
 }

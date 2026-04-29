@@ -41,9 +41,10 @@ Three-layer design:
 
 ```bash
 pnpm install
-pnpm run build        # tsup → dist/
-node bin/cli.js      # dev run
-pnpm run dev          # same thing
+pnpm build            # tsup → dist/
+node bin/cli.js       # dev run
+pnpm dev              # same thing
+pnpm test             # vitest
 ```
 
 Published usage: `npx create-viterex [project-name] [--flags]`
@@ -76,36 +77,36 @@ Shipped work has moved to `CHANGELOG.md`. Remaining open items are grouped by th
 ### Product / roadmap
 
 - [ ] Publish to npm as `create-viterex`
-- [ ] Publish `viterex-addon` to the Redaxo installer (separate repo)
-- [ ] Swap `install-submodule-addons.ts` for a Redaxo-installer install once `viterex-addon` is published — it's the shared frontend logic and should be installed by default
-- [ ] Ship default `templates/base/package.json.tpl` with Vite + Tailwind deps and scripts (token replacement for project name)
-- [ ] Ship default `templates/base/vite.config.js.tpl`, `tailwind.config.js.tpl`, `index.js`, `.gitignore.tpl`
-- [ ] `--generate-config` flag: run prompts, write JSON, exit (for CI)
-- [ ] Prompt for `redaxo_install_config.json` contents instead of copying the hard-coded `templates/redaxo/redaxo_install_config.json`; skip the step entirely when the user provides nothing
+- [x] Publish `viterex_addon` to the Redaxo installer (separate repo)
+- [x] Swap `install-submodule-addons.ts` for a Redaxo-installer install once `viterex_addon` is published — it's the shared frontend logic and should be installed by default
+- [x] Ship default `templates/base/package.json.tpl` with Vite + Tailwind deps and scripts (token replacement for project name) – Update: ships with `viterex_addon` stubs instead.
+- [x] Ship default `templates/base/vite.config.js.tpl`, `tailwind.config.js.tpl`, `index.js`, `.gitignore.tpl` – same as above re: `viterex_addon` stubs
+- [x] `--generate-config` flag: run prompts, write JSON, exit (for CI)
+- [x] Prompt for `redaxo_installer_config.json` contents instead of copying the hard-coded `templates/redaxo/redaxo_installer_config.json`; skip the step entirely when the user provides nothing — preset can also supply the file via `installerConfig`
 
 ### Decouple from MASSIF
 
-- [ ] Support a user-level `~/.viterex/addons.json` that adds extra entries to `ADDON_CATALOG` for interactive selection across projects — presets already cover per-project submodule-addons and template replacements
-- [ ] Remove `gittower` call from `open-browser.ts` (or gate behind a preset/flag) — currently hard-wired for the MASSIF workflow
+- [x] Support a user-level `~/.viterex/addons.json` that adds extra entries to `ADDON_CATALOG` for interactive selection across projects — presets already cover per-project submodule-addons and template replacements
+- [x] Remove `gittower` call from `open-browser.ts` (or gate behind a preset/flag) — currently hard-wired for the MASSIF workflow
 
 ### Bugs / cleanup (found during the current review)
 
-- [ ] Task "Install dependencies (composer + packages)" failed: Command failed with exit code 1: pnpm install
+- [x] Task "Install dependencies (composer + packages)" failed: Command failed with exit code 1: pnpm install
       \u2009ERR_PNPM_NO_PKG_MANIFEST\u2009 No package.json found in /Users/yvestorres/Herd/viterex-setup-test/my-viterex-project
        ERR_PNPM_NO_PKG_MANIFEST  No package.json found in /Users/yvestorres/Herd/viterex-setup-test/my-viterex-project
-- [ ] Delete unused `src/tasks/setup-database.ts` — never imported; DB is created inline by `setup:run --db-createdb=yes`
-- [ ] Fix `scripts/test-run.sh`: `CLI` points to `src/dist/index.js`, should be `dist/index.js`
-- [ ] Update `README.md` addon table to match `ADDON_CATALOG` (drop `plyr`, `markitup`, `redactor`, `yform_quick_edit`); replace `massifSettings` docs with `templateReplacements`
-- [ ] Allow `--resume` with `--config` (derive project dir from the config file, not only from the positional arg) in `src/state.ts#loadState`
-- [ ] Stop silent `git push --force` fallback in `create-git-remote.ts` — prompt or require an explicit `--force` flag
-- [ ] Honour `skipDb` in `install-redaxo.ts` (currently still passes DB creds and `--db-createdb=yes`)
-- [ ] Make `install-redaxo.ts` locale/timezone configurable (prompt defaults: `de_de` / `Europe/Berlin`)
-- [ ] Surface dev-server failures: `start-dev-server.ts` uses `stdio: "ignore"` — write to a log file or inherit when `--verbose`
-- [ ] Handle Windows in `open-browser.ts` (`start` command) or gracefully skip
+- [x] Delete unused `src/tasks/setup-database.ts` — never imported; DB is created inline by `setup:run --db-createdb=yes`
+- [x] Fix `scripts/test-run.sh`: `CLI` points to `src/dist/index.js`, should be `dist/index.js`
+- [x] Update `README.md` addon table to match `ADDON_CATALOG` (drop `plyr`, `markitup`, `redactor`, `yform_quick_edit`); replace `massifSettings` docs with `templateReplacements`
+- [x] Allow `--resume` with `--config` (derive project dir from the config file, not only from the positional arg) in `src/state.ts#loadState`
+- [x] Stop silent `git push --force` fallback in `create-git-remote.ts` — prompt or require an explicit `--force` flag
+- [x] Honour `skipDb` in `install-redaxo.ts` (currently still passes DB creds and `--db-createdb=yes`)
+- [x] Make `install-redaxo.ts` locale/timezone configurable (prompt defaults: `de_de` / `Europe/Berlin`)
+- [x] Surface dev-server failures: `start-dev-server.ts` uses `stdio: "ignore"` — write to a log file or inherit when `--verbose` — superseded: dev server is no longer started by the installer; "Show next steps" prints the run command instead
+- [x] Handle Windows in `open-browser.ts` (`start` command) or gracefully skip
 
 ### Tooling
 
-- [ ] Add `tsup.config.ts` so the build is declarative
-- [ ] Rename `pnpm run dev` → `pnpm run start`, and have a real `dev` script run `tsup --watch` — today `dev` requires a prior `build`
-- [ ] Add a minimal Vitest unit test for `replacePlaceholders` (in `scaffold-frontend.ts`) and the `loadState` migration logic
-- [ ] Add CI (GitHub Actions) running `pnpm build` + `scripts/test-run.sh`
+- [x] Add `tsup.config.ts` so the build is declarative
+- [x] Rename `pnpm run dev` → `pnpm dev`
+- [x] Add a minimal Vitest unit test for `replacePlaceholders` (in `scaffold-frontend.ts`) and the `loadState` migration logic
+- [x] Add CI (GitHub Actions) running `pnpm build` + `scripts/test-run.sh`

@@ -10,78 +10,88 @@ interface StateData {
   completedTasks: string[];
 }
 
-/**
- * Resolve the state file path. When resuming, we need to find the project dir
- * from the state file itself — so we check the provided project name argument
- * or scan the current directory.
- */
 function resolveStatePath(projectDir: string): string {
   return path.join(projectDir, STATE_FILE);
 }
 
 /**
- * Load state for --resume. Finds the state file in the project directory,
- * reads back the saved config and list of completed task names.
+ * Load state for --resume. Resolves the project directory from either the
+ * positional project-name argument or `--config <path>` (the config file's
+ * own `projectDir` field).
  */
 export async function loadState(
   projectNameArg: string | undefined,
   options: Record<string, unknown>
 ): Promise<StateData> {
-  // The project dir must be determined from the argument or config
-  const projectName = projectNameArg as string | undefined;
-  if (!projectName) {
-    throw new Error(
-      "--resume requires a project name argument so we can find .viterex-state.json"
-    );
+  if (projectNameArg) {
+    return loadStateFromDir(path.resolve(process.cwd(), projectNameArg), options);
   }
 
-  const projectDir = path.resolve(process.cwd(), projectName);
+  if (options.config) {
+    const cfg = (await fs.readJSON(options.config as string)) as { projectDir?: string };
+    if (!cfg.projectDir) {
+      throw new Error(
+        `--resume --config requires the config file to have a "projectDir" field.`,
+      );
+    }
+    return loadStateFromDir(cfg.projectDir, options);
+  }
+
+  throw new Error(
+    "--resume requires either a project name argument or --config <path> with a projectDir field.",
+  );
+}
+
+async function loadStateFromDir(
+  projectDir: string,
+  options: Record<string, unknown>,
+): Promise<StateData> {
   const statePath = resolveStatePath(projectDir);
 
   if (!(await fs.pathExists(statePath))) {
     throw new Error(
-      `No state file found at ${statePath}. Cannot resume — run without --resume to start fresh.`
+      `No state file found at ${statePath}. Cannot resume — run without --resume to start fresh.`,
     );
   }
 
-  // Read as untyped first to handle migration from old format
   const raw: Record<string, unknown> = await fs.readJSON(statePath);
   const rawConfig = raw.config as Record<string, unknown>;
 
-  // Migrate old state format: convert massifSettings to templateReplacements
+  // Migrate old massifSettings → templateReplacements
   if (rawConfig.massifSettings && !rawConfig.templateReplacements) {
     const ms = rawConfig.massifSettings as Record<string, string>;
-    // Convert camelCase keys to SCREAMING_SNAKE_CASE with MASSIF_ prefix
-    // e.g. "googleMapsLink" → "MASSIF_GOOGLE_MAPS_LINK", "firma" → "MASSIF_FIRMA"
     rawConfig.templateReplacements = Object.fromEntries(
       Object.entries(ms).map(([k, v]) => {
-        const snake = k.replace(/([A-Z])/g, '_$1').toUpperCase();
+        const snake = k.replace(/([A-Z])/g, "_$1").toUpperCase();
         return [`MASSIF_${snake}`, v];
-      })
+      }),
     );
     delete rawConfig.massifSettings;
   }
-  // Ensure new fields have defaults
+
+  // Backfill defaults for fields added in newer installer versions
   if (!rawConfig.templateReplacements) rawConfig.templateReplacements = {};
   if (!rawConfig.preset) rawConfig.preset = "custom";
+  if (!rawConfig.layout) rawConfig.layout = "modern";
+  if (!rawConfig.installMode) rawConfig.installMode = "fresh";
+  if (!rawConfig.redaxoLang) rawConfig.redaxoLang = "de_de";
+  if (!rawConfig.redaxoTimezone) rawConfig.redaxoTimezone = "Europe/Berlin";
 
   const data = raw as unknown as StateData;
 
-  // Apply any CLI overrides on top of saved config
   if (options.skipDb) data.config.skipDb = true;
   if (options.skipAddons) data.config.skipAddons = true;
   if (options.skipGit) data.config.skipGit = true;
 
   p.log.info(
-    `Resuming from state file — ${data.completedTasks.length} task(s) already completed`
+    `Resuming from state file — ${data.completedTasks.length} task(s) already completed`,
   );
 
   return data;
 }
 
 /**
- * Save state after a task completes. Writes the full config and the list of
- * completed task names so the run can be resumed.
+ * Save state after a task completes.
  */
 export async function saveState(
   config: ViterexConfig,
@@ -95,8 +105,8 @@ export async function saveState(
 }
 
 /**
- * Delete the state file. Called on fresh runs (to clear stale state)
- * and after successful completion.
+ * Delete the state file. Called on fresh runs (clear stale state) and after
+ * successful completion.
  */
 export async function clearState(projectDir: string): Promise<void> {
   const statePath = resolveStatePath(projectDir);

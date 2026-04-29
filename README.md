@@ -1,14 +1,49 @@
 # create-viterex
 
-CLI tool to scaffold a **ViteRex** project — [Redaxo CMS](https://redaxo.org/) + [Vite](https://vitejs.dev/) + [Tailwind CSS](https://tailwindcss.com/).
+CLI tool to scaffold a **ViteRex** project — [Redaxo CMS](https://redaxo.org/) + [Vite](https://vitejs.dev/) + [Tailwind CSS](https://tailwindcss.com/) — *or* augment an existing Redaxo install with viterex_addon, ydeploy, and Deployer PHP.
 
 ## Quick start
 
 ```bash
+# Fresh install in a new directory
 npx create-viterex my-project
+
+# Augment the current directory (auto-detects existing Redaxo)
+cd ~/path/to/existing/redaxo
+npx create-viterex .
 ```
 
-The interactive prompts will walk you through project name, Redaxo version, database credentials, addon selection and package manager choice.
+The CLI inspects the target directory and switches between two modes:
+
+- **Fresh install** — empty target. Prompts for Redaxo version, admin credentials, DB credentials, layout, and addon extras. Downloads Redaxo, runs `setup:run`, installs the baseline, then preset extras.
+- **Augment** — existing Redaxo detected. Skips Redaxo download / setup. Prompts for which baseline addons to add on top of the existing install. Already-activated addons are pre-disabled.
+
+## Layouts
+
+Three directory layouts are supported:
+
+| Layout         | Console binary           | Backend entry           | Frontend entry      | Detection signal                               |
+| -------------- | ------------------------ | ----------------------- | ------------------- | ---------------------------------------------- |
+| `modern`       | `bin/console`            | `public/redaxo/index.php` | `public/index.php`  | `bin/console` AND `src/path_provider.php`      |
+| `classic`      | `redaxo/bin/console`     | `redaxo/index.php`      | `index.php`         | `redaxo/bin/console`, no `src/path_provider.php` |
+| `classic+theme` | `redaxo/bin/console`    | `redaxo/index.php`      | `index.php`         | classic + `theme/` directory at root           |
+
+Modern is the recommended layout for new projects. Pass `--layout modern|classic|classic+theme` to bypass the prompt for fresh installs. Augment mode uses whichever layout it detects.
+
+## Always-included baseline
+
+These addons are installed in this order regardless of preset choice (preset addons are merged on top, deduped). `viterex` is the last entry so downstream addons that subscribe to its `VITEREX_INSTALL_STUBS` extension point see it as available when they activate.
+
+| Order | Addon         | Source                                  |
+| ----- | ------------- | --------------------------------------- |
+| 1     | `structure` (with `history` plugin) | redaxo.org installer |
+| 2     | `phpmailer`   | redaxo.org installer                    |
+| 3     | `developer`   | redaxo.org installer                    |
+| 4     | `yrewrite`    | redaxo.org installer                    |
+| 5     | `ydeploy`     | redaxo.org installer                    |
+| 6     | `viterex`     | redaxo.org installer (`install:download viterex`) |
+
+Plus Deployer PHP is installed via Composer to `.tools/` (the project's `composer.json` is patched with `"config": { "vendor-dir": ".tools" }`).
 
 ## Usage
 
@@ -18,89 +53,62 @@ create-viterex [project-name] [options]
 
 ### Options
 
-| Flag              | Description                                              | Default |
-| ----------------- | -------------------------------------------------------- | ------- |
-| `--skip-db`       | Skip database creation                                   | `false` |
-| `--skip-addons`   | Skip addon installation                                  | `false` |
-| `--skip-git`      | Don't initialize a git repo                              | `false` |
-| `--pm <manager>`  | Package manager: `yarn`, `npm`, or `pnpm`                | `yarn`  |
-| `--config <path>` | Load config from a JSON file (skip all prompts)          | —       |
-| `--resume`        | Resume a previously failed run, skipping completed tasks | `false` |
-| `--dry-run`       | Log each task without executing anything                 | `false` |
-| `--verbose`       | Pipe task stdout/stderr to the terminal                  | `false` |
-| `-V, --version`   | Print version                                            | —       |
-| `-h, --help`      | Show help                                                | —       |
+| Flag                 | Description                                                          | Default          |
+| -------------------- | -------------------------------------------------------------------- | ---------------- |
+| `--skip-db`          | Skip database creation (assume pre-populated empty DB at credentials) | `false`          |
+| `--skip-addons`      | Skip addon installation                                              | `false`          |
+| `--skip-git`         | Don't initialize a git repo                                          | `false`          |
+| `--pm <manager>`     | Package manager: `yarn`, `npm`, or `pnpm`                            | `yarn`           |
+| `--preset <name>`    | Preset (`default`, `massif`, `custom`, or path to `preset.json`)    | prompted         |
+| `--config <path>`    | Load config from a JSON file (skip all prompts)                      | —                |
+| `--resume`           | Resume a previously failed run, skipping completed tasks             | `false`          |
+| `--dry-run`          | Log each task without executing anything                             | `false`          |
+| `--verbose`          | Pipe task stdout/stderr to the terminal                              | `false`          |
+| `--layout <m|c|ct>`  | Directory layout: `modern`, `classic`, `classic+theme`               | prompt (modern)  |
+| `--fresh`            | Force fresh-install pipeline even when an existing Redaxo is detected | `false`          |
+| `--force-push`       | Allow `git push --force` when the remote already has commits         | `false`          |
+| `--with-tower`       | Open Tower (macOS) after a successful run                            | auto-detect      |
+| `--lang <locale>`    | Redaxo language (e.g. `de_de`, `en_gb`)                              | `de_de`          |
+| `--timezone <tz>`    | Redaxo timezone (e.g. `Europe/Berlin`, `UTC`)                        | system tz        |
+| `--generate-config [path]` | Run prompts and write the resulting config JSON to `<path>` (default: `viterex.json`), then exit. Useful for CI. | —                |
+| `--force`            | Allow `--generate-config` to overwrite an existing file              | `false`          |
+| `-V, --version`      | Print version                                                        | —                |
+| `-h, --help`         | Show help                                                            | —                |
 
-## Examples
+### `--resume`
 
-### Interactive mode
-
-```bash
-npx create-viterex
-```
-
-You'll be prompted for everything. Pass a project name to skip the first question:
-
-```bash
-npx create-viterex my-site
-```
-
-### Skip specific steps
-
-```bash
-npx create-viterex my-site --skip-db --skip-git --pm pnpm
-```
-
-### Non-interactive mode with a config file
-
-```bash
-npx create-viterex --config viterex.json
-```
-
-### Preview what would happen
-
-```bash
-npx create-viterex --config viterex.json --dry-run
-```
-
-### Resume after a failure
-
-If a task fails mid-run, fix the issue and resume where you left off:
+If a task fails mid-run, fix the issue and resume. State is tracked in `.viterex-state.json` inside the project directory. The state file is automatically deleted on success.
 
 ```bash
 npx create-viterex my-site --resume
+# or, when only a config file is available:
+npx create-viterex --resume --config viterex.json
 ```
 
-Progress is tracked in `.viterex-state.json` inside the project directory. The state file is automatically deleted on successful completion.
-
-### Debug with verbose output
-
-```bash
-npx create-viterex my-site --verbose
-```
-
-All subprocess output (composer, php, mysql, git, etc.) is piped to the terminal instead of being suppressed.
+The config file's `projectDir` field provides the resume target when no positional project name is given.
 
 ## Config JSON schema
-
-When using `--config`, provide a JSON file matching this shape:
 
 ```jsonc
 {
   // Project
-  "projectName": "my-site", // Directory name (alphanumeric, hyphens, underscores)
+  "projectName": "my-site",
   "projectDir": "/absolute/path/to/my-site",
+  "layout": "modern",                // "modern" | "classic" | "classic+theme"
+  "installMode": "fresh",            // "fresh" | "augment"
 
   // Redaxo
-  "redaxoVersion": "5.17.1",
+  "redaxoVersion": "5.20.2",
   "redaxoAdminUser": "admin",
   "redaxoAdminPassword": "secret",
   "redaxoAdminEmail": "admin@example.com",
   "redaxoErrorEmail": "errors@example.com",
-  "redaxoServerName": "my-site.test", // Local vhost hostname
+  "redaxoServerName": "my-site.test",
+  "redaxoLang": "de_de",
+  "redaxoTimezone": "Europe/Berlin",
 
   // Database
-  "skipDb": false, // true to skip DB creation entirely
+  "skipDb": false,
   "dbHost": "127.0.0.1",
   "dbPort": 3306,
   "dbName": "my_site",
@@ -108,82 +116,72 @@ When using `--config`, provide a JSON file matching this shape:
   "dbPassword": "",
 
   // Addons
-  "skipAddons": false, // true to skip addon installation
+  "skipAddons": false,
   "addons": [
-    { "key": "yrewrite", "install": true, "activate": true },
+    { "key": "structure", "install": true, "activate": true, "plugins": ["history"] },
+    { "key": "phpmailer", "install": true, "activate": true },
     { "key": "developer", "install": true, "activate": true },
-    {
-      "key": "ui_tools",
-      "install": true,
-      "activate": true,
-      "plugins": ["jquery-minicolors", "selectize"],
-    },
+    { "key": "yform", "install": true, "activate": true },
+    { "key": "yrewrite", "install": true, "activate": true },
+    { "key": "ydeploy", "install": true, "activate": true },
+    { "key": "viterex_addon", "install": true, "activate": true },
+    { "key": "ui_tools", "install": true, "activate": true, "plugins": ["jquery-minicolors", "selectize"] }
   ],
 
   // Frontend
-  "packageManager": "yarn", // "yarn" | "npm" | "pnpm"
+  "packageManager": "yarn",          // "yarn" | "npm" | "pnpm"
 
-  // Massif Settings (business contact info inserted into rex_config)
-  "massifSettings": {
-    "firma": "My Company",
-    "strasse": "Strasse 1",
-    "plz": "5400",
-    "ort": "Baden",
-    "kantonCode": "AG",
-    "land": "Schweiz",
-    "landCode": "CH",
-    "phone": "+41 00 000 00 00",
-    "email": "info@example.com",
-    "googleMapsLink": "", // optional
-    "geoLat": "", // optional
-    "geoLong": "", // optional
+  // Preset
+  "preset": "default",
+  "templateReplacements": {          // {{TOKEN}} -> value in scaffolded files
+    "MASSIF_FIRMA": "My Company",
+    "MASSIF_EMAIL": "info@example.com"
   },
 
+  // Submodule addons (preset extras only — viterex_addon is no longer a submodule)
+  "submoduleAddons": [
+    { "url": "git@github.com:org/redaxo_massif.git", "path": "src/addons/massif", "packageKey": "massif" }
+  ],
+
+  // Preset extension (optional — typically set by a preset, not by hand)
+  "installerConfig": "/abs/path/to/redaxo_installer_config.json",
+  "deployerExtras": ["/abs/path/to/extra1.php"],
+
+  // Or supply REDAXO Installer credentials directly (used only when installerConfig is unset)
+  "installerApiLogin": "your-login",
+  "installerApiKey":   "your-api-key",
+
   // Deployment
-  "setupDeploy": false, // true to scaffold ydeploy config
+  "setupDeploy": false,
 
   // Git
-  "skipGit": false, // true to skip git init + initial commit
-  "gitProvider": "github.com", // "github.com" | "gitlab.com" (empty string to skip remote)
-  "gitNamespace": "my-org", // GitHub org or GitLab group/user
-  "gitRepoName": "my-site", // remote repository name
+  "skipGit": false,
+  "gitProvider": "github.com",       // "github.com" | "gitlab.com" | ""
+  "gitNamespace": "my-org",
+  "gitRepoName": "my-site",
 
-  // Runtime (optional in config file — overridden by CLI flags)
-  "verbose": false,
+  // Runtime (CLI flags override these)
+  "verbose": false
 }
 ```
 
-### Addon selection format
+> **Heads-up:** `installerApiKey` and any preset-supplied `redaxo_installer_config.json` are stored in plaintext on disk. Don't commit a generated `viterex.json` containing real credentials to a public repo.
 
-Each entry in the `addons` array:
+### Addon entry format
 
-| Field      | Type       | Description                                                               |
-| ---------- | ---------- | ------------------------------------------------------------------------- |
-| `key`      | `string`   | Redaxo addon key (e.g. `"yrewrite"`)                                      |
-| `install`  | `boolean`  | Whether to download and install the addon                                 |
-| `activate` | `boolean`  | Whether to activate the addon after install                               |
-| `plugins`  | `string[]` | Optional list of plugin keys to install and activate (e.g. `["history"]`) |
+| Field      | Type       | Description                                                |
+| ---------- | ---------- | ---------------------------------------------------------- |
+| `key`      | `string`   | Redaxo addon key (e.g. `"yrewrite"`)                       |
+| `install`  | `boolean`  | Download + install                                         |
+| `activate` | `boolean`  | Activate after install                                     |
+| `plugins`  | `string[]` | Optional list of plugin keys (e.g. `["history"]`)          |
+| `version`  | `string?`  | Optional version pin for `install:download`                |
 
-Plugins use slash notation internally: addon `structure` with plugin `history` becomes `structure/history`.
+Plugin keys use slash notation internally: addon `structure` with plugin `history` becomes `structure/history`.
 
-### Massif Settings format
+### Template replacements
 
-Business contact information inserted into the Redaxo `rex_config` table:
-
-| Field            | Type     | Description                     |
-| ---------------- | -------- | ------------------------------- |
-| `firma`          | `string` | Company name                    |
-| `strasse`        | `string` | Street address                  |
-| `plz`            | `string` | Postal code                     |
-| `ort`            | `string` | City                            |
-| `kantonCode`     | `string` | Canton/State code (e.g. `"AG"`) |
-| `land`           | `string` | Country name (e.g. `"Schweiz"`) |
-| `landCode`       | `string` | Country code (e.g. `"CH"`)      |
-| `phone`          | `string` | Phone number                    |
-| `email`          | `string` | Contact email                   |
-| `googleMapsLink` | `string` | Google Maps link (optional)     |
-| `geoLat`         | `string` | Latitude (optional)             |
-| `geoLong`        | `string` | Longitude (optional)            |
+Custom prompts defined in a preset's `customPrompts` array populate the `templateReplacements` map. Tokens of the form `{{KEY}}` in any template file (including the seed SQL) are replaced at scaffold time.
 
 ### Git remote format
 
@@ -193,41 +191,71 @@ Business contact information inserted into the Redaxo `rex_config` table:
 | `gitNamespace` | `string` | Organization or username                                |
 | `gitRepoName`  | `string` | Repository name                                         |
 
+## Preset extension
+
+Presets can supply two kinds of personal/site-specific files that the installer would otherwise prompt for or skip.
+
+| Preset field      | Type       | Effect at scaffold time                                                                                                                          |
+| ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `installerConfig` | `string`   | Path (relative to the preset directory) to a `redaxo_installer_config.json`. Copied to `<dataDir>/addons/install/config.json`.                   |
+| `deployerExtras`  | `string[]` | List of `.php` paths (relative to the preset directory). Each file is copied to the project root, `require`'d in `deploy.php`, and added to its `clear_paths`. |
+
+**Precedence (installer config):**
+
+1. **Preset wins.** If the preset declares `installerConfig`, the installer copies that file and skips the prompt entirely.
+2. **Otherwise prompt.** Fresh installs ask `Configure REDAXO Installer API credentials? (no/yes)` (default: no). Confirming asks for username + API key, then writes a fresh `config.json` from the answers.
+3. **Skip.** If the user declines, no installer config is installed.
+
+**`deployerExtras`:**
+
+The default `templates/deploy/deploy.php.tpl` exposes two placeholders — `{{DEPLOYER_EXTRAS}}` (immediately after the standard `require`s) and `{{DEPLOYER_EXTRAS_CLEAR_PATHS}}` (inside the `add('clear_paths', [...])` array). Each entry in `deployerExtras` produces one `require __DIR__ . '/<basename>';` line and one `'<basename>',` clear_paths entry. Empty when no extras are declared.
+
+Example preset slice:
+
+```json
+{
+  "name": "my-preset",
+  "installerConfig": "redaxo_installer_config.json",
+  "deployerExtras": ["deployer.task.release.acme.php"]
+}
+```
+
+The two files (`redaxo_installer_config.json` and `deployer.task.release.acme.php`) live next to the preset's `preset.json`.
+
 ## Pipeline
 
-The CLI runs these tasks sequentially:
+```
+ 1  Configure composer (.tools/, deployer)   — both modes
+ 2  Download Redaxo                          — skip when augment
+ 3  Install Redaxo                           — skip when augment OR setup already complete
+ 4  Install addons                           — both modes (idempotent); ALWAYS_INCLUDED + extras
+ 5  Install viterex stubs                    — `php bin/console viterex:install-stubs`; requires viterex_addon ≥ 3.2.0
+ 6  Scaffold frontend (Vite, configs)        — both modes
+ 7  Seed database                             — skip when augment OR --skip-db OR no seedFile
+ 8  Install dependencies (composer + pm)      — both modes
+ 9  Initialize git repo                       — skip if .git/ exists or --skip-git
+10  Add submodule addons (preset extras)      — runs AFTER deps; skip if --skip-git or none
+11  Activate submodule addons                 — composer install + package:install/activate
+12  Git initial commit                        — skip if HEAD exists or --skip-git
+13  Create remote git repository              — skip if no provider or --skip-git
+14  Open frontend and backend in browser      — both
+15  Show next steps                           — refresh browserslist + print `<pm> run dev` instruction
+```
 
-| #   | Task                                                                           | Skipped when                          |
-| --- | ------------------------------------------------------------------------------ | ------------------------------------- |
-| 1   | Download Redaxo                                                                | —                                     |
-| 2   | Create database                                                                | `--skip-db`                           |
-| 3   | Install Redaxo                                                                 | —                                     |
-| 4   | Install addons                                                                 | `--skip-addons` or no addons selected |
-| 5   | Scaffold frontend (Vite, configs)                                              | —                                     |
-| 6   | Install dependencies (composer + packages)                                     | —                                     |
-| 7   | Initialize git                                                                 | `--skip-git`                          |
-| 8   | Install submodule addons (viterex, massif, massif_settings, massif_dnd_sorter) | `--skip-git`                          |
-| 9   | Git initial commit                                                             | `--skip-git`                          |
-| 10  | Create remote git repository                                                   | `--skip-git` or no git provider       |
-| 11  | Open frontend and backend in browser                                           | —                                     |
-| 12  | Start Vite dev server                                                          | —                                     |
+Each task is idempotent — re-running on a partially-set-up project converges instead of erroring. Resume from a specific failure with `--resume`.
 
-Each task is idempotent. If one fails, fix the issue and re-run with `--resume`.
+## Available addon extras
 
-## Available addons
-
-All addons below are selected by default in interactive mode:
+Baseline addons are installed regardless of preset choice (see Always-included baseline above). The interactive multiselect offers these extras on top — recommended ones are pre-checked:
 
 | Addon                   | Description                                      |
 | ----------------------- | ------------------------------------------------ |
 | `yform`                 | Form builder                                     |
-| `yrewrite`              | URL rewriting                                    |
 | `be_tools`              | Backend enhancements                             |
 | `sprog`                 | i18n / variables                                 |
 | `url`                   | Custom URL profiles                              |
 | `adminer`               | DB management                                    |
 | `bloecks`               | Block editor                                     |
-| `developer`             | File-based templates/modules                     |
 | `focuspoint`            | Image focal point                                |
 | `mblock`                | Repeatable fields                                |
 | `mform`                 | Module form builder                              |
@@ -235,21 +263,16 @@ All addons below are selected by default in interactive mode:
 | `cropper`               | Image cropping                                   |
 | `hyphenator`            | Auto-hyphenation                                 |
 | `emailobfuscator`       | Email obfuscation                                |
-| `plyr`                  | Media player                                     |
 | `structure_tweaks`      | Structure tweaks                                 |
 | `cke5`                  | CKEditor 5                                       |
 | `ui_tools`              | UI tools (plugins: jquery-minicolors, selectize) |
 | `uploader`              | Media upload                                     |
 | `useragent`             | Device detection                                 |
 | `yform_adminer`         | YForm adminer                                    |
-| `yform_quick_edit`      | YForm quick edit                                 |
 | `yform_spam_protection` | YForm spam protection                            |
 | `yform_usability`       | YForm usability                                  |
 | `media_negotiator`      | WebP/AVIF negotiation                            |
 | `statistics`            | Statistics                                       |
-| `ydeploy`               | Deployment                                       |
-| `structure`             | Structure (plugin: history)                      |
-| `phpmailer`             | PHPMailer                                        |
 | `be_password`           | Password policy                                  |
 | `block_peek`            | Slice preview                                    |
 
@@ -257,16 +280,17 @@ All addons below are selected by default in interactive mode:
 
 - Node.js >= 18
 - PHP (for Redaxo CLI commands)
-- MySQL / MariaDB (unless `--skip-db`)
+- MySQL / MariaDB (unless `--skip-db` and you have an empty DB ready)
 - Composer
 - Git (unless `--skip-git`)
 
 ## Development
 
 ```bash
-pnpm install
-pnpm run build          # tsup -> dist/
-node bin/cli.js         # run locally
+npm install
+npm run build         # tsup -> dist/
+node dist/index.js    # run locally
+./scripts/test-run.sh # smoke tests (--dry-run scenarios)
 ```
 
 ## License

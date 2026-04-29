@@ -3,18 +3,21 @@ import fs from "fs-extra";
 import { exec } from "../utils/exec.js";
 import type { ViterexConfig } from "../types.js";
 
-/**
- * Minimum ignores to prevent heavy directories from being committed
- * even if the full .gitignore hasn't been written yet.
- */
-const SAFETY_IGNORES = ["node_modules", "vendor", "/var/cache/*", "/var/log/*"];
+const SAFETY_IGNORES = [
+  "node_modules",
+  "vendor",
+  ".tools",
+  "/var/cache/*",
+  "/var/log/*",
+];
 
 export async function initGitRepo(config: ViterexConfig): Promise<void> {
   const { projectDir, verbose } = config;
 
-  await exec("git", ["init"], { cwd: projectDir, verbose });
+  if (!(await fs.pathExists(path.join(projectDir, ".git")))) {
+    await exec("git", ["init"], { cwd: projectDir, verbose });
+  }
 
-  // Ensure critical ignores exist before any `git add`
   const gitignorePath = path.join(projectDir, ".gitignore");
   if (await fs.pathExists(gitignorePath)) {
     const existing = await fs.readFile(gitignorePath, "utf-8");
@@ -28,12 +31,27 @@ export async function initGitRepo(config: ViterexConfig): Promise<void> {
 }
 
 export async function gitInitialCommit(config: ViterexConfig): Promise<void> {
-  const { projectDir, verbose } = config;
+  const { projectDir, layout, verbose } = config;
+
+  // Skip when a HEAD already exists (a previous run committed).
+  try {
+    await exec("git", ["rev-parse", "--verify", "HEAD"], { cwd: projectDir });
+    return;
+  } catch {
+    // No HEAD yet; continue.
+  }
 
   await exec("git", ["add", "."], { cwd: projectDir, verbose });
 
-  // Ensure executable scripts are tracked with +x in git
-  await exec("git", ["update-index", "--chmod=+x", "bin/console"], { cwd: projectDir, verbose });
+  // Ensure the layout-specific console binary is tracked with +x.
+  const consoleRel = layout === "modern" ? "bin/console" : "redaxo/bin/console";
+  if (await fs.pathExists(path.join(projectDir, consoleRel))) {
+    try {
+      await exec("git", ["update-index", "--chmod=+x", consoleRel], { cwd: projectDir, verbose });
+    } catch {
+      // index lookup may fail on first commit before tree is realised; non-fatal
+    }
+  }
 
   await exec("git", ["commit", "-m", "initial commit"], { cwd: projectDir, verbose });
 }

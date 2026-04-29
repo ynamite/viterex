@@ -8,7 +8,8 @@
   },
   "scripts": {
     "dev": "node bin/cli.js",
-    "build": "tsup src/index.ts --format esm --dts",
+    "build": "tsup",
+    "test": "vitest run",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
@@ -22,6 +23,7 @@
   "devDependencies": {
     "tsup": "^8.4.0",
     "typescript": "^5.7.0",
+    "vitest": "^3.0.0",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^22.0.0"
   },

@@ -28,7 +28,7 @@ $deploymentRepository = 'git@github.com:user/repo.git';
 
 require __DIR__ . '/src/addons/ydeploy/deploy_yak.php';
 require __DIR__ . '/deployer.task.setup.php';
-// require __DIR__ . '/deployer.task.release.metanet.php';
+{{DEPLOYER_EXTRAS}}
 
 
 $isGit = is_dir(__DIR__ . '/.git');
@@ -65,7 +65,7 @@ add('clear_paths', [
     'localhost+2-key.pem',
     'localhost+2.pem',
     'deploy.php',
-    'deployer.task.release.metanet.php',
+{{DEPLOYER_EXTRAS_CLEAR_PATHS}}
     'quickstart',
     'sync-config',
     'sync-db',

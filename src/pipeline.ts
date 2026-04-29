@@ -1,6 +1,8 @@
 import * as p from "@clack/prompts";
 import type { ViterexConfig } from "./types.js";
 import { saveState } from "./state.js";
+import { mergeBaselineAddons } from "./utils/baseline.js";
+import { configureComposer } from "./tasks/configure-composer.js";
 import { downloadRedaxo } from "./tasks/download-redaxo.js";
 import { installRedaxo } from "./tasks/install-redaxo.js";
 import { installAddons } from "./tasks/install-addons.js";
@@ -8,10 +10,14 @@ import { scaffoldFrontend } from "./tasks/scaffold-frontend.js";
 import { importSql } from "./tasks/import-sql.js";
 import { installDependencies } from "./tasks/install-deps.js";
 import { initGitRepo, gitInitialCommit } from "./tasks/init-git.js";
-import { installSubmoduleAddons } from "./tasks/install-submodule-addons.js";
+import { addSubmoduleAddons, activateSubmoduleAddons } from "./tasks/install-submodule-addons.js";
+import { installViterexStubs } from "./tasks/install-viterex-stubs.js";
 import { createGitRemote } from "./tasks/create-git-remote.js";
 import { openBrowser } from "./tasks/open-browser.js";
-import { startDevServer } from "./tasks/start-dev-server.js";
+import { showNextSteps } from "./tasks/show-next-steps.js";
+import { PasswordRuleError } from "./tasks/install-redaxo.js";
+
+const MAX_PASSWORD_RETRIES = 3;
 
 export interface Task {
   name: string;
@@ -21,18 +27,25 @@ export interface Task {
   run: (config: ViterexConfig) => Promise<void>;
 }
 
+const isAugment = (c: ViterexConfig) => c.installMode === "augment";
+
 /**
- * All installation tasks in order.
- * Each task is idempotent — if it fails, fix the issue and re-run.
- * The `skip` predicate lets tasks be conditionally bypassed.
+ * The 14-step ordered installation pipeline. Each task is idempotent —
+ * if it fails, fix the issue and re-run with --resume (or just re-run).
  */
 const tasks: Task[] = [
   {
+    name: "Configure composer (.tools/, deployer)",
+    run: configureComposer,
+  },
+  {
     name: "Download Redaxo",
+    skip: (c) => isAugment(c),
     run: downloadRedaxo,
   },
-{
+  {
     name: "Install Redaxo",
+    skip: (c) => isAugment(c),
     run: installRedaxo,
   },
   {
@@ -41,12 +54,17 @@ const tasks: Task[] = [
     run: installAddons,
   },
   {
+    name: "Install viterex stubs (package.json, vite.config.js, ...)",
+    skip: (c) => !c.addons.some((a) => a.key === "viterex_addon" && a.activate),
+    run: installViterexStubs,
+  },
+  {
     name: "Scaffold frontend (Vite, configs)",
     run: scaffoldFrontend,
   },
   {
     name: "Seed database",
-    skip: (c) => c.skipDb || !c.seedFile,
+    skip: (c) => isAugment(c) || c.skipDb || !c.seedFile,
     run: importSql,
   },
   {
@@ -60,9 +78,14 @@ const tasks: Task[] = [
     run: initGitRepo,
   },
   {
-    name: "Install addons as submodules",
+    name: "Add submodule addons (preset extras)",
     skip: (c) => c.skipGit || !c.submoduleAddons?.length,
-    run: installSubmoduleAddons,
+    run: addSubmoduleAddons,
+  },
+  {
+    name: "Activate submodule addons",
+    skip: (c) => !c.submoduleAddons?.length,
+    run: activateSubmoduleAddons,
   },
   {
     name: "Git initial commit",
@@ -79,8 +102,9 @@ const tasks: Task[] = [
     run: openBrowser,
   },
   {
-    name: "Start Vite dev server",
-    run: startDevServer,
+    name: "Show next steps",
+    interactive: true,
+    run: showNextSteps,
   },
 ];
 
@@ -91,11 +115,24 @@ export interface PipelineOptions {
 
 export async function runPipeline(
   config: ViterexConfig,
-  options: PipelineOptions = {}
+  options: PipelineOptions = {},
 ): Promise<void> {
   const { completedTasks = [], dryRun = false } = options;
   const total = tasks.length;
   const done = new Set(completedTasks);
+  let passwordRetries = 0;
+
+  // Enforce the baseline regardless of how the config was loaded — covers
+  // --resume from older state files (which may pre-date a new baseline addon)
+  // and --config from users who hand-rolled their addons list.
+  const beforeKeys = new Set(config.addons.map((a) => a.key));
+  config.addons = mergeBaselineAddons(config.addons);
+  const added = config.addons
+    .map((a) => a.key)
+    .filter((k) => !beforeKeys.has(k));
+  if (added.length > 0) {
+    p.log.info(`Merged missing baseline addons into config: ${added.join(", ")}`);
+  }
 
   if (dryRun) {
     p.log.info("Dry run — no tasks will be executed\n");
@@ -131,7 +168,9 @@ export async function runPipeline(
         const e = err as Record<string, unknown>;
         const stderr = e.stderr ? `\n${e.stderr}` : "";
         const stdout = e.stdout ? `\n${e.stdout}` : "";
-        throw new Error(`Task "${task.name}" failed: ${(err as Error).message}${stderr}${stdout}`);
+        throw new Error(
+          `Task "${task.name}" failed: ${(err as Error).message}${stderr}${stdout}`,
+        );
       }
     } else {
       const s = p.spinner();
@@ -143,10 +182,32 @@ export async function runPipeline(
         await saveState(config, [...done]);
       } catch (err) {
         s.stop(`${label} ✗`);
+
+        // Specific recovery: Redaxo rejected the admin password (rule: 8–4096 chars).
+        // Prompt for a new one, update config in place, retry this task.
+        if (err instanceof PasswordRuleError && passwordRetries < MAX_PASSWORD_RETRIES) {
+          passwordRetries++;
+          p.log.warn(err.message);
+          const newPassword = await p.password({
+            message: `Admin password (Redaxo rule: 8–4096 chars) — retry ${passwordRetries}/${MAX_PASSWORD_RETRIES}`,
+            validate: (v) => {
+              if (v.length < 8) return "Must be at least 8 characters.";
+              if (v.length > 4096) return "Must be at most 4096 characters.";
+            },
+          });
+          if (p.isCancel(newPassword)) process.exit(0);
+          config.redaxoAdminPassword = newPassword as string;
+          await saveState(config, [...done]);
+          i--; // re-run the same task with the updated password
+          continue;
+        }
+
         const e = err as Record<string, unknown>;
         const stderr = e.stderr ? `\n${e.stderr}` : "";
         const stdout = e.stdout ? `\n${e.stdout}` : "";
-        throw new Error(`Task "${task.name}" failed: ${(err as Error).message}${stderr}${stdout}`);
+        throw new Error(
+          `Task "${task.name}" failed: ${(err as Error).message}${stderr}${stdout}`,
+        );
       }
     }
   }
