@@ -193,12 +193,14 @@ Custom prompts defined in a preset's `customPrompts` array populate the `templat
 
 ## Preset extension
 
-Presets can supply two kinds of personal/site-specific files that the installer would otherwise prompt for or skip.
+Presets can supply personal/site-specific files that the installer would otherwise prompt for or skip.
 
-| Preset field      | Type       | Effect at scaffold time                                                                                                                          |
-| ----------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `installerConfig` | `string`   | Path (relative to the preset directory) to a `redaxo_installer_config.json`. Copied to `<dataDir>/addons/install/config.json`.                   |
-| `deployerExtras`  | `string[]` | List of `.php` paths (relative to the preset directory). Each file is copied to the project root, `require`'d in `deploy.php`, and added to its `clear_paths`. |
+| Preset field      | Type                                          | Effect at scaffold time                                                                                                                          |
+| ----------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `installerConfig` | `string`                                      | Path (relative to the preset directory) to a `redaxo_installer_config.json`. Copied to `<dataDir>/addons/install/config.json`.                   |
+| `deployerExtras`  | `string[]`                                    | List of `.php` paths (relative to the preset directory). Each file is copied to the project root, `require`'d in `deploy.php`, and added to its `clear_paths`. |
+| `filesDir`        | `string`                                      | Optional; defaults to `"files"`. Directory (relative to the preset directory) whose contents are copied verbatim into `projectDir` with skip-if-exists. |
+| `layout`          | `"modern" \| "classic" \| "classic+theme"`    | Optional. When set AND a `files/` directory exists, the installer validates the user's chosen layout matches; aborts before any file is copied if not. When set, the layout prompt is skipped (the preset's value is used unless `--layout` overrides). |
 
 **Precedence (installer config):**
 
@@ -210,17 +212,34 @@ Presets can supply two kinds of personal/site-specific files that the installer 
 
 The default `templates/deploy/deploy.php.tpl` exposes two placeholders — `{{DEPLOYER_EXTRAS}}` (immediately after the standard `require`s) and `{{DEPLOYER_EXTRAS_CLEAR_PATHS}}` (inside the `add('clear_paths', [...])` array). Each entry in `deployerExtras` produces one `require __DIR__ . '/<basename>';` line and one `'<basename>',` clear_paths entry. Empty when no extras are declared.
 
+**`filesDir` / `layout`:**
+
+A preset may ship arbitrary content (asset starters, sample workflow files, custom config, etc.) by adding a `files/` directory next to its `preset.json`. The directory is copied verbatim into the user's project root with skip-if-exists semantics — existing files are never overwritten, so re-runs and user customizations are safe.
+
+The `files/` directory is **layout-locked**: its internal structure mirrors the project tree as the preset author intends it to land on disk. Authors are expected to declare which layout the preset targets via the `layout` field; the installer validates the user's choice and skips the layout prompt accordingly. CLI `--layout` overrides the preset's declared layout, in which case the apply-preset-files task aborts with a clear error before any file is copied.
+
 Example preset slice:
 
 ```json
 {
   "name": "my-preset",
   "installerConfig": "redaxo_installer_config.json",
-  "deployerExtras": ["deployer.task.release.acme.php"]
+  "deployerExtras": ["deployer.task.release.acme.php"],
+  "layout": "modern"
 }
 ```
 
-The two files (`redaxo_installer_config.json` and `deployer.task.release.acme.php`) live next to the preset's `preset.json`.
+```
+presets/my-preset/
+├── preset.json
+├── redaxo_installer_config.json
+├── deployer.task.release.acme.php
+└── files/
+    ├── .env.example
+    └── src/assets/img/logo.svg
+```
+
+After install, `.env.example` lands at `<projectDir>/.env.example` and the logo at `<projectDir>/src/assets/img/logo.svg`. Choose `--layout classic` and the install aborts before any file in `files/` is touched.
 
 ## Pipeline
 
@@ -231,15 +250,16 @@ The two files (`redaxo_installer_config.json` and `deployer.task.release.acme.ph
  4  Install addons                           — both modes (idempotent); ALWAYS_INCLUDED + extras
  5  Install viterex stubs                    — `php bin/console viterex:install-stubs`; requires viterex_addon ≥ 3.2.0
  6  Scaffold frontend (Vite, configs)        — both modes
- 7  Seed database                             — skip when augment OR --skip-db OR no seedFile
- 8  Install dependencies (composer + pm)      — both modes
- 9  Initialize git repo                       — skip if .git/ exists or --skip-git
-10  Add submodule addons (preset extras)      — runs AFTER deps; skip if --skip-git or none
-11  Activate submodule addons                 — composer install + package:install/activate
-12  Git initial commit                        — skip if HEAD exists or --skip-git
-13  Create remote git repository              — skip if no provider or --skip-git
-14  Open frontend and backend in browser      — both
-15  Show next steps                           — refresh browserslist + print `<pm> run dev` instruction
+ 7  Apply preset files                       — copy preset's files/ verbatim with skip-if-exists; skip when no presetFilesDir
+ 8  Seed database                             — skip when augment OR --skip-db OR no seedFile
+ 9  Install dependencies (composer + pm)      — both modes
+10  Initialize git repo                       — skip if .git/ exists or --skip-git
+11  Add submodule addons (preset extras)      — runs AFTER deps; skip if --skip-git or none
+12  Activate submodule addons                 — composer install + package:install/activate
+13  Git initial commit                        — skip if HEAD exists or --skip-git
+14  Create remote git repository              — skip if no provider or --skip-git
+15  Open frontend and backend in browser      — both
+16  Show next steps                           — refresh browserslist + print `<pm> run dev` instruction
 ```
 
 Each task is idempotent — re-running on a partially-set-up project converges instead of erroring. Resume from a specific failure with `--resume`.

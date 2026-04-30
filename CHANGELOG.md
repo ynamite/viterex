@@ -10,6 +10,13 @@ release. Nothing has been published to npm yet — everything lives under
 
 ### Added (2026-04-30)
 
+- **Preset extension: `filesDir` and `layout`.** Presets can ship arbitrary files via a `files/` directory copied verbatim into the project root with skip-if-exists semantics — branding assets, sample workflow files, custom config, anything that should land somewhere in the user's project tree.
+  - `filesDir` (`string`, relative to preset dir; defaults to `"files"`) — directory copied verbatim into `projectDir` with `overwrite: false`. Internal structure mirrors the project tree as the preset author intends it on disk (e.g. `files/src/assets/img/logo.svg` lands at `<projectDir>/src/assets/img/logo.svg`).
+  - `layout` (`"modern" | "classic" | "classic+theme"`) — optional layout-lock. When set AND a `files/` dir exists, the new `apply-preset-files` task aborts with a clear error before any file is touched if the user's chosen layout disagrees. When set, the layout prompt is skipped (the preset's value is used unless `--layout` overrides).
+  - New pipeline task `apply-preset-files` (`src/tasks/apply-preset-files.ts`) slotted between *Scaffold frontend* (step 6) and *Seed database* (now step 8). Skip predicate: `!c.presetFilesDir`. The task validates `presetLayout` against the resolved `layout` before running `fs.copy(presetFilesDir, projectDir, { overwrite: false })`.
+  - Prompt order changed: preset selection now runs before layout selection so a preset's `layout` can suppress the layout prompt. CLI `--layout` still wins for assignment; mismatches surface at the apply-preset-files task with a hard error before any file is touched.
+  - Wired in `src/types.ts` (new fields on `PresetConfig` and `ViterexConfig`), `src/prompts.ts` (preset block reordered above layout; `presetLayout` / `presetFilesDir` resolved after `loadPreset`), `src/tasks/apply-preset-files.ts` (new), `src/pipeline.ts` (task registered).
+  - Test coverage in `src/tasks/__tests__/apply-preset-files.test.ts` (5 tests over the validation table: no-op, copy when layout unset, copy when layout matches, throw on mismatch, skip-if-exists).
 - **Preset extension: `installerConfig` and `deployerExtras`.** Presets can now ship personal/site-specific files instead of leaking them into default templates.
   - `installerConfig` (`string`, relative to preset dir) — a `redaxo_installer_config.json` copied to `<dataDir>/addons/install/config.json`. Skips the new credentials prompt when set.
   - `deployerExtras` (`string[]`, relative to preset dir) — `.php` files copied to the project root, `require`'d in `deploy.php` (via the new `{{DEPLOYER_EXTRAS}}` placeholder) and added to its `clear_paths` (via `{{DEPLOYER_EXTRAS_CLEAR_PATHS}}`).
@@ -27,6 +34,7 @@ release. Nothing has been published to npm yet — everything lives under
 
 ### Changed (2026-04-30)
 
+- Pipeline grew from 15 → 16 steps to accommodate the new *Apply preset files* task; the docblock count comment in `src/pipeline.ts` was generalized rather than re-counted.
 - `templates/deploy/deploy.php.tpl` — line 31 (formerly the commented-out metanet require) is now `{{DEPLOYER_EXTRAS}}`; the hardcoded `'deployer.task.release.metanet.php',` clear_paths entry is replaced with `{{DEPLOYER_EXTRAS_CLEAR_PATHS}}`. Empty for the default preset; populated when a preset declares `deployerExtras`.
 - `presets/massif/preset.json` adopts the new fields: `installerConfig: "redaxo_installer_config.json"` and `deployerExtras: ["deployer.task.release.metanet.php"]`. Both files live alongside the preset.
 - `replacePlaceholders` extracted from `src/tasks/scaffold-frontend.ts` into `src/utils/replace-placeholders.ts` so it's importable from tests. Behaviour unchanged.

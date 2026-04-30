@@ -79,29 +79,15 @@ export async function collectConfig(
   });
   if (p.isCancel(packageManager)) process.exit(0);
 
-  // ─── Layout (fresh only) ──────────────────────────────────────────
-  let layout: Layout = detection.layout;
-  if (!isAugment) {
-    if (options.layout) {
-      layout = normalizeLayout(options.layout);
-    } else {
-      const selected = await p.select({
-        message: "Directory layout",
-        initialValue: "modern" as Layout,
-        options: [
-          { value: "modern", label: "Modern (recommended) — ydeploy-opinionated; bin/, src/, var/, public/" },
-          { value: "classic", label: "Classic — Redaxo defaults; redaxo/ at project root" },
-          { value: "classic+theme", label: "Classic + theme — classic + FriendsOfREDAXO/theme addon" },
-        ],
-      });
-      if (p.isCancel(selected)) process.exit(0);
-      layout = selected as Layout;
-    }
-  }
-
   // ─── Preset selection ─────────────────────────────────────────────
+  // Runs before layout selection so a preset that declares a `layout` can
+  // skip the layout prompt entirely. CLI `--layout` still wins over the
+  // preset's declared layout; if they disagree the apply-preset-files task
+  // errors out before any file is touched.
   let presetId = (options.preset as string) ?? "";
   let presetDir: string | undefined;
+  let presetLayout: Layout | undefined;
+  let presetFilesDir: string | undefined;
   let seedFile: string | undefined;
   let submoduleAddons: ViterexConfig["submoduleAddons"];
   let templateReplacements: Record<string, string> = {};
@@ -142,6 +128,37 @@ export async function collectConfig(
       deployerExtras = loaded.config.deployerExtras.map((f) =>
         path.resolve(loaded.dir, f),
       );
+    }
+    if (loaded.config.layout) {
+      presetLayout = loaded.config.layout;
+    }
+    const filesDirName = loaded.config.filesDir ?? "files";
+    const filesDirPath = path.resolve(loaded.dir, filesDirName);
+    if (await fs.pathExists(filesDirPath)) {
+      presetFilesDir = filesDirPath;
+    }
+  }
+
+  // ─── Layout (fresh only) ──────────────────────────────────────────
+  let layout: Layout = detection.layout;
+  if (!isAugment) {
+    if (options.layout) {
+      layout = normalizeLayout(options.layout);
+    } else if (presetLayout) {
+      layout = presetLayout;
+      p.log.info(`Using layout '${layout}' from preset '${presetId}'.`);
+    } else {
+      const selected = await p.select({
+        message: "Directory layout",
+        initialValue: "modern" as Layout,
+        options: [
+          { value: "modern", label: "Modern (recommended) — ydeploy-opinionated; bin/, src/, var/, public/" },
+          { value: "classic", label: "Classic — Redaxo defaults; redaxo/ at project root" },
+          { value: "classic+theme", label: "Classic + theme — classic + FriendsOfREDAXO/theme addon" },
+        ],
+      });
+      if (p.isCancel(selected)) process.exit(0);
+      layout = selected as Layout;
     }
   }
 
@@ -434,6 +451,8 @@ export async function collectConfig(
     packageManager: packageManager as ViterexConfig["packageManager"],
     preset: presetId,
     presetDir,
+    presetLayout,
+    presetFilesDir,
     seedFile,
     submoduleAddons,
     templateReplacements,

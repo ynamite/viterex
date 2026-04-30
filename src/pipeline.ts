@@ -7,6 +7,7 @@ import { downloadRedaxo } from "./tasks/download-redaxo.js";
 import { installRedaxo } from "./tasks/install-redaxo.js";
 import { installAddons } from "./tasks/install-addons.js";
 import { scaffoldFrontend } from "./tasks/scaffold-frontend.js";
+import { applyPresetFiles } from "./tasks/apply-preset-files.js";
 import { importSql } from "./tasks/import-sql.js";
 import { installDependencies } from "./tasks/install-deps.js";
 import { initGitRepo, gitInitialCommit } from "./tasks/init-git.js";
@@ -30,7 +31,7 @@ export interface Task {
 const isAugment = (c: ViterexConfig) => c.installMode === "augment";
 
 /**
- * The 14-step ordered installation pipeline. Each task is idempotent —
+ * The ordered installation pipeline. Each task is idempotent —
  * if it fails, fix the issue and re-run with --resume (or just re-run).
  */
 const tasks: Task[] = [
@@ -61,6 +62,11 @@ const tasks: Task[] = [
   {
     name: "Scaffold frontend (Vite, configs)",
     run: scaffoldFrontend,
+  },
+  {
+    name: "Apply preset files",
+    skip: (c) => !c.presetFilesDir,
+    run: applyPresetFiles,
   },
   {
     name: "Seed database",

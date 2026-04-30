@@ -37,6 +37,8 @@ export interface ViterexConfig {
   // Preset
   preset: string;
   presetDir?: string;
+  presetLayout?: Layout;        // pass-through of preset.config.layout (when set)
+  presetFilesDir?: string;      // absolute path to <presetDir>/<filesDir>; only set if dir exists
   seedFile?: string;
   submoduleAddons?: SubmoduleAddon[];
   templateReplacements: Record<string, string>;
@@ -84,6 +86,8 @@ export interface PresetConfig {
   deployerExtras?: string[]; // .php paths relative to preset dir; required'd at deploy.php line 31 + added to clear_paths
   redaxoLang?: string; // override prompt default; e.g. "de_de"
   redaxoTimezone?: string; // override prompt default; e.g. "Europe/Berlin"
+  layout?: Layout; // when set AND files/ exists, validated against the user's chosen layout
+  filesDir?: string; // relative to preset dir; defaults to "files"; copied verbatim into projectDir with skip-if-exists
 }
 
 export interface SubmoduleAddon {
