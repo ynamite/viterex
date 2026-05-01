@@ -11,6 +11,17 @@ release. Nothing has been published to npm yet — everything lives under
 ### Added (2026-05-01)
 
 - **Pipeline task: `Clear Redaxo cache`** (`src/tasks/clear-cache.ts`). Runs `php <console> cache:clear --no-interaction` between *Create remote git repository* (step 14) and *Open frontend and backend in browser* (step 16) so the just-opened browser doesn't show stale templates / modules / asset paths left behind by `setup:run`, addon install, `viterex:install-stubs`, or submodule activation. No skip predicate — `cache:clear` is idempotent and cheap; runs in both fresh and augment mode. Pipeline grew from 16 → 17 steps.
+- **Pipeline task: `Build frontend`** (`src/tasks/build-frontend.ts`). Runs `<pm> run build` between *Sync developer + clear cache* (step 15) and *Open frontend and backend in browser* (step 17). Skip predicate: `!fs.existsSync(<projectDir>/package.json)`. Non-fatal — a failed build prints a warning and the pipeline continues to *Show next steps*. Without this, the just-opened browser would 404 on Vite prod assets (`/assets/addons/viterex_addon/*`) on first load. `<pm>` is the user's chosen package manager (`yarn` / `npm` / `pnpm`). Pipeline grew from 17 → 18 steps.
+- **`withTower` preset key** (`PresetConfig.withTower?: boolean`). When `false`, suppresses the new "Add the repo to Git Tower?" prompt entirely. Default-preset value is `false`. The field was previously declared on `ViterexConfig` but never read from `PresetConfig` — `presets/default/preset.json` already shipped `"withTower": false` but was being silently ignored.
+- **Tower opt-in prompt** in the Git block of `src/prompts.ts`. macOS-only; gated on `gittower` being on PATH AND `preset.withTower !== false` AND the user actually opting in to *Initialize a local git repository?*. Sits between the local-repo and remote-repo prompts. Default value mirrors the preset's `withTower` (true → pre-checked, unset → no by default). The legacy `--with-tower` CLI flag still composes — when set, it forces Tower regardless of the prompt outcome.
+
+### Changed (2026-05-01)
+
+- **`apply-preset-files` now overwrites individual files** (`src/tasks/apply-preset-files.ts:28` — `fs.copy(presetFilesDir, projectDir, { overwrite: true })`) instead of skipping. Folder structure is still merged: pre-existing siblings outside the preset's tree are preserved, only files that exist on both sides are replaced by the preset version. Closes the surprise where a preset shipping an updated `.env.example` would silently no-op on re-run if the file already existed. The corresponding test was renamed from *preserves existing destination files (skip-if-exists)* to *overwrites existing destination files*; a new *merges folder contents without removing pre-existing siblings* test pins the merge invariant.
+- **`open-browser.ts` Tower invocation strictly gated on `withTower`.** The previous `withTower || (await commandExists("gittower"))` fallback at `open-browser.ts:18` opened Tower for any macOS user with the binary installed, regardless of intent. Strict gate closes the *Decouple from MASSIF* TODO item — Tower now opens only when the user explicitly opted in via the prompt, the `--with-tower` flag, or `preset.withTower === true`.
+- **Step 15 renamed: `Clear Redaxo cache` → `Sync developer + clear cache`.** `clearCache` now runs `php <console> developer:sync --no-interaction` before `cache:clear` (idempotent; gated on the `developer` addon being active in `config.addons`; warn-and-continue on failure for `--augment` setups where the addon may be absent). Without `developer:sync`, freshly-scaffolded templates / modules / actions weren't picked up by the public frontend until something else triggered a sync — typically the user logging into the backend, which is non-obvious and made the *Open browser* step appear broken. `developer` is in `ALWAYS_INCLUDED`, so the sync runs in fresh mode by default.
+- **`state.ts` strips package-resolved paths on save** (`presetDir`, `presetFilesDir`, `seedFile`, `installerConfig`, `deployerExtras`) and re-derives them on `loadState` by re-running `loadPreset(config.preset)` against the *current* installer location. Without this, an `npx create-viterex --resume` after the npx cache hash rotated would chase paths into a garbage-collected directory. As a side benefit, preset-side edits to `seed.sql.tpl` / `files/` between runs are now picked up on resume. The persisted `preset` field (a string like `"default"` or an absolute path to an external preset) is the single source of truth on resume; everything package-relative gets re-resolved. Three new tests in `state-migration.test.ts` lock the round-trip behaviour: built-in preset re-derivation, `preset === "custom"` no-op, missing-preset warn-and-continue.
+- **Pipeline grew from 17 → 18 steps.**
 
 ### Added (2026-04-30)
 
@@ -92,23 +103,27 @@ release. Nothing has been published to npm yet — everything lives under
 
 - `scripts/test-run.sh` — `CLI` path was `src/dist/index.js`; corrected to `dist/index.js`. Smoke-test scenarios updated for the 14-step pipeline + augment mode (7 scenarios: help/version, fresh modern, fresh classic, augment modern, augment classic, --resume + --config, legacy preset filter).
 
-### Pipeline (current, 14 steps)
+### Pipeline (current, 18 steps)
 
 ```
  1  Configure composer (.tools/, deployer)   — both modes
  2  Download Redaxo                          — skip when augment
  3  Install Redaxo                           — skip when augment OR setup_complete
  4  Install addons                           — both modes (idempotent)
- 5  Scaffold frontend                        — both modes
- 6  Seed database                             — skip when augment OR no seedFile
- 7  Install dependencies (composer + pm)      — both modes
- 8  Initialize git repo                       — skip if .git/ exists or skipGit
- 9  Add submodule addons (preset extras)      — runs AFTER deps
-10  Activate submodule addons                 — composer install + package:install/activate
-11  Git initial commit                        — skip if HEAD exists or skipGit
-12  Create remote git repository              — skip if no provider
-13  Open frontend and backend in browser      — both
-14  Start Vite dev server                     — both
+ 5  Install viterex stubs                    — requires viterex_addon ≥ 3.2.0
+ 6  Scaffold frontend                        — both modes
+ 7  Apply preset files                       — merge + overwrite; skip when no presetFilesDir
+ 8  Seed database                             — skip when augment OR --skip-db OR no seedFile
+ 9  Install dependencies (composer + pm)      — must run AFTER step 7 (preset can rewrite package.json)
+10  Initialize git repo                       — skip if .git/ exists or --skip-git
+11  Add submodule addons                      — runs AFTER deps
+12  Activate submodule addons                 — composer install + package:install/activate
+13  Git initial commit                        — skip if HEAD exists or --skip-git
+14  Create remote git repository              — skip if no provider or --skip-git
+15  Sync developer + clear cache              — developer:sync (best-effort) → cache:clear
+16  Build frontend                            — <pm> run build; skip if no package.json
+17  Open frontend and backend in browser      — both
+18  Show next steps                           — refresh browserslist + print next-step instructions
 ```
 
 ### Earlier work

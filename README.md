@@ -67,7 +67,7 @@ create-viterex [project-name] [options]
 | `--layout <m|c|ct>`  | Directory layout: `modern`, `classic`, `classic+theme`               | prompt (modern)  |
 | `--fresh`            | Force fresh-install pipeline even when an existing Redaxo is detected | `false`          |
 | `--force-push`       | Allow `git push --force` when the remote already has commits         | `false`          |
-| `--with-tower`       | Open Tower (macOS) after a successful run                            | auto-detect      |
+| `--with-tower`       | macOS only. Bypass the prompt and force-open Tower after a successful run. Skipped when the preset sets `withTower: false`. | prompted on macOS when `gittower` is on PATH |
 | `--lang <locale>`    | Redaxo language (e.g. `de_de`, `en_gb`)                              | `de_de`          |
 | `--timezone <tz>`    | Redaxo timezone (e.g. `Europe/Berlin`, `UTC`)                        | system tz        |
 | `--generate-config [path]` | Run prompts and write the resulting config JSON to `<path>` (default: `viterex.json`), then exit. Useful for CI. | —                |
@@ -86,6 +86,8 @@ npx create-viterex --resume --config viterex.json
 ```
 
 The config file's `projectDir` field provides the resume target when no positional project name is given.
+
+> Note: paths inside the installer package (preset directory, preset files, seed SQL, deployer extras, installer config) are resolved fresh on each resume rather than read from the state file. This makes `--resume` portable across `npx` invocations even when the npx cache hash changes between runs, and as a side benefit picks up preset-side edits to `seed.sql.tpl` / `files/` that landed between runs.
 
 ## Config JSON schema
 
@@ -199,8 +201,9 @@ Presets can supply personal/site-specific files that the installer would otherwi
 | ----------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `installerConfig` | `string`                                      | Path (relative to the preset directory) to a `redaxo_installer_config.json`. Copied to `<dataDir>/addons/install/config.json`.                   |
 | `deployerExtras`  | `string[]`                                    | List of `.php` paths (relative to the preset directory). Each file is copied to the project root, `require`'d in `deploy.php`, and added to its `clear_paths`. |
-| `filesDir`        | `string`                                      | Optional; defaults to `"files"`. Directory (relative to the preset directory) whose contents are copied verbatim into `projectDir` with skip-if-exists. |
+| `filesDir`        | `string`                                      | Optional; defaults to `"files"`. Directory whose contents are merged into `projectDir`: folders are walked recursively, individual files that exist on both sides are overwritten by the preset version. |
 | `layout`          | `"modern" \| "classic" \| "classic+theme"`    | Optional. When set AND a `files/` directory exists, the installer validates the user's chosen layout matches; aborts before any file is copied if not. When set, the layout prompt is skipped (the preset's value is used unless `--layout` overrides). |
+| `withTower`       | `boolean`                                     | Optional. When `false`, suppresses the "Add the repo to Git Tower?" prompt entirely. macOS-only feature; the prompt is also skipped when `gittower` isn't on PATH or the user declined to initialize a local git repo. |
 
 **Precedence (installer config):**
 
@@ -214,7 +217,7 @@ The default `templates/deploy/deploy.php.tpl` exposes two placeholders — `{{DE
 
 **`filesDir` / `layout`:**
 
-A preset may ship arbitrary content (asset starters, sample workflow files, custom config, etc.) by adding a `files/` directory next to its `preset.json`. The directory is copied verbatim into the user's project root with skip-if-exists semantics — existing files are never overwritten, so re-runs and user customizations are safe.
+A preset may ship arbitrary content (asset starters, sample workflow files, custom config, etc.) by adding a `files/` directory next to its `preset.json`. The directory is merged into the user's project root: folder structure is walked recursively (siblings outside the preset's tree are preserved), and individual files that exist on both sides are overwritten by the preset version. This means a preset's authoritative content (e.g. an updated `.env.example`) lands on every install — including re-runs — instead of silently going stale. Any user-customized files that should NOT be reset on re-run should live outside the preset's `files/` tree.
 
 The `files/` directory is **layout-locked**: its internal structure mirrors the project tree as the preset author intends it to land on disk. Authors are expected to declare which layout the preset targets via the `layout` field; the installer validates the user's choice and skips the layout prompt accordingly. CLI `--layout` overrides the preset's declared layout, in which case the apply-preset-files task aborts with a clear error before any file is copied.
 
@@ -250,17 +253,18 @@ After install, `.env.example` lands at `<projectDir>/.env.example` and the logo 
  4  Install addons                           — both modes (idempotent); ALWAYS_INCLUDED + extras
  5  Install viterex stubs                    — `php bin/console viterex:install-stubs`; requires viterex_addon ≥ 3.2.0
  6  Scaffold frontend (Vite, configs)        — both modes
- 7  Apply preset files                       — copy preset's files/ verbatim with skip-if-exists; skip when no presetFilesDir
+ 7  Apply preset files                       — copy preset's files/ into projectDir, merging folders and overwriting individual files; skip when no presetFilesDir
  8  Seed database                             — skip when augment OR --skip-db OR no seedFile
- 9  Install dependencies (composer + pm)      — both modes
+ 9  Install dependencies (composer + pm)      — both modes; runs AFTER step 7 so a preset rewriting package.json is honored
 10  Initialize git repo                       — skip if .git/ exists or --skip-git
 11  Add submodule addons (preset extras)      — runs AFTER deps; skip if --skip-git or none
 12  Activate submodule addons                 — composer install + package:install/activate
 13  Git initial commit                        — skip if HEAD exists or --skip-git
 14  Create remote git repository              — skip if no provider or --skip-git
-15  Clear Redaxo cache                        — `php <console> cache:clear` so the just-opened browser shows fresh content
-16  Open frontend and backend in browser      — both
-17  Show next steps                           — refresh browserslist + print `<pm> run dev` instruction
+15  Sync developer + clear cache              — `developer:sync` (gated on the developer addon; non-fatal) → `cache:clear`
+16  Build frontend                            — `<pm> run build`; skip if no `package.json`; non-fatal — warns and continues on failure
+17  Open frontend and backend in browser      — both
+18  Show next steps                           — refresh browserslist + print `<pm> run dev` instruction
 ```
 
 Each task is idempotent — re-running on a partially-set-up project converges instead of erroring. Resume from a specific failure with `--resume`.
