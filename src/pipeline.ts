@@ -64,6 +64,9 @@ const tasks: Task[] = [
     name: "Scaffold frontend (Vite, configs)",
     run: scaffoldFrontend,
   },
+  // INVARIANT: "Apply preset files" must come BEFORE "Install dependencies".
+  // The preset's files/ tree can overwrite package.json (and similar), so the
+  // dep install/upgrade must run against the post-merge version.
   {
     name: "Apply preset files",
     skip: (c) => !c.presetFilesDir,

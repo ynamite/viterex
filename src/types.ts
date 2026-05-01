@@ -95,7 +95,7 @@ export interface PresetConfig {
   redaxoLang?: string; // override prompt default; e.g. "de_de"
   redaxoTimezone?: string; // override prompt default; e.g. "Europe/Berlin"
   layout?: Layout; // when set AND files/ exists, validated against the user's chosen layout
-  filesDir?: string; // relative to preset dir; defaults to "files"; copied verbatim into projectDir with skip-if-exists
+  filesDir?: string; // relative to preset dir; defaults to "files"; copied into projectDir, merging folders and overwriting individual files
   withTower?: boolean; // when false, suppress the "Add to Git Tower?" prompt entirely
 }
 

@@ -4,7 +4,10 @@ import * as p from "@clack/prompts";
 import type { ViterexConfig } from "../types.js";
 
 /**
- * Copy a preset's `files/` directory verbatim into projectDir, with skip-if-exists.
+ * Copy a preset's `files/` directory into projectDir, merging folders and
+ * overwriting individual files. Pre-existing destination files outside the
+ * preset's source tree are left untouched; files that exist on both sides
+ * are replaced by the preset version.
  *
  * `presetFilesDir` and `presetLayout` are pre-resolved in prompts.ts (mirroring
  * how `installerConfig` and `deployerExtras` are resolved before the pipeline
@@ -22,7 +25,7 @@ export async function applyPresetFiles(config: ViterexConfig): Promise<void> {
     );
   }
 
-  await fs.copy(presetFilesDir, projectDir, { overwrite: false });
+  await fs.copy(presetFilesDir, projectDir, { overwrite: true });
   p.log.info(
     `Applied preset files from ${path.relative(process.cwd(), presetFilesDir)}`,
   );

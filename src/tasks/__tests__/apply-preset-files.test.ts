@@ -80,14 +80,24 @@ describe("applyPresetFiles", () => {
     expect(await fs.pathExists(path.join(projectDir, ".env.example"))).toBe(false);
   });
 
-  it("preserves existing destination files (skip-if-exists)", async () => {
+  it("overwrites existing destination files", async () => {
     await fs.outputFile(path.join(presetFilesDir, ".env.example"), "FROM=preset\n");
     await fs.outputFile(path.join(projectDir, ".env.example"), "FROM=user\n");
 
     await applyPresetFiles(makeConfig({ presetFilesDir }));
 
     expect(await fs.readFile(path.join(projectDir, ".env.example"), "utf-8")).toBe(
-      "FROM=user\n",
+      "FROM=preset\n",
     );
+  });
+
+  it("merges folder contents without removing pre-existing siblings", async () => {
+    await fs.outputFile(path.join(presetFilesDir, "src/a.txt"), "preset-a\n");
+    await fs.outputFile(path.join(projectDir, "src/b.txt"), "user-b\n");
+
+    await applyPresetFiles(makeConfig({ presetFilesDir }));
+
+    expect(await fs.readFile(path.join(projectDir, "src/a.txt"), "utf-8")).toBe("preset-a\n");
+    expect(await fs.readFile(path.join(projectDir, "src/b.txt"), "utf-8")).toBe("user-b\n");
   });
 });
