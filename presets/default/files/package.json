@@ -1,0 +1,48 @@
+{
+  "name": "viterex-project",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "setup-https": "mkcert -install && mkcert localhost 127.0.0.1 ::1",
+    "format": "biome format --write && prettier --write \"**/*.{html,css,scss}\"",
+    "lint": "biome check && stylelint \"**/*.{css,scss}\""
+  },
+  "dependencies": {
+    "alpinejs": "^3.14.0",
+    "@alpinejs/collapse": "^3.14.0",
+    "@alpinejs/focus": "^3.14.0",
+    "@alpinejs/morph": "^3.14.0",
+    "@alpinejs/persist": "^3.14.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.13",
+    "@iconify/tailwind4": "^1.0.0",
+    "@iconify-json/lucide": "^1.2.0",
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/typography": "^0.5.19",
+    "@tailwindcss/vite": "^4.2.4",
+    "baseline-browser-mapping": "^2.10.0",
+    "browserslist": "^4.24.0",
+    "cross-env": "^10.1.0",
+    "lightningcss": "^1.32.0",
+    "mkcert": "^3.2.0",
+    "prettier": "^3.8.1",
+    "prettier-plugin-css-order": "^2.2.0",
+    "prettier-plugin-organize-attributes": "^1.0.0",
+    "prettier-plugin-style-order": "^0.2.2",
+    "prettier-plugin-tailwindcss": "^0.8.0",
+    "stylelint": "^17.9.0",
+    "stylelint-config-standard": "^40.0.0",
+    "tailwind-clamp": "^4.5.1",
+    "tailwindcss": "^4.2.4",
+    "vite": "^8.0.10",
+    "vite-plugin-live-reload": "^3.1.0",
+    "vite-plugin-static-copy": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

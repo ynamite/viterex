@@ -1,0 +1,211 @@
+@import "tailwindcss";
+
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+@plugin "@iconify/tailwind4";
+@plugin "tailwind-clamp";
+
+@source "/src/templates/**/*.php";
+@source "/src/modules/**/*.php";
+@source "/src/addons/project/lib/**/*.php";
+@source "/src/addons/project/fragments/**/*.php";
+@source not "/src/addons/**/vendor/**/*";
+
+@theme {
+	--color-bg: #070712;
+	--color-surface: #0f0f1c;
+	--color-surface-2: #1a1a2e;
+	--color-fg: #ffffff;
+	--color-muted: #cdd0e0;
+	--color-cream: #ffecc1;
+
+	--color-brand-red: #ff3b3b;
+	--color-brand-magenta: #ff269e;
+	--color-brand-violet: #a64bff;
+	--color-brand-blue: #4d8bff;
+	--color-brand-cyan: #4ee0ff;
+	--color-brand-yellow: #fdd054;
+
+	--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+	--spacing-safe: calc(env(safe-area-inset-bottom, 0rem) + clamp(1.5rem, 1.32394rem + 0.751174vw, 2rem));
+}
+
+@font-face {
+	font-style: normal;
+	font-weight: 400;
+	src: url("@/fonts/inter-400.woff2") format("woff2");
+	font-family: "Inter";
+	font-display: swap;
+}
+@font-face {
+	font-style: normal;
+	font-weight: 600;
+	src: url("@/fonts/inter-600.woff2") format("woff2");
+	font-family: "Inter";
+	font-display: swap;
+}
+@font-face {
+	font-style: normal;
+	font-weight: 800;
+	src: url("@/fonts/inter-800.woff2") format("woff2");
+	font-family: "Inter";
+	font-display: swap;
+}
+
+@utility text-gradient-brand {
+	background: linear-gradient(
+		90deg,
+		var(--color-brand-red),
+		var(--color-brand-magenta) 40%,
+		var(--color-brand-violet) 65%,
+		var(--color-brand-cyan)
+	);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+@utility btn-primary {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	transition:
+		transform 150ms,
+		box-shadow 150ms;
+	border-radius: 0.625rem;
+	background: linear-gradient(90deg, var(--color-brand-magenta), var(--color-brand-violet));
+	padding: 0.625rem 1.25rem;
+	color: #fff;
+	font-weight: 700;
+	&:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 8px 24px -8px var(--color-brand-magenta);
+	}
+	&:focus-visible {
+		outline: 2px solid var(--color-brand-cyan);
+		outline-offset: 2px;
+	}
+}
+
+@utility btn-ghost {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	transition:
+		color 150ms,
+		border-color 150ms;
+	border: 1px solid color-mix(in oklch, white 15%, transparent);
+	border-radius: 0.625rem;
+	padding: 0.625rem 1.25rem;
+	color: var(--color-fg);
+	&:hover {
+		border-color: var(--color-brand-cyan);
+		color: var(--color-brand-cyan);
+	}
+	&:focus-visible {
+		outline: 2px solid var(--color-brand-cyan);
+		outline-offset: 2px;
+	}
+}
+
+[x-cloak] {
+	display: none !important;
+}
+
+html {
+	scroll-behavior: smooth;
+	scroll-padding-block-start: 10rem;
+	scrollbar-color: color-mix(in oklch, var(--color-brand-violet) 55%, transparent) var(--color-surface-2);
+	scrollbar-gutter: stable;
+	scrollbar-width: thin;
+}
+body {
+	background: var(--color-bg);
+	color: var(--color-muted);
+	font-family: var(--font-sans);
+	-webkit-font-smoothing: antialiased;
+	overflow-x: hidden;
+}
+
+article {
+	@apply prose-code:bg-surface-2 prose-pre:bg-surface-2 prose-invert prose-code:px-1.5 prose-code:py-0.5 prose-pre:border prose-pre:border-white/10 prose-code:rounded prose-headings:font-extrabold prose-a:text-brand-cyan prose-code:text-cream prose-headings:text-fg hover:prose-a:underline prose-a:no-underline prose-code:before:content-none prose-code:after:content-none prose-headings:scroll-mt-24 prose prose-lg max-w-none [&_pre>code]:px-0;
+	:where(:first-child) {
+		margin-top: 0;
+	}
+}
+
+@keyframes page-out {
+	0% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+
+	50%,
+	100% {
+		transform: translateY(-4px);
+		opacity: 0;
+	}
+}
+
+@keyframes page-in {
+	0%,
+	50% {
+		transform: translateY(4px);
+		opacity: 0;
+	}
+
+	100% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+@keyframes fade-in {
+	0%,
+	50% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 1;
+	}
+}
+main {
+	view-transition-name: main;
+}
+header {
+	view-transition-name: site-header;
+}
+footer {
+	view-transition-name: site-footer;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation: none;
+}
+::view-transition-old(main) {
+	animation: page-out 400ms ease both;
+}
+
+::view-transition-new(main) {
+	animation: page-in 400ms ease both;
+}
+
+::view-transition-old(site-header),
+::view-transition-new(site-header),
+::view-transition-old(site-footer),
+::view-transition-new(site-footer) {
+	mix-blend-mode: normal;
+}
+
+::view-transition-old(site-header),
+::view-transition-old(site-footer) {
+	animation: none;
+}
+
+::view-transition-new(site-header),
+::view-transition-new(site-footer) {
+	animation: fade-in 400ms ease both;
+}

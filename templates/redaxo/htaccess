@@ -1,335 +1,49 @@
-#Action php /cgi-php56/php
-#AddHandler php56 .php
-
-
-# php_flag opcache.enable 0
-
-# php_flag opcache.validate_timestamps Off
-
-# maximum memory that OPcache can use to store compiled PHP files
-# php_flag opcache.memory_consumption 256
-
-# maximum number of files that can be stored in the cache
-# php_flag opcache.max_accelerated_files 20000
-
-# maximum memory allocated to store the results
-# php_flag realpath_cache_size 4096K
-
-# save the results for 10 minutes (600 seconds)
-# php_flag realpath_cache_ttl 600
-
-
-# Apache Server Configs v2.14.0 | MIT License
-# https://github.com/h5bp/server-configs-apache
-
-# (!) Using `.htaccess` files slows down Apache, therefore, if you have
-# access to the main server configuration file (which is usually called
-# `httpd.conf`), you should add this logic there.
-#
-# https://httpd.apache.org/docs/current/howto/htaccess.html.
-
-# ######################################################################
-# # CROSS-ORIGIN                                                       #
-# ######################################################################
-
 # ----------------------------------------------------------------------
-# | Cross-origin requests                                              |
+# MASSIF baseline .htaccess — shared hosting
 # ----------------------------------------------------------------------
 
-# Allow cross-origin requests.
-#
-# https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
-# http://enable-cors.org/
-# http://www.w3.org/TR/cors/
-
-# <IfModule mod_headers.c>
-#     Header set Access-Control-Allow-Origin "*"
-# </IfModule>
-
-# ----------------------------------------------------------------------
-# | Cross-origin images                                                |
-# ----------------------------------------------------------------------
-
-# Send the CORS header for images when browsers request it.
-#
-# https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image
-# https://blog.chromium.org/2011/07/using-cross-domain-images-in-webgl-and.html
-
-<IfModule mod_setenvif.c>
-    <IfModule mod_headers.c>
-        <FilesMatch "\.(bmp|cur|gif|ico|jpe?g|png|svgz?|webp)$">
-            SetEnvIf Origin ":" IS_CORS
-            Header set Access-Control-Allow-Origin "*" env=IS_CORS
-        </FilesMatch>
-    </IfModule>
-</IfModule>
-
-# ----------------------------------------------------------------------
-# | Cross-origin web fonts                                             |
-# ----------------------------------------------------------------------
-
-# Allow cross-origin access to web fonts.
-
-<IfModule mod_headers.c>
-    <FilesMatch "\.(eot|otf|tt[cf]|woff2?)$">
-        Header set Access-Control-Allow-Origin "*"
-    </FilesMatch>
-</IfModule>
-
-# ----------------------------------------------------------------------
-# | Cross-origin resource timing                                       |
-# ----------------------------------------------------------------------
-
-# Allow cross-origin access to the timing information for all resources.
-#
-# If a resource isn't served with a `Timing-Allow-Origin` header that
-# would allow its timing information to be shared with the document,
-# some of the attributes of the `PerformanceResourceTiming` object will
-# be set to zero.
-#
-# http://www.w3.org/TR/resource-timing/
-# http://www.stevesouders.com/blog/2014/08/21/resource-timing-practical-tips/
-
-# <IfModule mod_headers.c>
-#     Header set Timing-Allow-Origin: "*"
-# </IfModule>
-
-# ######################################################################
-# # ERRORS                                                             #
-# ######################################################################
-
-# ----------------------------------------------------------------------
-# | Custom error messages/pages                                        |
-# ----------------------------------------------------------------------
-
-# Customize what Apache returns to the client in case of an error.
-# https://httpd.apache.org/docs/current/mod/core.html#errordocument
-
-ErrorDocument 404 /404.html
-
-# ----------------------------------------------------------------------
-# | Error prevention                                                   |
-# ----------------------------------------------------------------------
-
-# Disable the pattern matching based on filenames.
-#
-# This setting prevents Apache from returning a 404 error as the result
-# of a rewrite when the directory with the same name does not exist.
-#
-# https://httpd.apache.org/docs/current/content-negotiation.html#multiviews
-
-Options -MultiViews
-
-# ######################################################################
-# # INTERNET EXPLORER                                                  #
-# ######################################################################
-
-# ----------------------------------------------------------------------
-# | Document modes                                                     |
-# ----------------------------------------------------------------------
-
-# Force Internet Explorer 8/9/10 to render pages in the highest mode
-# available in the various cases when it may not.
-#
-# https://hsivonen.fi/doctype/#ie8
-#
-# (!) Starting with Internet Explorer 11, document modes are deprecated.
-# If your business still relies on older web apps and services that were
-# designed for older versions of Internet Explorer, you might want to
-# consider enabling `Enterprise Mode` throughout your company.
-#
-# https://msdn.microsoft.com/en-us/library/ie/bg182625.aspx#docmode
-# http://blogs.msdn.com/b/ie/archive/2014/04/02/stay-up-to-date-with-enterprise-mode-for-internet-explorer-11.aspx
-
-<IfModule mod_headers.c>
-
-    Header set X-UA-Compatible "IE=edge"
-
-    # `mod_headers` cannot match based on the content-type, however,
-    # the `X-UA-Compatible` response header should be send only for
-    # HTML documents and not for the other resources.
-
-    <FilesMatch "\.(appcache|atom|bbaw|bmp|crx|css|cur|eot|f4[abpv]|flv|geojson|gif|htc|ico|jpe?g|js|json(ld)?|m4[av]|manifest|map|mp4|oex|og[agv]|opus|otf|pdf|png|rdf|rss|safariextz|svgz?|swf|topojson|tt[cf]|txt|vcard|vcf|vtt|webapp|web[mp]|webmanifest|woff2?|xloc|xml|xpi)$">
-        Header unset X-UA-Compatible
-    </FilesMatch>
-
-</IfModule>
-
-# ######################################################################
-# # MEDIA TYPES AND CHARACTER ENCODINGS                                #
-# ######################################################################
-
-# ----------------------------------------------------------------------
-# | Media types                                                        |
-# ----------------------------------------------------------------------
-
-# Serve resources with the proper media types (f.k.a. MIME types).
-#
-# https://www.iana.org/assignments/media-types/media-types.xhtml
-# https://httpd.apache.org/docs/current/mod/mod_mime.html#addtype
-
-<IfModule mod_mime.c>
-
-  # Data interchange
-
-    AddType application/atom+xml                        atom
-    AddType application/json                            json map topojson
-    AddType application/ld+json                         jsonld
-    AddType application/rss+xml                         rss
-    AddType application/vnd.geo+json                    geojson
-    AddType application/xml                             rdf xml
-
-  # JavaScript
-
-    # Normalize to standard type.
-    # https://tools.ietf.org/html/rfc4329#section-7.2
-
-    AddType application/javascript                      js
-
-  # Manifest files
-
-    AddType application/manifest+json                   webmanifest
-    AddType application/x-web-app-manifest+json         webapp
-    AddType text/cache-manifest                         appcache
-
-  # Media files
-
-    AddType audio/mp4                                   f4a f4b m4a
-    AddType audio/ogg                                   oga ogg opus
-    AddType image/bmp                                   bmp
-    AddType image/svg+xml                               svg svgz
-    AddType image/webp                                  webp
-    AddType video/mp4                                   f4v f4p m4v mp4
-    AddType video/ogg                                   ogv
-    AddType video/webm                                  webm
-    AddType video/x-flv                                 flv
-
-    # Serving `.ico` image files with a different media type
-    # prevents Internet Explorer from displaying then as images:
-    # https://github.com/h5bp/html5-boilerplate/commit/37b5fec090d00f38de64b591bcddcb205aadf8ee
-
-    AddType image/x-icon                                cur ico
-
-  # Web fonts
-
-    AddType application/font-woff                       woff
-    AddType application/font-woff2                      woff2
-    AddType application/vnd.ms-fontobject               eot
-
-    # Browsers usually ignore the font media types and simply sniff
-    # the bytes to figure out the font type.
-    # https://mimesniff.spec.whatwg.org/#matching-a-font-type-pattern
-    #
-    # However, Blink and WebKit based browsers will show a warning
-    # in the console if the following font types are served with any
-    # other media types.
-
-    AddType application/x-font-ttf                      ttc ttf
-    AddType font/opentype                               otf
-
-  # Other
-
-    AddType application/octet-stream                    safariextz
-    AddType application/x-bb-appworld                   bbaw
-    AddType application/x-chrome-extension              crx
-    AddType application/x-opera-extension               oex
-    AddType application/x-xpinstall                     xpi
-    AddType text/vcard                                  vcard vcf
-    AddType text/vnd.rim.location.xloc                  xloc
-    AddType text/vtt                                    vtt
-    AddType text/x-component                            htc
-
-</IfModule>
-
-# ----------------------------------------------------------------------
-# | Character encodings                                                |
-# ----------------------------------------------------------------------
-
-# Serve all resources labeled as `text/html` or `text/plain`
-# with the media type `charset` parameter set to `UTF-8`.
-#
-# https://httpd.apache.org/docs/current/mod/core.html#adddefaultcharset
-
+Options -Indexes -MultiViews
 AddDefaultCharset utf-8
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-# Serve the following file types with the media type `charset`
-# parameter set to `UTF-8`.
-#
-# https://httpd.apache.org/docs/current/mod/mod_mime.html#addcharset
-
+# MIME types Apache sometimes misses on older shared hosting
 <IfModule mod_mime.c>
-    AddCharset utf-8 .atom \
-                     .bbaw \
-                     .css \
-                     .geojson \
-                     .js \
-                     .json \
-                     .jsonld \
-                     .manifest \
-                     .rdf \
-                     .rss \
-                     .topojson \
-                     .vtt \
-                     .webapp \
-                     .webmanifest \
-                     .xloc \
-                     .xml
+    AddType application/manifest+json    webmanifest
+    AddType application/wasm             wasm
+    AddType image/avif                   avif
+    AddType image/avif-sequence          avifs
 </IfModule>
 
-# ######################################################################
-# # REWRITES                                                           #
-# ######################################################################
-
-# ----------------------------------------------------------------------
-# | Rewrite engine                                                     |
-# ----------------------------------------------------------------------
-
+# Rewrites
 <IfModule mod_rewrite.c>
-
-    # (1)
     RewriteEngine On
-
-    # (2)
-    #Options +FollowSymlinks
-
-    # (3)
     Options +SymLinksIfOwnerMatch
-
-    # (4)
     RewriteBase /
 
-    # (6)
-    RewriteCond %{HTTPS} =on
-    RewriteRule ^ - [env=proto:https]
+    # Force HTTPS
     RewriteCond %{HTTPS} !=on
-    RewriteRule ^ - [env=proto:http]
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
-</IfModule>
+    # Strip www.
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 
-# ----------------------------------------------------------------------
-# | Custom rewrite stuff                                               |
-# ----------------------------------------------------------------------
-<IfModule mod_rewrite.c>
-    # ENABLE REWRITING
-    RewriteEngine On
+    # Block dotfiles, allow /.well-known/
+    RewriteCond %{REQUEST_URI} !(^|/)\.well-known/
+    RewriteRule "(^|/)\." - [F]
 
+    # Front controller
     # Workaround for RewriteBase
     RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
     RewriteRule ^(.*) - [E=BASE:%1]
 
-    # REDIRECT ROBOTS.TXT TO SEO42 ROBOTS FUNCTION
+    # REDIRECT ROBOTS.TXT TO ROBOTS FUNCTION
     RewriteRule ^sitemap\.xml$ %{ENV:BASE}/index.php?rex_yrewrite_func=sitemap [NC,L]
     RewriteRule ^robots\.txt$ %{ENV:BASE}/index.php?rex_yrewrite_func=robots [NC,L]
-
-    # REWRITE RULE FOR SEO FRIENDLY DOWNLOAD URLS
-    RewriteRule ^download[s]?/ index.php?func=download&%{QUERY_STRING} [NC,L]
 
     # REWRITE RULE FOR SEO FRIENDLY IMAGE MANAGER URLS
     RewriteRule ^mediatypes/([^/]*)/([^/]*) %{ENV:BASE}/index.php?rex_media_type=$1&rex_media_file=$2
     RewriteRule ^media/([^/]+)/(.*) %{ENV:BASE}/index.php?rex_media_type=$1&rex_media_file=$2&%{QUERY_STRING} [B]
-    RewriteRule ^image/([^/]*)/([^/]*)/([^/]*) %{ENV:BASE}/index.php?rex_media_auto_size=1&rex_media_type=$1&rex_media_file=$3__w$2&%{QUERY_STRING} [B]
 
     # REWRITE RULE FOR JS/CSS VERSIONING
     RewriteRule ^(.*)\.[0-9]+\.(css|js)$ $1.$2 [L]
@@ -343,113 +57,26 @@ AddDefaultCharset utf-8
     RewriteCond %{REQUEST_URI} !^media/.*
 
     RewriteRule ^(.*)$ %{ENV:BASE}/index.php?%{QUERY_STRING} [L]
-
 </IfModule>
 
-# ######################################################################
-# # SECURITY                                                           #
-# ######################################################################
-
-<IfModule mod_autoindex.c>
-    Options -Indexes
-</IfModule>
-
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteCond %{REQUEST_URI} "!(^|/)\.well-known/([^./]+./?)+$" [NC]
-    RewriteCond %{SCRIPT_FILENAME} -d [OR]
-    RewriteCond %{SCRIPT_FILENAME} -f
-    RewriteRule "(^|/)\." - [F]
-</IfModule>
-
-<FilesMatch "(^#.*#|\.(bak|conf|dist|fla|in[ci]|log|psd|sh|sql|sw[op])|~)$">
-    <IfModule !mod_authz_core.c>
-        Order allow,deny
-        Deny from all
-        Satisfy All
-    </IfModule>
-    <IfModule mod_authz_core.c>
+# Block sensitive extensions
+<IfModule mod_authz_core.c>
+    <FilesMatch "(^#.*#|\.(bak|conf|dist|env|fla|in[ci]|log|orig|psd|sh|sql|sw[op])|~)$">
         Require all denied
-    </IfModule>
-</FilesMatch>
-
- <IfModule mod_headers.c>
-     Header always set Strict-Transport-Security "max-age=16070400; includeSubDomains"
- </IfModule>
-
-<IfModule mod_headers.c>
-    #Header set X-Content-Type-Options "nosniff"
-</IfModule>
-
-<IfModule mod_headers.c>
-     Header set X-XSS-Protection "1; mode=block"
-    <FilesMatch "\.(appcache|atom|bbaw|bmp|crx|css|cur|eot|f4[abpv]|flv|geojson|gif|htc|ico|jpe?g|js|json(ld)?|m4[av]|manifest|map|mp4|oex|og[agv]|opus|otf|pdf|png|rdf|rss|safariextz|svgz?|swf|topojson|tt[cf]|txt|vcard|vcf|vtt|webapp|web[mp]|webmanifest|woff2?|xloc|xml|xpi)$">
-        Header unset X-XSS-Protection
     </FilesMatch>
 </IfModule>
 
-<IfModule mod_headers.c>
-    Header unset X-Powered-By
-</IfModule>
-
-ServerSignature Off
-
-# ######################################################################
-# # WEB PERFORMANCE                                                    #
-# ######################################################################
-
+# Compression
 <IfModule mod_deflate.c>
-    <IfModule mod_setenvif.c>
-        <IfModule mod_headers.c>
-            SetEnvIfNoCase ^(Accept-EncodXng|X-cept-Encoding|X{15}|~{15}|-{15})$ ^((gzip|deflate)\s*,?\s*)+|[X~-]{4,13}$ HAVE_Accept-Encoding
-            RequestHeader append Accept-Encoding "gzip,deflate" env=HAVE_Accept-Encoding
-        </IfModule>
-    </IfModule>
     <IfModule mod_filter.c>
-        AddOutputFilterByType DEFLATE "application/atom+xml" \
-                                      "application/javascript" \
-                                      "application/json" \
-                                      "application/ld+json" \
-                                      "application/manifest+json" \
-                                      "application/rdf+xml" \
-                                      "application/rss+xml" \
-                                      "application/schema+json" \
-                                      "application/vnd.geo+json" \
-                                      "application/vnd.ms-fontobject" \
-                                      "application/x-font-ttf" \
-                                      "application/x-javascript" \
-                                      "application/x-web-app-manifest+json" \
-                                      "application/xhtml+xml" \
-                                      "application/xml" \
-                                      "font/eot" \
-                                      "font/opentype" \
-                                      "image/bmp" \
-                                      "image/svg+xml" \
-                                      "image/vnd.microsoft.icon" \
-                                      "image/x-icon" \
-                                      "text/cache-manifest" \
-                                      "text/css" \
-                                      "text/html" \
-                                      "text/javascript" \
-                                      "text/plain" \
-                                      "text/vcard" \
-                                      "text/vnd.rim.location.xloc" \
-                                      "text/vtt" \
-                                      "text/x-component" \
-                                      "text/x-cross-domain-policy" \
-                                      "text/xml"
-    </IfModule>
-    <IfModule mod_mime.c>
-        AddEncoding gzip              svgz
+        AddOutputFilterByType DEFLATE text/html text/css text/javascript \
+                                      application/javascript application/json \
+                                      application/xml image/svg+xml \
+                                      font/ttf font/otf
     </IfModule>
 </IfModule>
 
-<IfModule mod_headers.c>
-    Header unset ETag
-</IfModule>
-
-FileETag None
-
+# Cache expiration — assumes hashed asset filenames (Vite)
 <IfModule mod_expires.c>
 
     ExpiresActive on
@@ -512,3 +139,12 @@ FileETag None
     ExpiresByType text/x-cross-domain-policy            "access plus 1 week"
 
 </IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on'"
+    Header always unset X-Powered-By
+</IfModule>
+
+ServerSignature Off

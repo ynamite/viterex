@@ -1,7 +1,8 @@
 {
   "name": "default",
   "description": "Minimal Redaxo + Vite setup. ALWAYS_INCLUDED baseline addons (structure+history, phpmailer, developer, yrewrite, ydeploy, viterex) are added on top regardless of preset.",
-  "addons": ["adminer"],
+  "addons": ["adminer", "tinymce"],
   "submoduleAddons": [],
-  "seedFile": "seed.sql.tpl"
+  "seedFile": "seed.sql.tpl",
+  "layout": "modern"
 }
