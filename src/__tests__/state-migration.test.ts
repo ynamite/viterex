@@ -2,7 +2,8 @@ import os from "node:os";
 import path from "node:path";
 import fs from "fs-extra";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { loadState } from "../state.js";
+import { loadState, saveState } from "../state.js";
+import type { ViterexConfig } from "../types.js";
 
 let tmpDir: string;
 
@@ -55,6 +56,117 @@ describe("loadState — older state-file migration", () => {
     expect(result.config.installMode).toBe("fresh");
     expect(result.config.redaxoLang).toBe("de_de");
     expect(result.config.redaxoTimezone).toBe("Europe/Berlin");
+  });
+
+  it("strips package-resolved paths on save and re-derives them on load (built-in preset)", async () => {
+    // Simulate paths resolved from a previous run at a different package location
+    // — what would happen if the installer had been npx-installed and re-installed
+    // since the state file was written.
+    const stalePackageRoot = "/some/old/npx/cache/_npx/abc123/node_modules/create-viterex";
+    const config = {
+      projectName: "rt-test",
+      projectDir: tmpDir,
+      layout: "modern",
+      installMode: "fresh",
+      redaxoVersion: "5.21.0",
+      redaxoAdminUser: "admin",
+      redaxoAdminPassword: "x",
+      redaxoAdminEmail: "a@b.test",
+      redaxoErrorEmail: "e@b.test",
+      redaxoServerName: "rt.test",
+      redaxoLang: "de_de",
+      redaxoTimezone: "Europe/Zurich",
+      skipDb: false,
+      dbHost: "127.0.0.1",
+      dbPort: 3306,
+      dbName: "rt",
+      dbUser: "root",
+      dbPassword: "",
+      skipAddons: false,
+      addons: [],
+      packageManager: "yarn",
+      preset: "default",
+      // These are the absolute paths that would have been resolved last run
+      // from the (now-stale) package location:
+      presetDir: `${stalePackageRoot}/presets/default`,
+      presetFilesDir: `${stalePackageRoot}/presets/default/files`,
+      seedFile: `${stalePackageRoot}/presets/default/seed.sql.tpl`,
+      installerConfig: `${stalePackageRoot}/presets/default/redaxo_installer_config.json`,
+      deployerExtras: [`${stalePackageRoot}/presets/default/deploy.staging.php`],
+      submoduleAddons: [],
+      templateReplacements: {},
+      setupDeploy: true,
+      skipGit: false,
+      gitProvider: "",
+      gitNamespace: "",
+      gitRepoName: "",
+      verbose: false,
+    } as unknown as ViterexConfig;
+
+    await saveState(config, ["task-a"]);
+
+    // On disk: the stale paths must be gone.
+    const onDisk = (await fs.readJSON(path.join(tmpDir, ".viterex-state.json"))) as {
+      config: Record<string, unknown>;
+    };
+    expect(onDisk.config.presetDir).toBeUndefined();
+    expect(onDisk.config.presetFilesDir).toBeUndefined();
+    expect(onDisk.config.seedFile).toBeUndefined();
+    expect(onDisk.config.installerConfig).toBeUndefined();
+    expect(onDisk.config.deployerExtras).toBeUndefined();
+    // Sanity: persisted fields the loader needs are still there.
+    expect(onDisk.config.preset).toBe("default");
+    expect(onDisk.config.projectDir).toBe(tmpDir);
+
+    // On load: paths are re-derived against the *current* package location.
+    const loaded = await loadState(tmpDir, {});
+    expect(loaded.config.presetDir).toBeDefined();
+    expect(loaded.config.presetDir).not.toContain(stalePackageRoot);
+    expect(loaded.config.presetDir!.endsWith("/presets/default")).toBe(true);
+    expect(loaded.config.presetFilesDir).toBeDefined();
+    expect(loaded.config.presetFilesDir!.endsWith("/presets/default/files")).toBe(true);
+    expect(loaded.config.seedFile).toBeDefined();
+    expect(loaded.config.seedFile!.endsWith("/presets/default/seed.sql.tpl")).toBe(true);
+    // The default preset doesn't ship installerConfig or deployerExtras.
+    expect(loaded.config.installerConfig).toBeUndefined();
+    expect(loaded.config.deployerExtras).toBeUndefined();
+  });
+
+  it("leaves package-resolved paths unset when preset is 'custom'", async () => {
+    const stateFile = path.join(tmpDir, ".viterex-state.json");
+    await fs.writeJSON(stateFile, {
+      config: {
+        projectDir: tmpDir,
+        preset: "custom",
+        addons: [],
+        templateReplacements: {},
+      },
+      completedTasks: [],
+    });
+
+    const result = await loadState(tmpDir, {});
+    expect(result.config.presetDir).toBeUndefined();
+    expect(result.config.presetFilesDir).toBeUndefined();
+    expect(result.config.seedFile).toBeUndefined();
+  });
+
+  it("warns and continues when the persisted preset can no longer be resolved", async () => {
+    const stateFile = path.join(tmpDir, ".viterex-state.json");
+    await fs.writeJSON(stateFile, {
+      config: {
+        projectDir: tmpDir,
+        preset: "this-preset-does-not-exist-anywhere",
+        addons: [],
+        templateReplacements: {},
+      },
+      completedTasks: [],
+    });
+
+    // Should not throw; tasks that depend on preset-derived paths will be
+    // skipped by their own predicates downstream.
+    const result = await loadState(tmpDir, {});
+    expect(result.config.presetDir).toBeUndefined();
+    expect(result.config.presetFilesDir).toBeUndefined();
   });
 
   it("migrates legacy massifSettings into templateReplacements", async () => {
