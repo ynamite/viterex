@@ -1,4 +1,4 @@
-import { commandExists, exec } from "../utils/exec.js";
+import { exec } from "../utils/exec.js";
 import type { ViterexConfig } from "../types.js";
 
 export async function openBrowser(config: ViterexConfig): Promise<void> {
@@ -14,8 +14,8 @@ export async function openBrowser(config: ViterexConfig): Promise<void> {
   await exec(openCmd, [frontendUrl], execOpts);
   await exec(openCmd, [backendUrl], execOpts);
 
-  // Tower: only on macOS, and only when explicitly requested OR available on PATH
-  if (process.platform === "darwin" && (withTower || (await commandExists("gittower")))) {
+  // Tower: only when the user explicitly opted in (prompt, --with-tower, or preset).
+  if (process.platform === "darwin" && withTower) {
     try {
       await exec("gittower", ["."], { cwd: config.projectDir, verbose });
     } catch {

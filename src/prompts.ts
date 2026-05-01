@@ -5,6 +5,7 @@ import { ADDON_CATALOG, ALWAYS_INCLUDED, type Layout, type ViterexConfig } from 
 import { discoverPresets, loadPreset, resolveSeedFile } from "./preset.js";
 import { promptAugmentAddons } from "./tasks/augment-prompt.js";
 import { dataDirFor, type DetectionResult } from "./utils/detect.js";
+import { commandExists } from "./utils/exec.js";
 import { getLatestRedaxoVersion } from "./utils/redaxo-version.js";
 
 interface CliOptions {
@@ -379,6 +380,7 @@ export async function collectConfig(
   let gitProvider = "";
   let gitNamespace = "";
   let gitRepoName = "";
+  let withTower = false;
 
   if (!skipGit) {
     const initLocal = await p.confirm({
@@ -389,6 +391,22 @@ export async function collectConfig(
     skipGit = !initLocal;
 
     if (!skipGit) {
+      // Tower (macOS-only opt-in). Skip if preset opts out, or gittower
+      // isn't on PATH, or the user declined local git above.
+      const presetTower = loaded?.config.withTower;
+      if (
+        process.platform === "darwin" &&
+        presetTower !== false &&
+        (await commandExists("gittower"))
+      ) {
+        const answer = await p.confirm({
+          message: "Add the repo to Git Tower?",
+          initialValue: presetTower === true,
+        });
+        if (p.isCancel(answer)) process.exit(0);
+        withTower = answer as boolean;
+      }
+
       const setupRemote = await p.confirm({
         message: "Create a remote git repository?",
         initialValue: false,
@@ -463,7 +481,7 @@ export async function collectConfig(
     gitRepoName,
     verbose: false,
     forcePush: !!options.forcePush,
-    withTower: !!options.withTower,
+    withTower: withTower || !!options.withTower,
     installerConfig,
     deployerExtras,
     installerApiLogin,
