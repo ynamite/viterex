@@ -103,6 +103,7 @@ Shipped work has moved to `CHANGELOG.md`. Remaining open items are grouped by th
 - [x] Make `install-redaxo.ts` locale/timezone configurable (prompt defaults: `de_de` / `Europe/Berlin`)
 - [x] Surface dev-server failures: `start-dev-server.ts` uses `stdio: "ignore"` — write to a log file or inherit when `--verbose` — superseded: dev server is no longer started by the installer; "Show next steps" prints the run command instead
 - [x] Handle Windows in `open-browser.ts` (`start` command) or gracefully skip
+- [x] before finishing up and showing next steps, we should clear Redaxo cache again using `php redaxo/bin/console cache:clear` to prevent stale content/templates/modules etc.
 
 ### Tooling
 

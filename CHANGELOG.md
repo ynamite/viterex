@@ -8,6 +8,10 @@ release. Nothing has been published to npm yet — everything lives under
 
 ## [Unreleased]
 
+### Added (2026-05-01)
+
+- **Pipeline task: `Clear Redaxo cache`** (`src/tasks/clear-cache.ts`). Runs `php <console> cache:clear --no-interaction` between *Create remote git repository* (step 14) and *Open frontend and backend in browser* (step 16) so the just-opened browser doesn't show stale templates / modules / asset paths left behind by `setup:run`, addon install, `viterex:install-stubs`, or submodule activation. No skip predicate — `cache:clear` is idempotent and cheap; runs in both fresh and augment mode. Pipeline grew from 16 → 17 steps.
+
 ### Added (2026-04-30)
 
 - **Preset extension: `filesDir` and `layout`.** Presets can ship arbitrary files via a `files/` directory copied verbatim into the project root with skip-if-exists semantics — branding assets, sample workflow files, custom config, anything that should land somewhere in the user's project tree.

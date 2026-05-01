@@ -258,8 +258,9 @@ After install, `.env.example` lands at `<projectDir>/.env.example` and the logo 
 12  Activate submodule addons                 — composer install + package:install/activate
 13  Git initial commit                        — skip if HEAD exists or --skip-git
 14  Create remote git repository              — skip if no provider or --skip-git
-15  Open frontend and backend in browser      — both
-16  Show next steps                           — refresh browserslist + print `<pm> run dev` instruction
+15  Clear Redaxo cache                        — `php <console> cache:clear` so the just-opened browser shows fresh content
+16  Open frontend and backend in browser      — both
+17  Show next steps                           — refresh browserslist + print `<pm> run dev` instruction
 ```
 
 Each task is idempotent — re-running on a partially-set-up project converges instead of erroring. Resume from a specific failure with `--resume`.

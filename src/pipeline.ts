@@ -8,6 +8,7 @@ import { installRedaxo } from "./tasks/install-redaxo.js";
 import { installAddons } from "./tasks/install-addons.js";
 import { scaffoldFrontend } from "./tasks/scaffold-frontend.js";
 import { applyPresetFiles } from "./tasks/apply-preset-files.js";
+import { clearCache } from "./tasks/clear-cache.js";
 import { importSql } from "./tasks/import-sql.js";
 import { installDependencies } from "./tasks/install-deps.js";
 import { initGitRepo, gitInitialCommit } from "./tasks/init-git.js";
@@ -102,6 +103,10 @@ const tasks: Task[] = [
     name: "Create remote git repository",
     skip: (c) => c.skipGit || !c.gitProvider,
     run: createGitRemote,
+  },
+  {
+    name: "Clear Redaxo cache",
+    run: clearCache,
   },
   {
     name: "Open frontend and backend in browser",
