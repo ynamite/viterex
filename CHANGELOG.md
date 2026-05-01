@@ -22,6 +22,7 @@ release. Nothing has been published to npm yet — everything lives under
 - **Step 15 renamed: `Clear Redaxo cache` → `Sync developer + clear cache`.** `clearCache` now runs `php <console> developer:sync --no-interaction` before `cache:clear` (idempotent; gated on the `developer` addon being active in `config.addons`; warn-and-continue on failure for `--augment` setups where the addon may be absent). Without `developer:sync`, freshly-scaffolded templates / modules / actions weren't picked up by the public frontend until something else triggered a sync — typically the user logging into the backend, which is non-obvious and made the *Open browser* step appear broken. `developer` is in `ALWAYS_INCLUDED`, so the sync runs in fresh mode by default.
 - **`state.ts` strips package-resolved paths on save** (`presetDir`, `presetFilesDir`, `seedFile`, `installerConfig`, `deployerExtras`) and re-derives them on `loadState` by re-running `loadPreset(config.preset)` against the *current* installer location. Without this, an `npx create-viterex --resume` after the npx cache hash rotated would chase paths into a garbage-collected directory. As a side benefit, preset-side edits to `seed.sql.tpl` / `files/` between runs are now picked up on resume. The persisted `preset` field (a string like `"default"` or an absolute path to an external preset) is the single source of truth on resume; everything package-relative gets re-resolved. Three new tests in `state-migration.test.ts` lock the round-trip behaviour: built-in preset re-derivation, `preset === "custom"` no-op, missing-preset warn-and-continue.
 - **Pipeline grew from 17 → 18 steps.**
+- **`Sync developer + clear cache` moved from step 15 → step 13.** It now runs immediately after *Activate submodule addons* and before *Git initial commit*. `developer:sync` can write filesystem-side templates / modules pulled out of the DB, and they need to land in the initial commit instead of leaving the project with dirty working-tree state on first `git status`. Step indices shifted: *Git initial commit* 13→14, *Create remote git repository* 14→15.
 
 ### Added (2026-04-30)
 
@@ -118,9 +119,9 @@ release. Nothing has been published to npm yet — everything lives under
 10  Initialize git repo                       — skip if .git/ exists or --skip-git
 11  Add submodule addons                      — runs AFTER deps
 12  Activate submodule addons                 — composer install + package:install/activate
-13  Git initial commit                        — skip if HEAD exists or --skip-git
-14  Create remote git repository              — skip if no provider or --skip-git
-15  Sync developer + clear cache              — developer:sync (best-effort) → cache:clear
+13  Sync developer + clear cache              — developer:sync (best-effort) → cache:clear; runs before the initial commit
+14  Git initial commit                        — skip if HEAD exists or --skip-git
+15  Create remote git repository              — skip if no provider or --skip-git
 16  Build frontend                            — <pm> run build; skip if no package.json
 17  Open frontend and backend in browser      — both
 18  Show next steps                           — refresh browserslist + print next-step instructions

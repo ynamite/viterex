@@ -259,9 +259,9 @@ After install, `.env.example` lands at `<projectDir>/.env.example` and the logo 
 10  Initialize git repo                       — skip if .git/ exists or --skip-git
 11  Add submodule addons (preset extras)      — runs AFTER deps; skip if --skip-git or none
 12  Activate submodule addons                 — composer install + package:install/activate
-13  Git initial commit                        — skip if HEAD exists or --skip-git
-14  Create remote git repository              — skip if no provider or --skip-git
-15  Sync developer + clear cache              — `developer:sync` (gated on the developer addon; non-fatal) → `cache:clear`
+13  Sync developer + clear cache              — `developer:sync` (gated on the developer addon; non-fatal) → `cache:clear`; runs before the initial commit so any FS writes from sync land in it
+14  Git initial commit                        — skip if HEAD exists or --skip-git
+15  Create remote git repository              — skip if no provider or --skip-git
 16  Build frontend                            — `<pm> run build`; skip if no `package.json`; non-fatal — warns and continues on failure
 17  Open frontend and backend in browser      — both
 18  Show next steps                           — refresh browserslist + print `<pm> run dev` instruction

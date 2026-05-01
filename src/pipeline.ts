@@ -100,6 +100,13 @@ const tasks: Task[] = [
     skip: (c) => !c.submoduleAddons?.length,
     run: activateSubmoduleAddons,
   },
+  // Run developer:sync + cache:clear BEFORE the git initial commit so any
+  // FS writes from developer:sync (templates/modules pulled out of the DB)
+  // land in the first commit instead of as dirty working-tree state.
+  {
+    name: "Sync developer + clear cache",
+    run: clearCache,
+  },
   {
     name: "Git initial commit",
     skip: (c) => c.skipGit,
@@ -109,10 +116,6 @@ const tasks: Task[] = [
     name: "Create remote git repository",
     skip: (c) => c.skipGit || !c.gitProvider,
     run: createGitRemote,
-  },
-  {
-    name: "Sync developer + clear cache",
-    run: clearCache,
   },
   {
     name: "Build frontend",
