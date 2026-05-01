@@ -4,5 +4,6 @@
   "addons": ["adminer", "tinymce"],
   "submoduleAddons": [],
   "seedFile": "seed.sql.tpl",
-  "layout": "modern"
+  "layout": "modern",
+  "withTower": false
 }
