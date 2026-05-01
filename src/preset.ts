@@ -2,7 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import fs from "fs-extra";
 import * as p from "@clack/prompts";
-import type { PresetConfig } from "./types.js";
+import { ADDON_CATALOG, type AddonSelection, type PresetAddonInput, type PresetConfig } from "./types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const presetsDir = path.resolve(__dirname, "../presets");
@@ -60,7 +60,11 @@ export async function loadPreset(
     throw new Error(`Preset not found: ${configPath}`);
   }
 
-  const config: PresetConfig = await fs.readJSON(configPath);
+  const raw: PresetConfig = await fs.readJSON(configPath);
+  const config: PresetConfig = {
+    ...raw,
+    addons: raw.addons?.map(normalizePresetAddon),
+  };
 
   if (config.submoduleAddons?.length) {
     const before = config.submoduleAddons.length;
@@ -83,4 +87,10 @@ export async function loadPreset(
  */
 export function resolveSeedFile(seedFile: string, presetDir: string): string {
   return path.resolve(presetDir, seedFile);
+}
+
+function normalizePresetAddon(entry: PresetAddonInput): AddonSelection {
+  if (typeof entry !== "string") return entry;
+  const catalog = ADDON_CATALOG.find((a) => a.key === entry);
+  return { key: entry, install: true, activate: true, plugins: catalog?.plugins };
 }

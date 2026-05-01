@@ -41,7 +41,7 @@ export async function scaffoldFrontend(config: ViterexConfig): Promise<void> {
     ADMIN_USER: redaxoAdminUser,
     ADMIN_EMAIL: redaxoAdminEmail,
     ERROR_EMAIL: redaxoErrorEmail,
-    HOST_PROTOCOL: "https",
+    HOST_PROTOCOL: "http",
     ...config.templateReplacements,
   };
 

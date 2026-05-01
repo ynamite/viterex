@@ -37,6 +37,10 @@ Three-layer design:
 - `ADDON_CATALOG` — Static list of available Redaxo addons with recommended defaults
 - `Task` (`src/pipeline.ts`) — `{ name, skip?, run }` interface
 
+## Preset `addons` format
+
+A preset's `addons` field accepts two interchangeable forms — strings (`"adminer"`) or full `AddonSelection` objects (`{ key, install, activate, plugins? }`). Strings are normalized to objects at load time in `src/preset.ts#loadPreset` via `normalizePresetAddon`; for keys present in `ADDON_CATALOG`, the matching `plugins` are auto-applied (mirroring the multiselect path in `prompts.ts`). Mixed arrays work. See `presets/default/preset.json` (shorthand) and `presets/massif/preset.json` (verbose) for examples.
+
 ## Build & run
 
 ```bash

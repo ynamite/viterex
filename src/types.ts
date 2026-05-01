@@ -74,10 +74,18 @@ export interface AddonSelection {
   version?: string; // optional version pin for install:download
 }
 
+/**
+ * Input form of a preset addon. Strings are shorthand for
+ * `{ key, install: true, activate: true, plugins: <from ADDON_CATALOG> }`
+ * and are normalized to full `AddonSelection` objects at load time
+ * (`src/preset.ts#loadPreset`). Both forms can be mixed in the same array.
+ */
+export type PresetAddonInput = string | AddonSelection;
+
 export interface PresetConfig {
   name: string;
   description: string;
-  addons?: AddonSelection[];
+  addons?: PresetAddonInput[];
   submoduleAddons?: SubmoduleAddon[];
   seedFile?: string; // relative to preset dir
   templateReplacements?: Record<string, string>;
