@@ -1,17 +1,38 @@
+import * as p from "@clack/prompts";
 import { exec } from "../utils/exec.js";
 import { consolePathFor } from "../utils/detect.js";
 import type { ViterexConfig } from "../types.js";
 
 /**
- * Clear Redaxo cache so the just-opened browser doesn't show stale templates,
- * modules, or asset paths left behind by earlier setup phases (setup:run,
- * addon install, viterex:install-stubs, submodule activation).
+ * Sync filesystem-side templates/modules/actions into the database via the
+ * developer addon, then clear the Redaxo cache. Without `developer:sync`,
+ * freshly-scaffolded templates aren't picked up until something else triggers
+ * a sync (e.g. the user logging into the backend), which leaves the public
+ * frontend rendering stale/empty content on first load.
  *
- * Idempotent — `cache:clear` is safe to run any number of times.
+ * `developer:sync` is best-effort: in `--augment` mode the addon may not be
+ * installed, in which case we skip silently. `cache:clear` always runs.
  */
 export async function clearCache(config: ViterexConfig): Promise<void> {
-  const { projectDir, layout, verbose } = config;
+  const { projectDir, layout, verbose, addons } = config;
   const consolePath = consolePathFor(layout);
+
+  const developerActive = addons.some(
+    (a) => a.key === "developer" && a.activate,
+  );
+  if (developerActive) {
+    try {
+      await exec(
+        "php",
+        [consolePath, "developer:sync", "--no-interaction"],
+        { cwd: projectDir, verbose },
+      );
+    } catch (err) {
+      p.log.warn(
+        `developer:sync failed — continuing with cache:clear. (${(err as Error).message})`,
+      );
+    }
+  }
 
   await exec(
     "php",

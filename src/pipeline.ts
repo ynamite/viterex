@@ -111,7 +111,7 @@ const tasks: Task[] = [
     run: createGitRemote,
   },
   {
-    name: "Clear Redaxo cache",
+    name: "Sync developer + clear cache",
     run: clearCache,
   },
   {
