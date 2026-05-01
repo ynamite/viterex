@@ -1,3 +1,5 @@
+import path from "node:path";
+import fs from "fs-extra";
 import * as p from "@clack/prompts";
 import type { ViterexConfig } from "./types.js";
 import { saveState } from "./state.js";
@@ -8,6 +10,7 @@ import { installRedaxo } from "./tasks/install-redaxo.js";
 import { installAddons } from "./tasks/install-addons.js";
 import { scaffoldFrontend } from "./tasks/scaffold-frontend.js";
 import { applyPresetFiles } from "./tasks/apply-preset-files.js";
+import { buildFrontend } from "./tasks/build-frontend.js";
 import { clearCache } from "./tasks/clear-cache.js";
 import { importSql } from "./tasks/import-sql.js";
 import { installDependencies } from "./tasks/install-deps.js";
@@ -110,6 +113,11 @@ const tasks: Task[] = [
   {
     name: "Clear Redaxo cache",
     run: clearCache,
+  },
+  {
+    name: "Build frontend",
+    skip: (c) => !fs.existsSync(path.join(c.projectDir, "package.json")),
+    run: buildFrontend,
   },
   {
     name: "Open frontend and backend in browser",
