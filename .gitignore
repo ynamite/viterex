@@ -42,4 +42,8 @@ presets/massif/
 *.sw?
 *.pem
 *.key
+.superpowers
+.claude
+docs
+
 
