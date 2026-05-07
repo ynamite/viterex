@@ -3,6 +3,16 @@
   "version": "3.0.0-alpha.0",
   "description": "CLI to scaffold a ViteRex (Redaxo + Vite) project",
   "type": "module",
+  "author": "ynamite <ynamite@gmail.com>",
+  "homepage": "https://github.com/ynamite/viterex/tree/main/viterex-installer#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ynamite/viterex.git",
+    "directory": "viterex-installer"
+  },
+  "bugs": {
+    "url": "https://github.com/ynamite/viterex/issues"
+  },
   "bin": {
     "create-viterex": "./bin/cli.js"
   },
@@ -31,7 +41,7 @@
     "dist",
     "bin",
     "templates",
-    "presets"
+    "presets/default"
   ],
   "engines": {
     "node": ">=18"

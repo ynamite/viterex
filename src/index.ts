@@ -1,4 +1,5 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import fs from "fs-extra";
 import chalk from "chalk";
 import { Command } from "commander";
@@ -9,12 +10,17 @@ import { detectInstallation } from "./utils/detect.js";
 import { printBanner, printSuccess, printError } from "./utils/log.js";
 import type { Layout, ViterexConfig } from "./types.js";
 
+const pkgVersion = (() => {
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  return fs.readJsonSync(path.join(here, "..", "package.json")).version as string;
+})();
+
 const program = new Command();
 
 program
   .name("create-viterex")
   .description("Scaffold a ViteRex (Redaxo + Vite) project, or augment an existing Redaxo install")
-  .version("1.0.0")
+  .version(pkgVersion)
   .argument("[project-name]", "Name of the project directory (or '.' to augment current dir)")
   .option("--skip-db", "Skip database creation")
   .option("--skip-addons", "Skip addon installation")
