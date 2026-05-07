@@ -191,7 +191,6 @@ RESUME_CONFIG="$TMPDIR_BASE/resume-test.json"
 RESUME_DIR="$TMPDIR_BASE/resume-test"
 mkdir -p "$RESUME_DIR"
 make_fresh_modern_config resume-test > /dev/null
-mv "$TMPDIR_BASE/resume-test.json" "$RESUME_CONFIG"
 
 # Write a state file simulating one completed task
 cat > "$RESUME_DIR/.viterex-state.json" <<JSON
