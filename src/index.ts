@@ -42,6 +42,14 @@ program
   .action(async (projectName, options) => {
     printBanner();
 
+    if (/-(alpha|beta|rc)/.test(pkgVersion)) {
+      console.log(
+        chalk.yellow(`⚠ This is a ${pkgVersion} pre-release.`) +
+          chalk.dim(` Report issues at https://github.com/ynamite/viterex/issues`)
+      );
+      console.log("");
+    }
+
     try {
       // --generate-config: run prompts, write JSON, exit. Never enters the pipeline.
       if (options.generateConfig) {
