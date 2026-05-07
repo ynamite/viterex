@@ -4,6 +4,8 @@
 
 CLI tool to scaffold a **ViteRex** project — [Redaxo CMS](https://redaxo.org/) + [Vite](https://vitejs.dev/) + [Tailwind CSS](https://tailwindcss.com/) — *or* augment an existing Redaxo install with viterex_addon, ydeploy, and Deployer PHP.
 
+[Viterex-installer-short.webm](https://github.com/user-attachments/assets/09684bb5-2402-4640-8437-08918cc13b44)
+
 ## Quick start
 
 ```bash
